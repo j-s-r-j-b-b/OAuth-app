@@ -332,3 +332,35 @@ export function formatRange(minH: number, maxH: number): string {
   if (uMin === uMax) return a === b ? `${b} ${name(uMax, b)}` : `${a}–${b} ${name(uMax, b)}`;
   return `${a} ${name(uMin, a)} – ${b} ${name(uMax, b)}`;
 }
+
+/**
+ * Parse a human duration label ("3–6 weeks", "30 min – 2 hours", "Same day", "Up to 21 business days")
+ * into calendar hours. Returns null when the label has no recognisable duration.
+ * Models write labels more reliably than they convert units, so labels are used to sanity-check hours.
+ */
+export function parseDurationLabel(label: string): { minHours: number; maxHours: number } | null {
+  const s = label.toLowerCase().replace(/[–—]/g, '-');
+  if (/\b(instant|immediate|minutes?)\b/.test(s) && !/\d/.test(s)) return { minHours: 0, maxHours: 0.5 };
+  if (/same[- ]day/.test(s) && !/\d+\s*(day|week|month)/.test(s)) return { minHours: 0.5, maxHours: 8 };
+  const unitHours = (u: string): number | null => {
+    if (/^(min|minute)/.test(u)) return 1 / 60;
+    if (/^(h|hr|hour)/.test(u)) return 1;
+    if (/^business ?day/.test(u)) return 24 * 1.4;
+    if (/^(d|day)/.test(u)) return 24;
+    if (/^(w|wk|week)/.test(u)) return 168;
+    if (/^(mo|month)/.test(u)) return 720;
+    return null;
+  };
+  const re = /(\d+(?:\.\d+)?)\s*(?:-|to)?\s*(\d+(?:\.\d+)?)?\s*\+?\s*(business ?days?|minutes?|mins?|hours?|hrs?|h\b|days?|d\b|weeks?|wks?|w\b|months?|mo\b)/g;
+  const values: number[] = [];
+  for (const m of s.matchAll(re)) {
+    const u = unitHours(m[3]);
+    if (u == null) continue;
+    values.push(Number(m[1]) * u);
+    if (m[2]) values.push(Number(m[2]) * u);
+  }
+  if (!values.length) return null;
+  const upTo = /\bup to\b|\bwithin\b|\bunder\b|\bless than\b/.test(s) && values.length === 1;
+  const sameDay = /same[- ]day/.test(s);
+  return { minHours: upTo ? 0 : sameDay ? Math.min(0.5, ...values) : Math.min(...values), maxHours: Math.max(...values) };
+}

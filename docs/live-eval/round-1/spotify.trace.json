@@ -1,0 +1,310 @@
+{
+  "query": "Spotify",
+  "events": [
+    {
+      "type": "stage",
+      "stage": "resolve",
+      "message": "Identifying “Spotify”",
+      "t": 1
+    },
+    {
+      "type": "search",
+      "query": "Spotify API OAuth app developer documentation",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 2607
+    },
+    {
+      "type": "info",
+      "message": "Identified Spotify — A digital music, podcast, and video streaming service that provides access to millions of songs and other content from creators worldwide.",
+      "t": 11306
+    },
+    {
+      "type": "stage",
+      "stage": "composio",
+      "message": "Checking Composio’s toolkit catalog",
+      "t": 11306
+    },
+    {
+      "type": "info",
+      "message": "Composio toolkit `spotify` has no managed OAuth app: you must register your own before anyone can connect.",
+      "t": 12468
+    },
+    {
+      "type": "stage",
+      "stage": "research",
+      "message": "Researching docs, policies and real-world reports",
+      "t": 12468
+    },
+    {
+      "type": "search",
+      "query": "Spotify OAuth app review approval verification publish requirements",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 14424
+    },
+    {
+      "type": "search",
+      "query": "Spotify OAuth app approval how long experience reddit OR forum",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 14909
+    },
+    {
+      "type": "read",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/apps",
+      "title": "Apps | Spotify for Developers",
+      "ok": true,
+      "chars": 3153,
+      "via": "direct",
+      "sourceId": "S2",
+      "t": 22714
+    },
+    {
+      "type": "read",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+      "title": "Quota modes | Spotify for Developers",
+      "ok": true,
+      "chars": 4727,
+      "via": "direct",
+      "sourceId": "S10",
+      "t": 22826
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "portal",
+        "target": "GET https://developer.spotify.com/dashboard",
+        "result": "pass",
+        "summary": "Portal reachable (200, \"spotify-for-developers\"); no sign-in redirect seen on the landing page.",
+        "detail": "Chain: 200 developer.spotify.com/dashboard",
+        "id": "P2",
+        "at": "2026-10-29T12:57:02.092Z"
+      },
+      "t": 22830
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "authorize-endpoint",
+        "target": "GET https://accounts.spotify.com/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=user-read-private+user-read-email",
+        "result": "pass",
+        "summary": "Endpoint is live and rejects an unregistered client (200). Shows what a misconfigured app sees.",
+        "detail": "Chain: 303 accounts.spotify.com/authorize → 200 accounts.spotify.com/en/login\nFinal: https://accounts.spotify.com/en/login?continue=https%3A%2F%2Faccounts.spotify.com%2Fauthorize%3Fscope%3Duser-read-private%2Buser-read-email%26response_type%3Dcode%26redirect_uri%3Dhttps%253A%252F%252Fbackend.composio.dev%252Fapi%252Fv3%252Ftoolkits%252Fauth%252Fcallback%26state%3Doauth-runway-probe%\nExcerpt: title=\"Spotify\" | [Continue with phone number](/en/v2/login/phone?continue=https%3A%2F%2Faccounts.spotify.com%2Fauthorize%3Fscope%3Duser-read-private%2Buser-read-email%26response_type%3Dcode%26redirect_uri%3Dhttps%253A%252F%252Fbackend.composio.dev%252Fapi%252Fv3%252Ftoolkits%252Fauth%252Fcallback%26state%3Doauth-runway-probe%26client_id%3Doauth-runway-probe%26flow_ctx%3D8938732e-32af-4fbf-86b7-de128304b8d4%253A1793300221&client_id=oauth-runway-probe&flow_ctx=8938732e-32af-4fbf-86b7-de128304b8d4%3A1793300221)[Continue with Google](/en/login/google?continue=https%3A%2F%2Faccounts.spotify.com%2Fauthorize%3Fscope%3Duser-read-private%2Buser-read-email%26response_type%3Dcode%26redirect_uri%3Dhttp",
+        "id": "P3",
+        "at": "2026-10-29T12:57:02.137Z"
+      },
+      "t": 22875
+    },
+    {
+      "type": "search",
+      "query": "site:developer.spotify.com \"Quota modes\"",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 24634
+    },
+    {
+      "type": "search",
+      "query": "site:developer.spotify.com \"Scopes\" developer",
+      "count": 1,
+      "engine": "composio:exa",
+      "t": 25587
+    },
+    {
+      "type": "finding",
+      "fact": "Spotify apps are created in the Spotify Developer Dashboard (developer.spotify.com/dashboard) by clicking Create an App, entering App Name and App Description, checking the Terms of Service, and clicking CREATE. Up to 25 apps can be created per developer account.",
+      "sourceIds": [
+        "S2"
+      ],
+      "t": 33489
+    },
+    {
+      "type": "finding",
+      "fact": "Newly created Spotify apps start in Development Mode, which restricts usage to a maximum of 5 allowlisted users (added by email in User Management settings) and the app owner must have a Spotify Premium account.",
+      "sourceIds": [
+        "S10"
+      ],
+      "t": 33489
+    },
+    {
+      "type": "finding",
+      "fact": "To go live (Extended Quota Mode) for arbitrary users, Spotify requires an established business entity operating an active launched service with at least 250,000 Monthly Active Users (MAUs), availability in key markets, and commercial viability. Applications must be submitted via a Google Form using a company email, followed by a questionnaire in the dashboard.",
+      "sourceIds": [
+        "S10"
+      ],
+      "t": 33489
+    },
+    {
+      "type": "finding",
+      "fact": "Spotify's extended quota approval review process takes up to six weeks (or longer during peak periods), and if rejected, resubmission restarts the review window.",
+      "sourceIds": [
+        "S10",
+        "S16",
+        "S17"
+      ],
+      "t": 33489
+    },
+    {
+      "type": "finding",
+      "fact": "As of May 15, 2025, Spotify only accepts extended quota applications from established organizations, not individuals.",
+      "sourceIds": [
+        "S10"
+      ],
+      "t": 33489
+    },
+    {
+      "type": "finding",
+      "fact": "Spotify Web API uses OAuth 2.0 Authorization Code Flow with PKCE supported. Access tokens expire after 3,600 seconds (1 hour) and come with a refresh token.",
+      "sourceIds": [
+        "S4",
+        "S1"
+      ],
+      "t": 33489
+    },
+    {
+      "type": "finding",
+      "fact": "Redirect URIs must be explicitly allowlisted in the app's settings in the Spotify Developer Dashboard. For Composio, the redirect URI to register is https://backend.composio.dev/api/v3/toolkits/auth/callback.",
+      "sourceIds": [
+        "S2",
+        "S9"
+      ],
+      "t": 33489
+    },
+    {
+      "type": "read",
+      "url": "https://developer.spotify.com/documentation/web-api/tutorials/code-flow",
+      "title": "Authorization Code Flow | Spotify for Developers",
+      "ok": true,
+      "chars": 8509,
+      "via": "direct",
+      "sourceId": "S4",
+      "t": 34129
+    },
+    {
+      "type": "read",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/authorization",
+      "title": "Authorization | Spotify for Developers",
+      "ok": true,
+      "chars": 3438,
+      "via": "direct",
+      "sourceId": "S1",
+      "t": 34206
+    },
+    {
+      "type": "search",
+      "query": "site:developer.spotify.com \"Scopes\" \"scopes/list\" OR \"scopes\"",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 35678
+    },
+    {
+      "type": "search",
+      "query": "site:developer.spotify.com \"Authorization Code Flow\" token refresh",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 36012
+    },
+    {
+      "type": "info",
+      "message": "Research done: 7 findings, 5 pages read, 3 probes.",
+      "t": 42427
+    },
+    {
+      "type": "stage",
+      "stage": "write",
+      "message": "Writing the guide",
+      "t": 42427
+    },
+    {
+      "type": "info",
+      "message": "Verdict drafted: Spotify requires strict business verification and a minimum of 250,000 Monthly Active Users to unlock production access for arbitrary users.",
+      "t": 52811
+    },
+    {
+      "type": "stage",
+      "stage": "check",
+      "message": "Checking citations, confidence labels and ratings",
+      "t": 64346
+    },
+    {
+      "type": "quality",
+      "report": {
+        "claims": {
+          "tested": 0,
+          "official": 24,
+          "reported": 0,
+          "inferred": 6
+        },
+        "sources": {
+          "total": 7,
+          "fetched": 5,
+          "snippetOnly": 2,
+          "official": 6,
+          "community": 0,
+          "composio": 1
+        },
+        "probes": {
+          "total": 3,
+          "pass": 3,
+          "info": 0,
+          "fail": 0
+        },
+        "fixes": [
+          "step \"Create Custom Auth Configuration in Comp\": Composio auth-config creation is agent-doable via API → agent",
+          "step Create Custom Auth Configuration in Comp: \"tested\" on a claim no probe can confirm → official",
+          "no provider wait step although review_required = yes",
+          "scope user-read-private: \"tested\" on a claim no probe can confirm → inferred",
+          "scope user-read-email: \"tested\" on a claim no probe can confirm → inferred",
+          "scope streaming: \"tested\" on a claim no probe can confirm → inferred",
+          "scope user-modify-playback-state: \"tested\" on a claim no probe can confirm → inferred",
+          "scope user-read-playback-state: \"tested\" on a claim no probe can confirm → inferred"
+        ],
+        "llm": {
+          "calls": 6,
+          "inputTokens": 29601,
+          "outputTokens": 5751,
+          "model": "gemini-3.5-flash-lite"
+        }
+      },
+      "t": 64349
+    }
+  ],
+  "quality": {
+    "claims": {
+      "tested": 0,
+      "official": 24,
+      "reported": 0,
+      "inferred": 6
+    },
+    "sources": {
+      "total": 7,
+      "fetched": 5,
+      "snippetOnly": 2,
+      "official": 6,
+      "community": 0,
+      "composio": 1
+    },
+    "probes": {
+      "total": 3,
+      "pass": 3,
+      "info": 0,
+      "fail": 0
+    },
+    "fixes": [
+      "step \"Create Custom Auth Configuration in Comp\": Composio auth-config creation is agent-doable via API → agent",
+      "step Create Custom Auth Configuration in Comp: \"tested\" on a claim no probe can confirm → official",
+      "no provider wait step although review_required = yes",
+      "scope user-read-private: \"tested\" on a claim no probe can confirm → inferred",
+      "scope user-read-email: \"tested\" on a claim no probe can confirm → inferred",
+      "scope streaming: \"tested\" on a claim no probe can confirm → inferred",
+      "scope user-modify-playback-state: \"tested\" on a claim no probe can confirm → inferred",
+      "scope user-read-playback-state: \"tested\" on a claim no probe can confirm → inferred"
+    ],
+    "llm": {
+      "calls": 6,
+      "inputTokens": 29601,
+      "outputTokens": 5751,
+      "model": "gemini-3.5-flash-lite"
+    }
+  }
+}

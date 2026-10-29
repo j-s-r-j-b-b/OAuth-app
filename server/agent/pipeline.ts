@@ -22,6 +22,7 @@ import {
   deriveDifficulty,
   formatRange,
   lintGuide,
+  parseDurationLabel,
 } from '../../shared/schema.ts';
 import { matchToolkit } from '../catalog.ts';
 import { getToolkitAuth, getToolkitDocs, webSearch } from '../composio.ts';
@@ -34,6 +35,9 @@ import { RESEARCH_TOOLS, runTool, type ToolContext } from './tools.ts';
 export class UserFacingError extends Error {}
 
 const MAX_ROUNDS = 9;
+const MIN_PAGE_READS = 4;
+/** Claims a read-only probe can actually confirm: endpoints, discovery, PKCE, redirects, sign-in walls, client rejection. */
+const PROBEABLE = /endpoint|authori[sz]|token url|discovery|well-known|openid|pkce|code_challenge|redirect|callback|sign[- ]?in|log[- ]?in|portal|developer hub|console|client[_ ]?id|invalid_client|unauthorized_client|reachab|is live|returns? (an? )?(error|40\d)/i;
 const MAX_CALLS_PER_ROUND = 6;
 
 type Identity = {
@@ -158,6 +162,8 @@ export async function generateGuide(
   const seedQueries = [
     `${ident.name} OAuth app review approval verification publish requirements`,
     `${ident.name} OAuth app approval how long experience reddit OR forum`,
+    // The first evaluation showed paid gates (API tiers, connection caps, required subscriptions) were the most-missed facts.
+    `${ident.name} API pricing plans tiers limits for developers connections`,
   ];
   const seedResults = await Promise.all(seedQueries.map((q) => runTool('web_search', { query: q }, ctx).catch((e) => `Search failed: ${e.message}`)));
   const firstSearch = seed.hits
@@ -218,6 +224,10 @@ export async function generateGuide(
           return 'Invalid JSON arguments.';
         }
         if (c.function.name === 'finish_research') {
+          // Evaluation showed the model stopping after 1–3 page reads and leaning on search snippets.
+          if (ctx.readCount < MIN_PAGE_READS && round < MAX_ROUNDS - 1) {
+            return `Not yet: you have read ${ctx.readCount} page(s). Read at least ${MIN_PAGE_READS} before finishing, including the provider's pricing/plans or API-limits page and one community thread about review times, and save findings from them.`;
+          }
           finished = true;
           summary = String(args.summary ?? '');
           gaps = Array.isArray(args.gaps) ? args.gaps.map(String) : [];
@@ -310,10 +320,19 @@ export async function generateGuide(
   };
 
   const p1 = await writeJson(VERDICT_TASK, Part1);
-  // Tiles need short labels: keep the model's wording as the basis and derive a label from the hours.
+  const fixes: string[] = [];
   for (const k of ['handsOnEffort', 'timeToFirstConnection', 'timeToProduction'] as const) {
     const d = p1.verdict[k];
     if (d.minHours > d.maxHours) [d.minHours, d.maxHours] = [d.maxHours, d.minHours];
+    // Models write human labels more reliably than they convert to hours ("3–6 weeks" came back as 72–336 h).
+    // When the label parses and disagrees with the hours by more than 2.5×, trust the label.
+    const fromLabel = parseDurationLabel(d.label);
+    if (fromLabel && Math.abs(Math.log((fromLabel.maxHours + 0.5) / (d.maxHours + 0.5))) > Math.log(2.5)) {
+      fixes.push(`${k}: hours ${d.minHours}–${d.maxHours} contradicted label "${d.label}" → ${Math.round(fromLabel.minHours)}–${Math.round(fromLabel.maxHours)} h`);
+      d.minHours = fromLabel.minHours;
+      d.maxHours = fromLabel.maxHours;
+    }
+    // Tiles need short labels: keep the model's wording as the basis and derive a label from the hours.
     if (d.label.length > 32) {
       d.basis = d.basis ? `${d.label}. ${d.basis}` : d.label;
       d.label = formatRange(d.minHours, d.maxHours);
@@ -335,7 +354,6 @@ export async function generateGuide(
 
   // ── 5. Assemble & check ───────────────────────────────────────────────────
   emit({ type: 'stage', stage: 'check', message: 'Checking citations, confidence labels and ratings' });
-  const fixes: string[] = [];
   const known = new Set([...reg.sources.map((s) => s.id), ...reg.probes.map((p) => p.id)]);
   const cited = new Set<string>();
   const fixRefs = <T extends { sourceIds: string[]; confidence: string }>(item: T, where: string): T & { confidence: Confidence } => {
@@ -346,6 +364,13 @@ export async function generateGuide(
     if (confidence === 'tested' && !keep.some((i) => i.startsWith('P'))) {
       confidence = keep.length ? 'official' : 'inferred';
       fixes.push(`${where}: "tested" without a probe → ${confidence}`);
+    }
+    // A probe can only confirm endpoint-level facts; "tested" on anything else (scopes, review times…) is over-claiming.
+    const it = item as Record<string, unknown>;
+    const claimText = String(it.title ?? it.item ?? it.scope ?? it.detail ?? '');
+    if (confidence === 'tested' && !PROBEABLE.test(claimText)) {
+      confidence = keep.some((i) => i.startsWith('S')) ? 'official' : 'inferred';
+      fixes.push(`${where}: "tested" on a claim no probe can confirm → ${confidence}`);
     }
     if (confidence !== 'inferred' && keep.length === 0) {
       fixes.push(`${where}: "${confidence}" with no valid source → inferred`);
@@ -370,21 +395,45 @@ export async function generateGuide(
   });
 
   let stepNo = 0;
+  let hasProviderStep = false;
   const phases = p2.phases.map((ph, pi) => ({
     id: `p${pi + 1}`,
     title: ph.title,
     outcome: ph.outcome,
-    steps: ph.steps.map((s) => {
-      stepNo++;
-      const actor = (['agent', 'you', 'provider'] as const).includes(s.actor as any) ? (s.actor as 'agent' | 'you' | 'provider') : 'you';
-      return {
-        ...fixRefs(s, `step ${s.title.slice(0, 40)}`),
-        id: `s${stepNo}`,
-        actor,
-        links: (s.links ?? []).filter((l) => /^https?:\/\//.test(l.url)),
-      };
+    steps: ph.steps.flatMap((s) => {
+      let actor = (['agent', 'you', 'provider'] as const).includes(s.actor as any) ? (s.actor as 'agent' | 'you' | 'provider') : 'you';
+      // Creating the Composio auth config is a single API call with the developer's Composio key.
+      if (actor === 'you' && /auth ?config/i.test(s.title) && /creat|set ?up|add/i.test(s.title)) {
+        actor = 'agent';
+        fixes.push(`step "${s.title.slice(0, 40)}": Composio auth-config creation is agent-doable via API → agent`);
+      }
+      if (actor === 'provider') hasProviderStep = true;
+      const step = { ...fixRefs(s, `step ${s.title.slice(0, 40)}`), id: `s${++stepNo}`, actor, links: (s.links ?? []).filter((l) => /^https?:\/\//.test(l.url)) };
+      // A review wait is the provider's step, not the developer's: split it out so "who does what" is honest.
+      if (actor !== 'provider' && s.wait && /review|approv|verif|certif/i.test(`${s.title} ${s.wait}`)) {
+        hasProviderStep = true;
+        fixes.push(`step "${s.title.slice(0, 40)}": split its review wait into a provider step`);
+        return [
+          { ...step, wait: null },
+          {
+            ...step,
+            id: `s${++stepNo}`,
+            title: `${ident.name} reviews the submission`,
+            actor: 'provider' as const,
+            effort: 'None (waiting)',
+            wait: s.wait,
+            details: `Nothing to do but wait and watch for reviewer questions. The wait is ${s.wait}.`,
+            agentAssist: 'An agent can watch the review inbox and draft replies to reviewer questions.',
+            links: [],
+          },
+        ];
+      }
+      return [step];
     }),
   }));
+  if (!hasProviderStep && p1.factors.find((f) => f.key === 'review_required')?.value === 'yes') {
+    fixes.push('no provider wait step although review_required = yes');
+  }
 
   const notes = { ...p1.sourceNotes, ...p2.sourceNotes };
   const draft = {

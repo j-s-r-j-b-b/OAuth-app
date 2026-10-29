@@ -1,0 +1,509 @@
+{
+  "schemaVersion": 1,
+  "slug": "calendly",
+  "app": {
+    "name": "Calendly",
+    "website": "https://calendly.com",
+    "category": "Scheduling",
+    "description": "Calendly is an automated scheduling platform for individuals and teams to streamline meeting booking.",
+    "developerPortalUrl": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app",
+    "docsUrl": "https://developer.calendly.com/docs/authentication/overview"
+  },
+  "composio": {
+    "toolkitSlug": "calendly",
+    "managedOAuth": "available",
+    "authSchemes": [
+      "OAUTH2"
+    ],
+    "toolkitDocsUrl": "https://docs.composio.dev/toolkits/calendly",
+    "requiredFields": [],
+    "notes": [
+      "Calendly does not support selective scope approval by end users; whatever scopes are configured in your app will be requested in bulk.",
+      "To modify permissions later, update your scopes in the Calendly app settings and reconnect your account via Composio to issue a new token."
+    ]
+  },
+  "assumption": "An agent that reads, writes, and manages event types, scheduled events, and availability in any user's Calendly account.",
+  "verdict": {
+    "headline": "Calendly provides a completely self-serve OAuth setup with no review gate required for production use.",
+    "summary": "You can register an OAuth app instantly via the Calendly Developer Portal, configure your redirect URI and scopes, and immediately begin connecting user accounts. There are no app review queues, business verification steps, or test-user caps before going live. The only catch is that credentials are shown once upon creation and must be saved immediately, and PKCE with S256 is strictly required.",
+    "difficulty": "self-serve",
+    "handsOnEffort": {
+      "label": "15–30 min",
+      "minHours": 0.25,
+      "maxHours": 0.5,
+      "basis": "Creating a developer account and registering an OAuth app takes under half an hour."
+    },
+    "timeToFirstConnection": {
+      "label": "0–1 hour",
+      "minHours": 0,
+      "maxHours": 1,
+      "basis": "Instant self-serve creation allows immediate testing and connection."
+    },
+    "timeToProduction": {
+      "label": "0–1 hour",
+      "minHours": 0,
+      "maxHours": 1,
+      "basis": "No review gate or approval is required for production usage."
+    },
+    "longestPole": "Saving the generated client secret and webhook signing key immediately since they are only shown once.",
+    "cost": "Free",
+    "costDetail": "Calendly developer account and standard OAuth app creation are free of charge.",
+    "easierPaths": []
+  },
+  "factors": [
+    {
+      "key": "self_serve_registration",
+      "value": "yes",
+      "detail": "OAuth apps can be created directly via the Calendly Developer portal without human approval.",
+      "sourceIds": [
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "review_required",
+      "value": "no",
+      "detail": "No documented app review, verification, or certification gate is required before arbitrary users can authorize the app.",
+      "sourceIds": [
+        "S1",
+        "S4"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "business_verification",
+      "value": "no",
+      "detail": "No business verification documents are required to register an app or go live.",
+      "sourceIds": [
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "security_assessment",
+      "value": "no",
+      "detail": "No security assessments or audits are required for standard OAuth apps.",
+      "sourceIds": [
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "paid_access",
+      "value": "no",
+      "detail": "Standard API and OAuth features do not require a paid tier subscription for app creation.",
+      "sourceIds": [
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "partner_or_sales_gate",
+      "value": "no",
+      "detail": "No partner agreement or sales contact is required to build and deploy an integration.",
+      "sourceIds": [
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "user_cap_before_review",
+      "value": "no",
+      "detail": "No test-user caps or tenant caps are enforced for custom OAuth apps.",
+      "sourceIds": [
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "per_customer_setup",
+      "value": "no",
+      "detail": "End users can connect their accounts via standard OAuth without extra administrative configuration.",
+      "sourceIds": [
+        "S1",
+        "S3"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "phases": [
+    {
+      "id": "p1",
+      "title": "Register your Calendly app",
+      "outcome": "An active Calendly OAuth application with Client ID and Client Secret.",
+      "steps": [
+        {
+          "id": "s1",
+          "title": "Log in to the Calendly Developer Portal",
+          "actor": "you",
+          "effort": "5 min",
+          "wait": null,
+          "details": "Navigate to the **Calendly Developer Portal** at `https://calendly.com/app/developer` (or `https://developer.calendly.com/login`) and sign in with your Calendly account.",
+          "agentAssist": null,
+          "links": [
+            {
+              "label": "Calendly Developer Portal",
+              "url": "https://calendly.com/app/developer"
+            }
+          ],
+          "sourceIds": [
+            "S1"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "s2",
+          "title": "Create a new OAuth application",
+          "actor": "you",
+          "effort": "10 min",
+          "wait": null,
+          "details": "Go to the **OAuth apps** tab and click **Create OAuth app**. Provide your app name, select your environment type (**Sandbox** or **Production**), and enter the Composio callback URL: `https://backend.composio.dev/api/v3/toolkits/auth/callback` under **Redirect URI**.",
+          "agentAssist": "Draft the app name and verify the redirect URI before entering it into the portal.",
+          "links": [
+            {
+              "label": "Creating an OAuth app Guide",
+              "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app"
+            }
+          ],
+          "sourceIds": [
+            "S1"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "s3",
+          "title": "Save your client credentials immediately",
+          "actor": "you",
+          "effort": "2 min",
+          "wait": null,
+          "details": "Copy your **Client ID**, **Client Secret**, and **Webhook Signing Key** immediately upon creation. Calendly displays these credentials only once and cannot retrieve them again.",
+          "agentAssist": null,
+          "links": [],
+          "sourceIds": [
+            "S1"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "title": "Configure scopes and permissions",
+      "outcome": "Defined scope set configured for your Calendly app.",
+      "steps": [
+        {
+          "id": "s4",
+          "title": "Select required scopes in the app settings",
+          "actor": "you",
+          "effort": "5 min",
+          "wait": null,
+          "details": "In your app configuration, select the required permission scopes for your agent, such as `event_types:read`, `event_types:write`, `scheduled_events:read`, `scheduled_events:write`, `availability:read`, and `users:read`.",
+          "agentAssist": "Review the required AI agent use case and output the exact list of scopes needed.",
+          "links": [
+            {
+              "label": "Authorization Scopes",
+              "url": "https://developer.calendly.com/docs/authentication/scopes"
+            }
+          ],
+          "sourceIds": [
+            "S2"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "title": "Go live in Composio",
+      "outcome": "Calendly successfully integrated into Composio for AI agent tool execution.",
+      "steps": [
+        {
+          "id": "s5",
+          "title": "Create a custom auth config in Composio",
+          "actor": "agent",
+          "effort": "5 min",
+          "wait": null,
+          "details": "Go to the **Composio Dashboard**, select **Custom Auth**, and choose **Calendly**. Paste your `Client ID` and `Client Secret` obtained from the Calendly Developer Portal.",
+          "agentAssist": null,
+          "links": [
+            {
+              "label": "Composio Calendly Toolkit",
+              "url": "https://docs.composio.dev/toolkits/calendly"
+            }
+          ],
+          "sourceIds": [
+            "S3"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "s6",
+          "title": "Connect your Calendly account via Composio",
+          "actor": "you",
+          "effort": "5 min",
+          "wait": null,
+          "details": "Initiate an account connection flow within Composio. Authenticate with your Calendly account and approve the requested permission set to issue a valid access token.",
+          "agentAssist": null,
+          "links": [],
+          "sourceIds": [
+            "S3"
+          ],
+          "confidence": "official"
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "item": "Calendly Developer Account",
+      "neededFor": "registration",
+      "detail": "Required to access the developer portal and create OAuth applications.",
+      "sourceIds": [
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "Redirect URI",
+      "neededFor": "registration",
+      "detail": "Must be configured in the app settings (e.g., Composio callback https://backend.composio.dev/api/v3/toolkits/auth/callback).",
+      "sourceIds": [
+        "S1",
+        "S3"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "PKCE (S256) Support",
+      "neededFor": "testing",
+      "detail": "Calendly OAuth 2.1 strictly requires Proof Key for Code Exchange with the S256 method.",
+      "sourceIds": [
+        "S1"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "scopes": [
+    {
+      "scope": "event_types:read",
+      "purpose": "Read event types to inspect available meeting configurations.",
+      "tier": "basic",
+      "note": "Included implicitly or explicitly in standard agent scope sets.",
+      "sourceIds": [
+        "S2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "event_types:write",
+      "purpose": "Create and update event types.",
+      "tier": "sensitive",
+      "note": "Write scopes implicitly include read privileges for the same domain.",
+      "sourceIds": [
+        "S2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "scheduled_events:read",
+      "purpose": "List and view scheduled meetings.",
+      "tier": "basic",
+      "note": "Essential for agents checking user calendars.",
+      "sourceIds": [
+        "S2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "scheduled_events:write",
+      "purpose": "Cancel or manage scheduled events.",
+      "tier": "sensitive",
+      "note": "Allows modifying bookings.",
+      "sourceIds": [
+        "S2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "availability:read",
+      "purpose": "Read user availability schedules.",
+      "tier": "basic",
+      "note": "Used to check free/busy slots.",
+      "sourceIds": [
+        "S2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "users:read",
+      "purpose": "Read current user profile and organization details.",
+      "tier": "basic",
+      "note": "Required for identifying the authenticated user.",
+      "sourceIds": [
+        "S2"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "blockers": [
+    {
+      "title": "Lost Client Secret",
+      "symptom": "You closed the credential generation screen without copying the client secret and cannot find it in the portal.",
+      "likelihood": "occasional",
+      "howToProceed": "Calendly does not allow viewing secrets once generated. Delete the existing OAuth app and create a new one to obtain a fresh Client ID and Secret.",
+      "escalation": null,
+      "sourceIds": [
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Sandbox vs Production URL Rejection",
+      "symptom": "OAuth authorization fails with redirect URI mismatch or invalid URL error when testing.",
+      "likelihood": "common",
+      "howToProceed": "Ensure you are using an `https` redirect URI for Production apps. Localhost `http` URIs are only permitted when using a Sandbox environment app.",
+      "escalation": null,
+      "sourceIds": [
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Missing PKCE S256 Support",
+      "symptom": "Authorization requests fail or return bad request errors during token exchange.",
+      "likelihood": "rare",
+      "howToProceed": "Ensure your OAuth client implementation strictly enforces Proof Key for Code Exchange (PKCE) with `code_challenge_method=S256`. Managed flows in Composio handle this automatically.",
+      "escalation": null,
+      "sourceIds": [
+        "S1"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "nuances": [
+    {
+      "title": "No Granular User Scope Selection",
+      "detail": "Calendly does not let end users selectively approve individual scopes during the OAuth connection flow. The entire permission set configured in your OAuth app is requested at once.",
+      "sourceIds": [
+        "S3"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Write Scopes Imply Read Access",
+      "detail": "Write permission scopes in Calendly implicitly include read permissions for the same resource domain.",
+      "sourceIds": [
+        "S2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Environment Isolation",
+      "detail": "Sandbox apps and Production apps run on separate environments; credentials and redirect rules configured for Sandbox will not function against Production API endpoints.",
+      "sourceIds": [
+        "S1"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "composioSetup": {
+    "redirectUri": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+    "steps": [
+      "Navigate to the Composio Dashboard and open the Custom Auth settings for Calendly.",
+      "Input your Calendly Client ID and Client Secret.",
+      "Save the custom auth configuration and trigger a test user connection using the Composio integration flow."
+    ]
+  },
+  "evidence": {
+    "sources": [
+      {
+        "id": "S1",
+        "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app",
+        "title": "Creating an OAuth app | Calendly | Developer Documentation",
+        "kind": "official",
+        "accessedAt": "2026-10-29",
+        "note": "Creating an OAuth app requires app name, redirect URI, environment type, and scopes, showing credentials once.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S2",
+        "url": "https://developer.calendly.com/docs/authentication/scopes",
+        "title": "Authorization Scopes | Calendly | Developer Documentation",
+        "kind": "official",
+        "accessedAt": "2026-10-29",
+        "note": "Details available authorization scopes and their respective access domains.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S3",
+        "url": "https://docs.composio.dev/toolkits/calendly",
+        "title": "Composio docs: Calendly toolkit",
+        "kind": "composio",
+        "accessedAt": "2026-10-29",
+        "note": "Composio toolkit documentation confirms callback URI and managed OAuth support.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S4",
+        "url": "https://docs.unified.to/skills/calendly-oauth-app/SKILL.md",
+        "title": "Calendly OAuth2 App Registration",
+        "kind": "community",
+        "accessedAt": "2026-10-29",
+        "note": "Calendly OAuth creation is self-serve with no documented app review gate before arbitrary users can authorize it.",
+        "retrieval": "search-result"
+      }
+    ],
+    "probes": [
+      {
+        "id": "P1",
+        "kind": "composio-api",
+        "target": "GET https://backend.composio.dev/api/v3.1/toolkits/calendly",
+        "result": "pass",
+        "summary": "Auth schemes: OAUTH2 (managed). Connection fields: none. Default scopes: none listed.",
+        "detail": "[{\"scheme\":\"OAUTH2\",\"managed\":true,\"configFields\":[{\"name\":\"client_id\",\"displayName\":\"Client id\",\"required\":true,\"description\":\"Client id of the app\"},{\"name\":\"client_secret\",\"displayName\":\"Client secret\",\"required\":true,\"description\":\"Client secret of the app\"},{\"name\":\"oauth_redirect_uri\",\"displayName\":\"Redirect URI\",\"required\":false,\"description\":\"Add this Redirect URL to your app's OAuth allow list.\"},{\"name\":\"scopes\",\"displayName\":\"Scopes\",\"required\":false,\"description\":\"Scopes to request from the user, comma separated\"}],\"connectionFields\":[],\"defaultScopes\":[]}]",
+        "at": "2026-10-29T12:57:55.480Z"
+      },
+      {
+        "id": "P2",
+        "kind": "oauth-discovery",
+        "target": "GET https://auth.calendly.com/.well-known/openid-configuration | https://auth.calendly.com/.well-known/oauth-authorization-server",
+        "result": "info",
+        "summary": "No public OAuth/OIDC discovery document; endpoints must come from the provider docs.",
+        "detail": "404 https://auth.calendly.com/.well-known/openid-configuration\n404 https://auth.calendly.com/.well-known/oauth-authorization-server",
+        "at": "2026-10-29T12:58:04.163Z"
+      },
+      {
+        "id": "P3",
+        "kind": "authorize-endpoint",
+        "target": "GET https://auth.calendly.com/oauth/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=event_types%3Aread+scheduling%3Aread+scheduling%3Awrite",
+        "result": "pass",
+        "summary": "Endpoint is live; it sends the browser to sign-in before validating the client (200).",
+        "detail": "Chain: 301 auth.calendly.com/oauth/authorize → 302 calendly.com/oauth/authorize → 200 calendly.com/app/login\nFinal: https://calendly.com/app/login\nExcerpt: title=\"Calendly\"",
+        "at": "2026-10-29T12:58:04.997Z"
+      },
+      {
+        "id": "P4",
+        "kind": "portal",
+        "target": "GET https://developer.calendly.com",
+        "result": "pass",
+        "summary": "Portal reachable (200, \"Build with Calendly | Calendly | Developer Documentation\"); no sign-in redirect seen on the landing page.",
+        "detail": "Chain: 307 developer.calendly.com/ → 200 developer.calendly.com/docs/getting-started/overview",
+        "at": "2026-10-29T12:58:05.516Z"
+      }
+    ],
+    "openQuestions": [
+      {
+        "question": "What are the exact token expiration times and refresh token rotation rules for Calendly OAuth tokens?",
+        "whyItMatters": "Helps determine whether long-running agent workflows will experience unexpected disconnections due to expired credentials.",
+        "howToResolve": "Check Calendly developer documentation or test token lifetime empirically using a sandbox connection."
+      }
+    ],
+    "verification": null
+  },
+  "meta": {
+    "generatedAt": "2026-10-29T12:58:29.047Z",
+    "generator": "live",
+    "model": "gemini-3.5-flash-lite",
+    "durationSec": 42
+  }
+}

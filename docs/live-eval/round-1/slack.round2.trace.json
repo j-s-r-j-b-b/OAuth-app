@@ -1,0 +1,262 @@
+{
+  "query": "Slack",
+  "events": [
+    {
+      "type": "stage",
+      "stage": "resolve",
+      "message": "Identifying “Slack”",
+      "t": 1
+    },
+    {
+      "type": "search",
+      "query": "Slack API OAuth app developer documentation",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 2825
+    },
+    {
+      "type": "info",
+      "message": "Identified Slack — Slack is a channel-based messaging platform for teams to communicate, share files, and integrate with developer tools.",
+      "t": 10415
+    },
+    {
+      "type": "stage",
+      "stage": "composio",
+      "message": "Checking Composio’s toolkit catalog",
+      "t": 10416
+    },
+    {
+      "type": "info",
+      "message": "Composio toolkit `slack` has a managed OAuth app: you can prototype today and need your own app for production branding, scopes or quota.",
+      "t": 11833
+    },
+    {
+      "type": "stage",
+      "stage": "research",
+      "message": "Researching docs, policies and real-world reports",
+      "t": 11834
+    },
+    {
+      "type": "search",
+      "query": "Slack OAuth app review approval verification publish requirements",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 14160
+    },
+    {
+      "type": "search",
+      "query": "Slack OAuth app approval how long experience reddit OR forum",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 14191
+    },
+    {
+      "type": "search",
+      "query": "Slack API pricing plans tiers limits for developers connections",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 14392
+    },
+    {
+      "type": "finding",
+      "fact": "Slack apps can be distributed to other workspaces or published to the Slack Marketplace without a mandatory review if distributed via OAuth URL or private distribution, but Marketplace listing requires formal submission and review.",
+      "sourceIds": [
+        "S12"
+      ],
+      "t": 18597
+    },
+    {
+      "type": "finding",
+      "fact": "Slack API does not require a paid developer plan; all standard Web API calls are included across workspace tiers, governed by per-method rate limit tiers (Tiers 1-4 and Special).",
+      "sourceIds": [
+        "S24",
+        "S29"
+      ],
+      "t": 18597
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "portal",
+        "target": "GET https://api.slack.com/apps",
+        "result": "pass",
+        "summary": "Portal reachable (200, \"Slack API: Applications | Slack\"); no sign-in redirect seen on the landing page.",
+        "detail": "Chain: 200 api.slack.com/apps",
+        "id": "P2",
+        "at": "2026-10-29T12:59:42.814Z"
+      },
+      "t": 19350
+    },
+    {
+      "type": "read",
+      "url": "https://docs.slack.dev/app-management/distribution/",
+      "title": "App lifecycle & distribution | Slack Developer Docs",
+      "ok": true,
+      "chars": 14000,
+      "via": "direct",
+      "sourceId": "S12",
+      "t": 20108
+    },
+    {
+      "type": "read",
+      "url": "https://docs.slack.dev/authentication/installing-with-oauth/",
+      "title": "Installing via OAuth authorization code flow | Slack Developer Docs",
+      "ok": true,
+      "chars": 14000,
+      "via": "direct",
+      "sourceId": "S1",
+      "t": 20156
+    },
+    {
+      "type": "search",
+      "query": "site:docs.slack.dev distribution oauth app custom integration",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 21252
+    },
+    {
+      "type": "search",
+      "query": "site:docs.slack.dev scopes user token web api",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 21456
+    },
+    {
+      "type": "read",
+      "url": "https://docs.slack.dev/authentication/using-token-rotation/",
+      "title": "Using token rotation | Slack Developer Docs",
+      "ok": true,
+      "chars": 11841,
+      "via": "direct",
+      "sourceId": "S4",
+      "t": 27668
+    },
+    {
+      "type": "read",
+      "url": "https://docs.slack.dev/slack-marketplace/slack-marketplace-review-guide/",
+      "title": "Slack Marketplace review process | Slack Developer Docs",
+      "ok": true,
+      "chars": 14000,
+      "via": "direct",
+      "sourceId": "S11",
+      "t": 27747
+    },
+    {
+      "type": "search",
+      "query": "\"Slack\" marketplace review timeline days weeks site:slack.com OR site:docs.slack.dev",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 28417
+    },
+    {
+      "type": "search",
+      "query": "site:docs.slack.dev \"oauth.v2.access\" token expiration refresh rotation",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 28729
+    },
+    {
+      "type": "info",
+      "message": "Research done: 2 findings, 5 pages read, 2 probes.",
+      "t": 28730
+    },
+    {
+      "type": "warn",
+      "message": "Few findings were saved; the guide will lean on inferred judgments.",
+      "t": 28730
+    },
+    {
+      "type": "stage",
+      "stage": "write",
+      "message": "Writing the guide",
+      "t": 28731
+    },
+    {
+      "type": "info",
+      "message": "Verdict drafted: Slack offers instant self-serve app registration for private workspaces, but public Marketplace publishing requires a formal review.",
+      "t": 40418
+    },
+    {
+      "type": "stage",
+      "stage": "check",
+      "message": "Checking citations, confidence labels and ratings",
+      "t": 48351
+    },
+    {
+      "type": "quality",
+      "report": {
+        "claims": {
+          "tested": 2,
+          "official": 25,
+          "reported": 0,
+          "inferred": 0
+        },
+        "sources": {
+          "total": 10,
+          "fetched": 4,
+          "snippetOnly": 6,
+          "official": 8,
+          "community": 1,
+          "composio": 1
+        },
+        "probes": {
+          "total": 2,
+          "pass": 2,
+          "info": 0,
+          "fail": 0
+        },
+        "fixes": [
+          "step Configure Bot and User Token Scopes: \"tested\" on a claim no probe can confirm → official",
+          "scope channels:read: \"tested\" on a claim no probe can confirm → official",
+          "scope channels:write: \"tested\" on a claim no probe can confirm → official",
+          "scope chat:write: \"tested\" on a claim no probe can confirm → official",
+          "scope channels:history: \"tested\" on a claim no probe can confirm → official",
+          "scope search:read: \"tested\" on a claim no probe can confirm → official"
+        ],
+        "llm": {
+          "calls": 5,
+          "inputTokens": 25472,
+          "outputTokens": 5367,
+          "model": "gemini-3.5-flash-lite"
+        }
+      },
+      "t": 48355
+    }
+  ],
+  "quality": {
+    "claims": {
+      "tested": 2,
+      "official": 25,
+      "reported": 0,
+      "inferred": 0
+    },
+    "sources": {
+      "total": 10,
+      "fetched": 4,
+      "snippetOnly": 6,
+      "official": 8,
+      "community": 1,
+      "composio": 1
+    },
+    "probes": {
+      "total": 2,
+      "pass": 2,
+      "info": 0,
+      "fail": 0
+    },
+    "fixes": [
+      "step Configure Bot and User Token Scopes: \"tested\" on a claim no probe can confirm → official",
+      "scope channels:read: \"tested\" on a claim no probe can confirm → official",
+      "scope channels:write: \"tested\" on a claim no probe can confirm → official",
+      "scope chat:write: \"tested\" on a claim no probe can confirm → official",
+      "scope channels:history: \"tested\" on a claim no probe can confirm → official",
+      "scope search:read: \"tested\" on a claim no probe can confirm → official"
+    ],
+    "llm": {
+      "calls": 5,
+      "inputTokens": 25472,
+      "outputTokens": 5367,
+      "model": "gemini-3.5-flash-lite"
+    }
+  }
+}

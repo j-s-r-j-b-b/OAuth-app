@@ -1,0 +1,556 @@
+{
+  "schemaVersion": 1,
+  "slug": "slack",
+  "app": {
+    "name": "Slack",
+    "website": "https://slack.com",
+    "category": "Collaboration",
+    "description": "Slack is a channel-based messaging platform for teams to communicate, share files, and integrate with developer tools.",
+    "developerPortalUrl": "https://api.slack.com/apps",
+    "docsUrl": "https://docs.slack.dev/"
+  },
+  "composio": {
+    "toolkitSlug": "slack",
+    "managedOAuth": "available",
+    "authSchemes": [
+      "OAUTH2"
+    ],
+    "toolkitDocsUrl": "https://docs.composio.dev/toolkits/slack",
+    "requiredFields": [],
+    "notes": [
+      "Composio supports two toolkits: **Slack** (user-level auth for workspace actions) and **Slackbot** (bot-level auth for channel messaging and app mentions).",
+      "All executed API calls are subject to Composio's standard data encryption and 30-day retention policy."
+    ]
+  },
+  "assumption": "An AI agent that reads and sends messages, manages channels, and interacts with files across any customer's Slack workspace",
+  "verdict": {
+    "headline": "Slack offers instant self-serve app registration for private workspaces, but public Marketplace publishing requires a formal review.",
+    "summary": "Developers can create an app instantly at api.slack.com, configure OAuth scopes, and connect workspaces via custom credentials or direct OAuth install URLs without review. However, publishing to the public Slack Marketplace requires a formal preliminary and functional review process that can take up to several weeks.",
+    "difficulty": "self-serve",
+    "handsOnEffort": {
+      "label": "1–2 hours",
+      "minHours": 1,
+      "maxHours": 2,
+      "basis": "Creating a Slack app, setting redirect URIs, and configuring scopes takes under two hours."
+    },
+    "timeToFirstConnection": {
+      "label": "Instant",
+      "minHours": 0,
+      "maxHours": 1,
+      "basis": "Self-serve developer portal allows immediate testing and connection upon app creation."
+    },
+    "timeToProduction": {
+      "label": "Instant",
+      "minHours": 0,
+      "maxHours": 1,
+      "basis": "Unlisted distribution via OAuth URLs or custom credentials requires no review gate."
+    },
+    "longestPole": "Navigating workspace admin approval settings if the target workspace restricts unlisted apps.",
+    "cost": "Free",
+    "costDetail": "Free developer account and API access across standard Web API tiers.",
+    "easierPaths": [
+      {
+        "condition": "Using unlisted public distribution via direct OAuth install URL",
+        "effect": "Bypasses the multi-week Slack Marketplace review process completely."
+      }
+    ]
+  },
+  "factors": [
+    {
+      "key": "self_serve_registration",
+      "value": "yes",
+      "detail": "Any developer can create an app immediately at api.slack.com/apps with a free account.",
+      "sourceIds": [
+        "S3"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "review_required",
+      "value": "depends",
+      "detail": "No review is needed for internal use or unlisted distribution via OAuth URLs; public Marketplace listing requires formal review.",
+      "sourceIds": [
+        "S5"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "business_verification",
+      "value": "no",
+      "detail": "Not required for private apps or unlisted OAuth distribution.",
+      "sourceIds": [
+        "S5"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "security_assessment",
+      "value": "depends",
+      "detail": "Only required if submitting your app for public Slack Marketplace listing.",
+      "sourceIds": [
+        "S10"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "paid_access",
+      "value": "no",
+      "detail": "Slack API access is included at no additional cost across standard workspace tiers.",
+      "sourceIds": [
+        "S7",
+        "S8"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "partner_or_sales_gate",
+      "value": "no",
+      "detail": "No partnership or sales contact is required to build and deploy Slack integrations.",
+      "sourceIds": [
+        "S5"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "user_cap_before_review",
+      "value": "no",
+      "detail": "Unlisted distribution via OAuth URLs does not enforce test user caps.",
+      "sourceIds": [
+        "S5"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "per_customer_setup",
+      "value": "depends",
+      "detail": "Target workspaces may require admin approval or disabling 'Require apps from Slack Marketplace' to install unlisted apps.",
+      "sourceIds": [
+        "S5"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "phases": [
+    {
+      "id": "p1",
+      "title": "Register your Slack App",
+      "outcome": "An unconfigured Slack app record inside your developer account.",
+      "steps": [
+        {
+          "id": "s1",
+          "title": "Create a new app",
+          "actor": "you",
+          "effort": "5 min",
+          "wait": null,
+          "details": "Navigate to the **Slack API Portal**, click **Create New App**, select **From scratch**, enter your app name, and choose your target development workspace.",
+          "agentAssist": null,
+          "links": [
+            {
+              "label": "Slack API Apps",
+              "url": "https://api.slack.com/apps"
+            }
+          ],
+          "sourceIds": [
+            "S3"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "title": "Configure OAuth & Scopes",
+      "outcome": "OAuth redirect URIs and required permissions configured on your Slack app.",
+      "steps": [
+        {
+          "id": "s2",
+          "title": "Add redirect URL",
+          "actor": "you",
+          "effort": "5 min",
+          "wait": null,
+          "details": "Go to **OAuth & Permissions** in your app settings, locate **Redirect URLs**, click **Add New Redirect URL**, and enter `https://backend.composio.dev/api/v3/toolkits/auth/callback`. Click **Save URLs**.",
+          "agentAssist": "Draft the exact redirect URI string for you to copy and paste.",
+          "links": [
+            {
+              "label": "Slack API Apps",
+              "url": "https://api.slack.com/apps"
+            }
+          ],
+          "sourceIds": [
+            "S1",
+            "P1"
+          ],
+          "confidence": "tested"
+        },
+        {
+          "id": "s3",
+          "title": "Configure Bot and User Token Scopes",
+          "actor": "you",
+          "effort": "10 min",
+          "wait": null,
+          "details": "Under **OAuth & Permissions**, scroll down to **Scopes**. Add your required bot token scopes (e.g., `chat:write`, `channels:read`, `channels:history`, `search:read`, `channels:write`).",
+          "agentAssist": "Provide a complete checklist of required scopes matching your agent's intended tool calls.",
+          "links": [
+            {
+              "label": "Slack API Apps",
+              "url": "https://api.slack.com/apps"
+            }
+          ],
+          "sourceIds": [
+            "S9",
+            "P1"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "title": "Test with your own account",
+      "outcome": "Verified OAuth flow working end-to-end within your sandbox workspace.",
+      "steps": [
+        {
+          "id": "s4",
+          "title": "Install app to workspace",
+          "actor": "you",
+          "effort": "5 min",
+          "wait": null,
+          "details": "Navigate to **Basic Information** or **Install App**, click **Install to Workspace**, and authorize the permission prompts.",
+          "agentAssist": null,
+          "links": [
+            {
+              "label": "Slack API Apps",
+              "url": "https://api.slack.com/apps"
+            }
+          ],
+          "sourceIds": [
+            "S1",
+            "S5"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "p4",
+      "title": "Go live in Composio",
+      "outcome": "Slack integrated with Composio using your custom OAuth credentials.",
+      "steps": [
+        {
+          "id": "s5",
+          "title": "Retrieve client credentials",
+          "actor": "you",
+          "effort": "2 min",
+          "wait": null,
+          "details": "Navigate to **Basic Information** in your Slack app console and copy your **Client ID** and **Client Secret**.",
+          "agentAssist": null,
+          "links": [
+            {
+              "label": "Slack API Apps",
+              "url": "https://api.slack.com/apps"
+            }
+          ],
+          "sourceIds": [
+            "S3"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "s6",
+          "title": "Configure custom OAuth in Composio",
+          "actor": "you",
+          "effort": "5 min",
+          "wait": null,
+          "details": "Open your Composio dashboard, navigate to **Custom Auth** for the Slack toolkit, and paste your Slack **Client ID** and **Client Secret**. Save the configuration to generate your custom auth configuration ID.",
+          "agentAssist": "Generate the API request payload needed to configure custom auth via the Composio API.",
+          "links": [
+            {
+              "label": "Composio Slack Toolkit",
+              "url": "https://docs.composio.dev/toolkits/slack"
+            }
+          ],
+          "sourceIds": [
+            "S4"
+          ],
+          "confidence": "official"
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "item": "Slack Developer Account",
+      "neededFor": "registration",
+      "detail": "Free account to access api.slack.com/apps and create application records.",
+      "sourceIds": [
+        "S3"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "HTTPS Redirect URI",
+      "neededFor": "testing",
+      "detail": "A secure callback URL (e.g., https://backend.composio.dev/api/v3/toolkits/auth/callback) registered in app settings.",
+      "sourceIds": [
+        "S1",
+        "P1"
+      ],
+      "confidence": "tested"
+    },
+    {
+      "item": "Workspace Admin Approval (Conditional)",
+      "neededFor": "production",
+      "detail": "Required if the target workspace enforces restrictions against unlisted or non-Marketplace applications.",
+      "sourceIds": [
+        "S5"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "scopes": [
+    {
+      "scope": "channels:read",
+      "purpose": "View basic information about public channels in the workspace.",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "S9",
+        "P1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "channels:write",
+      "purpose": "Manage public channels and create new channels.",
+      "tier": "sensitive",
+      "note": null,
+      "sourceIds": [
+        "S9",
+        "P1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "chat:write",
+      "purpose": "Send messages on behalf of the app or user.",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "S9",
+        "P1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "channels:history",
+      "purpose": "View messages and other content in public channels.",
+      "tier": "sensitive",
+      "note": null,
+      "sourceIds": [
+        "S9",
+        "P1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "search:read",
+      "purpose": "Search messages and files across the workspace.",
+      "tier": "sensitive",
+      "note": null,
+      "sourceIds": [
+        "S9",
+        "P1"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "blockers": [
+    {
+      "title": "Marketplace Restriction Error",
+      "symptom": "Users see 'This app isn't listed in the Slack Marketplace' when attempting to authenticate.",
+      "likelihood": "common",
+      "howToProceed": "Disable 'Require apps from Slack Marketplace' in the target workspace under Settings → Apps & Workflows → App Management Settings.",
+      "escalation": null,
+      "sourceIds": [
+        "S5"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Admin Approval Prompt",
+      "symptom": "Users are blocked and asked to submit an install request to their workspace admin.",
+      "likelihood": "common",
+      "howToProceed": "Have a workspace admin approve the app request or disable 'Require approved apps' under the workspace app management settings.",
+      "escalation": null,
+      "sourceIds": [
+        "S5"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "nuances": [
+    {
+      "title": "Temporary Code Expiration",
+      "detail": "Authorization codes returned by Slack's `/oauth/v2/authorize` endpoint expire in 10 minutes and can only be used once.",
+      "sourceIds": [
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Token Rotation & Management",
+      "detail": "Slack supports token rotation mechanisms to enhance security for enterprise and standard integrations.",
+      "sourceIds": [
+        "S2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Rate Limit Tiers",
+      "detail": "Slack Web API calls are governed by method-specific rate limit tiers (Tiers 1-4 and Special limits) evaluated per workspace.",
+      "sourceIds": [
+        "S6",
+        "S8"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "composioSetup": {
+    "redirectUri": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+    "steps": [
+      "Navigate to the Composio dashboard and open the **Slack** toolkit settings.",
+      "Select **Custom OAuth Configuration**.",
+      "Paste your Slack App **Client ID** and **Client Secret** into the designated fields.",
+      "Confirm the default scopes or add custom scopes if required.",
+      "Save the configuration and pass the resulting auth config ID into your Composio execution sessions."
+    ]
+  },
+  "evidence": {
+    "sources": [
+      {
+        "id": "S1",
+        "url": "https://docs.slack.dev/authentication/installing-with-oauth/",
+        "title": "Installing via OAuth authorization code flow | Slack Developer Docs",
+        "kind": "official",
+        "accessedAt": "2026-10-29",
+        "note": "Details Slack's OAuth authorization code flow and temporary code expiration rules.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S2",
+        "url": "https://docs.slack.dev/authentication/using-token-rotation/",
+        "title": "Using token rotation | Slack Developer Docs",
+        "kind": "official",
+        "accessedAt": "2026-10-29",
+        "note": "Explains Slack's token rotation capabilities.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S3",
+        "url": "https://docs.slack.dev/app-management/quickstart-app-settings/",
+        "title": "Creating an app from app settings",
+        "kind": "official",
+        "accessedAt": "2026-10-29",
+        "note": "Covers app creation from app settings.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S4",
+        "url": "https://docs.composio.dev/toolkits/slack",
+        "title": "Composio docs: Slack toolkit",
+        "kind": "composio",
+        "accessedAt": "2026-10-29",
+        "note": "Outlines Composio Slack toolkit specifics.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S5",
+        "url": "https://docs.slack.dev/app-management/distribution/",
+        "title": "App lifecycle & distribution | Slack Developer Docs",
+        "kind": "official",
+        "accessedAt": "2026-10-29",
+        "note": "Details app lifecycle, distribution, and Marketplace review requirements.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S6",
+        "url": "https://docs.slack.dev/apis/web-api/rate-limits/",
+        "title": "Rate limits",
+        "kind": "official",
+        "accessedAt": "2026-10-29",
+        "note": "Describes Slack Web API rate limit tiers.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S7",
+        "url": "https://slack.com/pricing",
+        "title": "Slack Pricing Plans: Find the Right Fit for Your Team | Slack",
+        "kind": "official",
+        "accessedAt": "2026-10-29",
+        "note": "References Slack pricing and developer plan availability.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S8",
+        "url": "https://apispine.com/slack-api/pricing",
+        "title": "Slack API Pricing: Plans, Tiers, and Cost Examples (2026)",
+        "kind": "community",
+        "accessedAt": "2026-10-29",
+        "note": "Covers API rate limit tiers and cost expectations.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S9",
+        "url": "https://docs.slack.dev/reference/scopes",
+        "title": "Scopes",
+        "kind": "official",
+        "accessedAt": "2026-10-29",
+        "note": "Lists Slack Web API scopes and permissions.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S10",
+        "url": "https://docs.slack.dev/slack-marketplace/marketplace-terms-conditions/slack-security-review",
+        "title": "Slack Security Review",
+        "kind": "official",
+        "accessedAt": "2026-10-29",
+        "note": "Explains Slack security review requirements for Marketplace listings.",
+        "retrieval": "search-result"
+      }
+    ],
+    "probes": [
+      {
+        "id": "P1",
+        "kind": "composio-api",
+        "target": "GET https://backend.composio.dev/api/v3.1/toolkits/slack",
+        "result": "pass",
+        "summary": "Auth schemes: OAUTH2 (managed). Connection fields: none. Default scopes: calls:read calls:write channels:history channels:read channels:write chat:write dnd:read dnd:write emoji:read files:read files:write groups:history.",
+        "detail": "[{\"scheme\":\"OAUTH2\",\"managed\":true,\"configFields\":[{\"name\":\"client_id\",\"displayName\":\"Client id\",\"required\":true,\"description\":\"Client id of the app\"},{\"name\":\"client_secret\",\"displayName\":\"Client secret\",\"required\":true,\"description\":\"Client secret of the app\"},{\"name\":\"oauth_redirect_uri\",\"displayName\":\"Redirect URI\",\"required\":false,\"description\":\"Add this Redirect URL to your app's OAuth allow list.\"},{\"name\":\"scopes\",\"displayName\":\"User Scopes\",\"required\":false,\"description\":\"Scopes to request from the user, comma separated\"},{\"name\":\"verification_token\",\"displayName\":\"Verification Token\",\"required\":false,\"description\":\"Verification token required to verify the request is coming from slack. You can find it in the slack app settings just below the client id and secret. It is required to enable Slack triggers.\"}],\"connectionFields\":[{\"name\":\"generic_id\",\"displayName\":\"Slack Team ID\",\"required\":false,\"description\":\"Optional Slack workspace ID used to scope the OAuth authorize flow to a specific team. When provided, Slack will only allow installation in this workspace. Leave unset to let users pick any workspace they have access to.\"}],\"defaultScopes\":[\"calls:read\",\"calls:write\",\"channels:history\",\"channels:read\",\"channels:write\",\"chat:write\",\"dnd:read\",\"dnd:write\",\"emoji:read\",\"files:read\",\"files:write\",\"groups:history\",\"groups:read\",\"groups:write\",\"im:history\",\"im:read\",\"im:write\",\"links:read\",\"links:write\",\"lists:read\",\"lists:write\",\"mpim:history\",\"mpim:read\",\"mpim:write\"",
+        "at": "2026-10-29T12:59:35.297Z"
+      },
+      {
+        "id": "P2",
+        "kind": "portal",
+        "target": "GET https://api.slack.com/apps",
+        "result": "pass",
+        "summary": "Portal reachable (200, \"Slack API: Applications | Slack\"); no sign-in redirect seen on the landing page.",
+        "detail": "Chain: 200 api.slack.com/apps",
+        "at": "2026-10-29T12:59:42.814Z"
+      }
+    ],
+    "openQuestions": [
+      {
+        "question": "Will public Marketplace review timelines change for AI agent apps?",
+        "whyItMatters": "Helps plan production timelines if you decide to publish to the public Slack Marketplace instead of using unlisted distribution.",
+        "howToResolve": "Check the latest Slack Developer Changelog for updates on review guidelines."
+      }
+    ],
+    "verification": null
+  },
+  "meta": {
+    "generatedAt": "2026-10-29T13:00:11.817Z",
+    "generator": "live",
+    "model": "gemini-3.5-flash-lite",
+    "durationSec": 48
+  }
+}

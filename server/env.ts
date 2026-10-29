@@ -16,7 +16,8 @@ export const env = {
   port: num(process.env.PORT, 8787),
   /** Production when NODE_ENV says so, or when running the bundled server (dist/server.js) rather than TS sources. */
   isProd: process.env.NODE_ENV === 'production' || /\.js$/.test(process.argv[1] ?? ''),
-  dataDir: process.env.DATA_DIR || './.data',
+  /** Generated guides live here. On Railway, attaching a volume sets RAILWAY_VOLUME_MOUNT_PATH automatically. */
+  dataDir: process.env.DATA_DIR || process.env.RAILWAY_VOLUME_MOUNT_PATH || './.data',
   llm: {
     apiKey: process.env.LLM_API_KEY || '',
     baseURL: process.env.LLM_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta/openai/',

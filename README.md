@@ -47,9 +47,13 @@ Registering takes minutes. The hard part is everything after it: provider review
    - **Library:** research agents, one per app, followed a written [protocol](docs/RESEARCH_PROTOCOL.md). A *different* model then verified each guide adversarially and fixed what was wrong (see [verification](#what-was-tested-and-verified)).
    - **Live generation:** a smaller agent identifies the app, pulls Composio facts, then runs a research loop of search, read, probe and save findings. It writes in two structured passes, and the server checks the result before publishing it:
      - citations to pages it never retrieved are dropped;
-     - "tested" without a probe is downgraded;
+     - "tested" without a probe is downgraded, and so is "tested" on claims no probe can confirm (scopes, review times);
      - "official" backed only by community sources becomes "reported";
+     - hours that contradict their own label are corrected from the label (models write "3–6 weeks" reliably but convert it to hours badly);
+     - review waits become their own "Provider" step, and creating the Composio auth config is marked "Agent";
      - the rating is recomputed.
+
+     These rules came from running the agent on real apps and looking at what it got wrong (see [Live agent evaluation](#live-agent-evaluation)).
 
      The full agent trace is published with the guide.
 7. **Built on Composio, on a free stack.** The live agent's web search and page reading are [Composio Search](https://docs.composio.dev/toolkits/composio_search) tools, run with a Composio API key. The LLM is any OpenAI-compatible endpoint; the default is Google Gemini's free tier.
@@ -84,7 +88,28 @@ The full table and per-guide evidence counts are in [docs/VERIFICATION.md](docs/
   - **The biggest correction was a fresh policy change the research agent missed.** Its Workday guide said there was no self-serve route to a tenant. The verifier found Workday's October 2026 developer program, which lets an individual request a personal dev tenant (open beta). The guide's first-connection path changed; its rating stayed "gated", because production still needs each customer's admin.
   - **Most corrections were over-confident attribution, not wrong facts.** A third-party claim was marked "official" (X's "no free tier"), a date was stated more precisely than its source (Meta's "retired on Oct 9"), or a rule was over-generalised (Spotify's 5-user cap applying "only to new apps"). Two duration ranges also had hour bounds that contradicted their labels.
   - **Timelines are the weakest evidence.** For Xero, DocuSign, Spotify and Workday the production range rests on estimates, because the providers publish no review SLA. The guides now say "estimate" explicitly.
-- **Live agent:** _see "Live agent evaluation" below._
+- **Live agent:** evaluated against the verified library; see the next section.
+
+## Live agent evaluation
+
+The live agent runs on the free Gemini 3.5 Flash Lite tier with Composio Search, in about 1–2 minutes and 6–9 model calls per guide. I evaluated it by generating guides for three apps that already have verified library guides (Slack, Xero, Spotify), plus two that don't (Pipedrive, Calendly), and comparing the decision-level outputs: rating, production range, and the 8 factors. `npm run live-eval` reproduces the table in [docs/LIVE_EVAL.md](docs/LIVE_EVAL.md). Round-1 outputs are kept in `docs/live-eval/round-1/`.
+
+| Round | What changed | Rating matches library | Production ranges overlap | Factors agree |
+|---|---|---|---|---|
+| 1 | Baseline | 3/3 | 3/3 | 15/24 |
+| 2 | Pricing search added; must read ≥4 pages before finishing | 2/3 | 2/3 | 18/24 |
+| 3 (Slack only) | Asks explicitly what changes for unlisted / unapproved apps | Slack still wrong | | 16/24 overall |
+
+What this shows:
+- **Headline answers are usually right; nuance is where it fails.** Spotify's 250k-MAU gate and Xero's certification path came through every round. The most-missed facts were paid gates. Adding a pricing search fixed Xero's tiers, but Spotify's Premium requirement for app owners was still missed.
+- **Slack is the instructive miss.** Taken literally, Slack needs no review: any workspace can install an unlisted app. What makes it a months-long path is the read throttle for apps outside the Marketplace and API terms that reserve commercial distribution for Marketplace apps, both found only in Slack's changelog and terms. The library research found them; the live agent read the right review guide but never looked at the changelog. Prompting more specifically would only be overfitting to Slack.
+- **Runs vary.** The same app can land on different ratings across runs, because a small model doing one minute of research is sensitive to which pages it happens to read.
+- **Bugs found by running on real apps, and fixed in code rather than prompts:**
+  - hours contradicting their label ("3–6 weeks" stored as 3–14 days), which changed the rating;
+  - "tested" labels on claims no probe can confirm;
+  - every step attributed to "You".
+
+**Product consequence:** live guides are labelled "auto-checked, not human-reviewed" and are meant as a fast first answer. The path to library quality is a deep research pass plus an independent verifier, which is what the 10 library guides went through. A stronger model (`LLM_MODEL`, any OpenAI-compatible endpoint) is the cheapest upgrade.
 
 ## Run it locally
 
@@ -107,9 +132,9 @@ Library guides work with no keys at all; only live generation needs them.
 
 ## Deploy on Railway
 
-1. Push this repo to GitHub, then in Railway choose **New Project → Deploy from GitHub repo**. `railway.json` sets the build, start and health check.
-2. Variables: `LLM_API_KEY` and `COMPOSIO_API_KEY`. Optional: `LLM_MODEL`, `LLM_BASE_URL`, `GENERATE_LIMIT_PER_HOUR` (default 6 per IP), `DATA_DIR`.
-3. Add a **Volume** mounted at `/data` and set `DATA_DIR=/data`, so generated guides survive redeploys.
+1. Push this repo to GitHub, then in Railway choose **New Project → Deploy from GitHub repo**. Railway's builder runs `npm run build` and `npm start`. `railway.json` also sets a health check on `/api/health`.
+2. Variables: `LLM_API_KEY` and `COMPOSIO_API_KEY`. Optional: `LLM_MODEL`, `LLM_BASE_URL`, `GENERATE_LIMIT_PER_HOUR` (default 6 per IP).
+3. Attach a **Volume** to the service at any mount path, e.g. `/data`, so generated guides survive redeploys. The app picks up `RAILWAY_VOLUME_MOUNT_PATH` automatically; `DATA_DIR` overrides it.
 4. **Settings → Networking → Generate Domain.**
 
 ## How it's built

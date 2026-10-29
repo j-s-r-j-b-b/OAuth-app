@@ -1,0 +1,301 @@
+{
+  "query": "Slack",
+  "events": [
+    {
+      "type": "stage",
+      "stage": "resolve",
+      "message": "Identifying “Slack”",
+      "t": 1
+    },
+    {
+      "type": "search",
+      "query": "Slack API OAuth app developer documentation",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 2473
+    },
+    {
+      "type": "info",
+      "message": "Identified Slack — A channel-based messaging platform for teams.",
+      "t": 10147
+    },
+    {
+      "type": "stage",
+      "stage": "composio",
+      "message": "Checking Composio’s toolkit catalog",
+      "t": 10147
+    },
+    {
+      "type": "info",
+      "message": "Composio toolkit `slack` has a managed OAuth app: you can prototype today and need your own app for production branding, scopes or quota.",
+      "t": 11886
+    },
+    {
+      "type": "stage",
+      "stage": "research",
+      "message": "Researching docs, policies and real-world reports",
+      "t": 11886
+    },
+    {
+      "type": "search",
+      "query": "Slack OAuth app approval how long experience reddit OR forum",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 13970
+    },
+    {
+      "type": "search",
+      "query": "Slack OAuth app review approval verification publish requirements",
+      "count": 10,
+      "engine": "composio:duckduckgo",
+      "t": 16983
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "authorize-endpoint",
+        "target": "GET https://slack.com/oauth/v2/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=channels%3Aread+chat%3Awrite",
+        "result": "info",
+        "summary": "Endpoint responded 200 with a client-rendered page; client validation happens in the browser, so this probe is inconclusive.",
+        "detail": "Chain: 200 slack.com/oauth/v2/authorize\nFinal: https://slack.com/oauth/v2/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=channels%3Aread+chat%3Awrite\nExcerpt: ",
+        "id": "P2",
+        "at": "2026-10-29T12:54:53.937Z"
+      },
+      "t": 22644
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "portal",
+        "target": "GET https://api.slack.com/apps",
+        "result": "pass",
+        "summary": "Portal reachable (200, \"Slack API: Applications | Slack\"); no sign-in redirect seen on the landing page.",
+        "detail": "Chain: 200 api.slack.com/apps",
+        "id": "P3",
+        "at": "2026-10-29T12:54:54.138Z"
+      },
+      "t": 22845
+    },
+    {
+      "type": "search",
+      "query": "\"App lifecycle & distribution\" site:docs.slack.dev",
+      "count": 2,
+      "engine": "composio:exa",
+      "t": 24459
+    },
+    {
+      "type": "search",
+      "query": "\"Creating an app from app settings\" site:docs.slack.dev",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 24675
+    },
+    {
+      "type": "search",
+      "query": "\"Scopes\" site:docs.slack.dev/authentication/",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 24880
+    },
+    {
+      "type": "read",
+      "url": "https://docs.slack.dev/authentication/installing-with-oauth/",
+      "title": "Installing via OAuth authorization code flow | Slack Developer Docs",
+      "ok": true,
+      "chars": 14000,
+      "via": "direct",
+      "sourceId": "S1",
+      "t": 31434
+    },
+    {
+      "type": "read",
+      "url": "https://docs.slack.dev/app-management/distribution/",
+      "title": "App lifecycle & distribution | Slack Developer Docs",
+      "ok": true,
+      "chars": 14000,
+      "via": "direct",
+      "sourceId": "S15",
+      "t": 32025
+    },
+    {
+      "type": "search",
+      "query": "site:docs.slack.dev \"token rotation\" OR expiration",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 32358
+    },
+    {
+      "type": "search",
+      "query": "site:docs.slack.dev \"restricted scopes\" OR \"sensitive scopes\"",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 32665
+    },
+    {
+      "type": "finding",
+      "fact": "Slack OAuth app registration happens at api.slack.com/apps by selecting 'Create an App' (from scratch or manifest), naming it, and associating it with a development workspace.",
+      "sourceIds": [
+        "S5",
+        "P3"
+      ],
+      "t": 39332
+    },
+    {
+      "type": "finding",
+      "fact": "Slack apps can be distributed in three modes: Undistributed (single workspace, no OAuth code needed for initial workspace token), Unlisted distributed apps (public distribution activated in app settings for pilots/testing without marketplace listing), and Listed distributed apps (Slack Marketplace apps requiring review).",
+      "sourceIds": [
+        "S15",
+        "S26"
+      ],
+      "t": 39333
+    },
+    {
+      "type": "finding",
+      "fact": "To go live for arbitrary public users, commercial distribution requires submitting the app to the Slack Marketplace for review (preliminary review takes up to 10 business days, functional review up to 10 weeks; total wait times can span multiple months).",
+      "sourceIds": [
+        "S12",
+        "S15",
+        "S18"
+      ],
+      "t": 39333
+    },
+    {
+      "type": "finding",
+      "fact": "Before approval or for internal use / pilots, developers can enable 'Activate Public Distribution' in the app settings to allow installation on arbitrary workspaces via an unlisted URL/button. Workspaces may block unlisted apps if 'Require apps from Slack Marketplace' or 'Require approved apps' is enabled.",
+      "sourceIds": [
+        "S9",
+        "S15",
+        "S26"
+      ],
+      "t": 39333
+    },
+    {
+      "type": "finding",
+      "fact": "Slack agent/chatbot typical scopes include bot scopes like chat:write, channels:read, channels:history, commands, and user scopes like search:read if acting on behalf of users. Sensitive and restricted scopes (such as admin.* and broad data access) require strict justification and marketplace security review.",
+      "sourceIds": [
+        "S9",
+        "S45",
+        "S48"
+      ],
+      "t": 39333
+    },
+    {
+      "type": "finding",
+      "fact": "Slack OAuth v2 uses https://slack.com/oauth/v2/authorize for authorization and https://slack.com/api/oauth.v2.access for exchanging the 10-minute temporary code (using client_id, client_secret, code, and redirect_uri). PKCE is supported.",
+      "sourceIds": [
+        "S1",
+        "S42"
+      ],
+      "t": 39333
+    },
+    {
+      "type": "finding",
+      "fact": "Slack standard bot tokens do not expire by default unless 'Token Management & Token Rotation' is explicitly enabled in app settings (upon which access tokens expire in 12 hours and require single-use refresh tokens).",
+      "sourceIds": [
+        "S6",
+        "S40"
+      ],
+      "t": 39333
+    },
+    {
+      "type": "finding",
+      "fact": "The official Composio OAuth callback URL to register in Slack app settings is https://backend.composio.dev/api/v3/toolkits/auth/callback.",
+      "sourceIds": [
+        "S9"
+      ],
+      "t": 39333
+    },
+    {
+      "type": "info",
+      "message": "Research done: 8 findings, 3 pages read, 3 probes.",
+      "t": 43622
+    },
+    {
+      "type": "stage",
+      "stage": "write",
+      "message": "Writing the guide",
+      "t": 43622
+    },
+    {
+      "type": "info",
+      "message": "Verdict drafted: Slack offers instant self-serve registration for testing, but public commercial distribution requires a Marketplace review taking up to 10 weeks.",
+      "t": 51210
+    },
+    {
+      "type": "stage",
+      "stage": "check",
+      "message": "Checking citations, confidence labels and ratings",
+      "t": 65137
+    },
+    {
+      "type": "quality",
+      "report": {
+        "claims": {
+          "tested": 0,
+          "official": 28,
+          "reported": 0,
+          "inferred": 0
+        },
+        "sources": {
+          "total": 10,
+          "fetched": 3,
+          "snippetOnly": 7,
+          "official": 8,
+          "community": 1,
+          "composio": 1
+        },
+        "probes": {
+          "total": 3,
+          "pass": 2,
+          "info": 1,
+          "fail": 0
+        },
+        "fixes": [
+          "factor self_serve_registration: \"tested\" without a probe → official",
+          "step Create the Slack App: \"tested\" without a probe → official",
+          "step \"Create Custom Auth Config in Composio\": Composio auth-config creation is agent-doable via API → agent"
+        ],
+        "llm": {
+          "calls": 7,
+          "inputTokens": 39674,
+          "outputTokens": 6122,
+          "model": "gemini-3.5-flash-lite"
+        }
+      },
+      "t": 65144
+    }
+  ],
+  "quality": {
+    "claims": {
+      "tested": 0,
+      "official": 28,
+      "reported": 0,
+      "inferred": 0
+    },
+    "sources": {
+      "total": 10,
+      "fetched": 3,
+      "snippetOnly": 7,
+      "official": 8,
+      "community": 1,
+      "composio": 1
+    },
+    "probes": {
+      "total": 3,
+      "pass": 2,
+      "info": 1,
+      "fail": 0
+    },
+    "fixes": [
+      "factor self_serve_registration: \"tested\" without a probe → official",
+      "step Create the Slack App: \"tested\" without a probe → official",
+      "step \"Create Custom Auth Config in Composio\": Composio auth-config creation is agent-doable via API → agent"
+    ],
+    "llm": {
+      "calls": 7,
+      "inputTokens": 39674,
+      "outputTokens": 6122,
+      "model": "gemini-3.5-flash-lite"
+    }
+  }
+}
