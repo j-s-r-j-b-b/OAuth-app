@@ -1,0 +1,17 @@
+# dependencies & builds
+node_modules/
+dist/
+*.tsbuildinfo
+
+# secrets — never commit
+.env
+.env.*
+!.env.example
+
+# runtime data (generated guides live on the Railway volume)
+.data/
+*.log
+.DS_Store
+
+# local tooling
+.claude/

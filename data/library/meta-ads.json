@@ -1,0 +1,1228 @@
+{
+  "schemaVersion": 1,
+  "slug": "meta-ads",
+  "app": {
+    "name": "Meta Ads (Marketing API)",
+    "website": "https://www.facebook.com/business/ads",
+    "category": "Advertising",
+    "description": "Meta's Marketing API for reading ad performance (Insights) and creating or editing campaigns, ad sets, ads and creatives across Facebook, Instagram, Messenger and WhatsApp. Users authorize it through Facebook Login for Business on a Meta app you own.",
+    "developerPortalUrl": "https://developers.facebook.com/apps/",
+    "docsUrl": "https://developers.facebook.com/docs/marketing-api/"
+  },
+  "composio": {
+    "toolkitSlug": "metaads",
+    "managedOAuth": "not-available",
+    "authSchemes": [
+      "OAUTH2",
+      "API_KEY"
+    ],
+    "toolkitDocsUrl": "https://docs.composio.dev/toolkits/metaads",
+    "requiredFields": [],
+    "notes": [
+      "Composio has no managed OAuth app for `metaads` (78 tools, 0 triggers, toolkit version 20261026_00), so you must bring your own Meta app.",
+      "The related `facebook` toolkit (Pages only) and `instagram` toolkit (Business/Creator accounts) do have Composio-managed OAuth. Use them if you only need Page or Instagram content, not ads.",
+      "There is no Meta Ads-specific Composio auth guide (composio.dev/auth/meta and /auth/metaads return 404). Follow composio.dev/auth/facebook: it says the same steps apply to other Meta apps.",
+      "Tools take `ad_account_id` as `act_<id>`. Call Get Ad Accounts first. For ad accounts owned by a business portfolio, call List Businesses and then the owned/client ad-account tools, because those accounts do not appear in /me/adaccounts.",
+      "The toolkit also lists an API_KEY scheme. It suits a single business that pastes a token, such as a system-user token. The exact field name is unverified, so check it in the dashboard."
+    ]
+  },
+  "assumption": "An agent product that reads campaign performance and creates or edits ads in ad accounts owned by many different advertisers. Each advertiser connects their own Facebook user through your Meta app and Composio's OAuth2 flow.",
+  "verdict": {
+    "headline": "Same-day for your own ad accounts. Any advertiser needs Business Verification and App Review, typically 2–10 weeks.",
+    "summary": "Creating a Business-type Meta app is self-serve. You and anyone with a role on the app can connect right away, with Standard access to ads_read and ads_management, but the default Limited Marketing API tier is heavily throttled. Before outside advertisers can grant those permissions, the app needs Advanced Access through App Review, which requires a verified business portfolio. Upgrading the Marketing API Access Tier to Full access also requires 500 successful Marketing API calls in 15 days with an error rate under 15%. Meta says review decisions arrive within about a week. Developers report Business Verification taking 10 days to months and reviews taking 2–3 weeks.",
+    "difficulty": "formal-review",
+    "handsOnEffort": {
+      "label": "6–14 hours",
+      "minHours": 6,
+      "maxHours": 14,
+      "basis": "Our estimate: app and Composio setup 1–2 h, Business Verification about 1 h, scripting the call volume about 1 h, screen recordings and descriptions 3–6 h, plus fixes and resubmits."
+    },
+    "timeToFirstConnection": {
+      "label": "1–4 hours (same day)",
+      "minHours": 1,
+      "maxHours": 4,
+      "basis": "Connect as the app admin, who is a role user with Standard access to ads_read and ads_management, so no review is needed."
+    },
+    "timeToProduction": {
+      "label": "2–10 weeks",
+      "minHours": 336,
+      "maxHours": 1680,
+      "basis": "Meta's Security Center states about 2 business days for Business Verification, and App Review gives a decision 'within a week', so the floor is about 2 weeks with setup and call logging. Reports show verification taking 10+ days to 3.5 months (the 3.5-month case lies above this range) and reviews 17–20 days in mid-2026, plus rejection loops and the 500-call/15-day prerequisite."
+    },
+    "longestPole": "Business Verification of your business portfolio, followed by App Review for Advanced Access to ads_read, ads_management and business_management. Rejections over screen recordings are common.",
+    "cost": "Free (no Meta fees found)",
+    "easierPaths": [
+      {
+        "condition": "Only your own company's ad accounts, or a few pilot users you can add to App roles as Tester or Developer",
+        "effect": "No App Review or Business Verification is needed, because people with a role on the app can grant ads_read and ads_management with Standard access. The Limited tier's rate limits still apply (score 60, 300 s block)."
+      },
+      {
+        "condition": "You only need Facebook Page or Instagram publishing and insights, not ads",
+        "effect": "Use Composio's `facebook` or `instagram` toolkits, which have Composio-managed OAuth. You don't need your own Meta app."
+      },
+      {
+        "condition": "Read-only reporting",
+        "effect": "Request only ads_read and the Marketing API Access Tier feature. That means fewer screen recordings and a smaller review surface than with ads_management or business_management."
+      },
+      {
+        "condition": "A single business that owns all the ad accounts",
+        "effect": "Use a system-user token from that business with Composio's API_KEY scheme instead of an OAuth flow for many users."
+      }
+    ],
+    "costDetail": "Meta's docs list no fee for the app, App Review or Marketing API access; the Limited tier is granted automatically. You need a registered legal business with matching documents and a website, plus a public privacy policy. Ad spend is billed to each advertiser's own ad account. The free rating is inferred, because no page states the pricing explicitly."
+  },
+  "factors": [
+    {
+      "key": "self_serve_registration",
+      "value": "yes",
+      "detail": "Anyone with a Facebook account can register as a Meta developer and create an app at developers.facebook.com/apps/creation/. The console sits behind a Facebook login.",
+      "sourceIds": [
+        "S11",
+        "P5"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "review_required",
+      "value": "yes",
+      "detail": "Managing other people's ad accounts requires Advanced Access to ads_read and/or ads_management, which App Review approves one permission at a time. Full access to the Marketing API Access Tier is also granted through App Review.",
+      "sourceIds": [
+        "S5",
+        "S6",
+        "S8"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "business_verification",
+      "value": "yes",
+      "detail": "Advanced Access requires the app to be connected to a verified business portfolio. Until then, users from other businesses can't grant permissions.",
+      "sourceIds": [
+        "S6",
+        "S7",
+        "S10",
+        "S17"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "security_assessment",
+      "value": "no",
+      "detail": "No third-party security assessment was found for ads permissions. The obligations are self-attested: data handling questions, an annual Data Use Checkup and possibly a Data Protection Assessment questionnaire.",
+      "sourceIds": [
+        "S10",
+        "S17",
+        "S23"
+      ],
+      "confidence": "inferred"
+    },
+    {
+      "key": "paid_access",
+      "value": "no",
+      "detail": "The Marketing API product and the Limited tier are granted automatically when you add the product, and the docs mention no fee for Full access or App Review.",
+      "sourceIds": [
+        "S5"
+      ],
+      "confidence": "inferred"
+    },
+    {
+      "key": "partner_or_sales_gate",
+      "value": "no",
+      "detail": "There is no partner program or sales contact. Meta announced on Oct 9, 2026 that Tech Provider Access Verification 'will no longer be required' (the post gives no separate effective date). Business Verification and App Review remain.",
+      "sourceIds": [
+        "S17"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "user_cap_before_review",
+      "value": "yes",
+      "detail": "Before Advanced Access, only people with a role on the app (or in the business portfolio that claimed it) can grant permissions. The Limited tier is heavily rate-limited and meant for development only.",
+      "sourceIds": [
+        "S6",
+        "S8",
+        "S5"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "per_customer_setup",
+      "value": "no",
+      "detail": "One app serves all advertisers. Each user grants access via Facebook Login and needs ads_read or ads_management on the ad accounts they pick. Nothing needs configuring per tenant.",
+      "sourceIds": [
+        "S5",
+        "S13"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "phases": [
+    {
+      "id": "register",
+      "title": "Register a developer account, business portfolio and app",
+      "outcome": "A Business-type Meta app with the ads use case, connected to a business portfolio you administer.",
+      "steps": [
+        {
+          "id": "register-dev",
+          "title": "Register as a Meta developer",
+          "actor": "you",
+          "effort": "10 min",
+          "wait": null,
+          "details": "Log in to Facebook, open **developers.facebook.com** and complete developer registration. The app console isn't usable without a logged-in Facebook session: our logged-out request to `/apps/creation/` got a 'Page Not Found' shell.",
+          "agentAssist": "Checks which Facebook account and contact email you plan to use. That email receives all App Review notices.",
+          "links": [
+            {
+              "label": "Create an App with Meta",
+              "url": "https://developers.facebook.com/docs/development/create-an-app/"
+            }
+          ],
+          "sourceIds": [
+            "S11",
+            "P5"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "business-portfolio",
+          "title": "Create or choose a business portfolio you control",
+          "actor": "you",
+          "effort": "10–15 min",
+          "wait": null,
+          "details": "To access data you don't own, the app must be connected to a business portfolio. Use your company's existing portfolio, or create one during app creation (**Business → Create a business portfolio**). A **Business Admin** of this portfolio must later complete Business Verification. Make the legal name, address, phone and website match your registration documents.",
+          "agentAssist": "Prepares the exact legal name, registered address and website as they appear on your incorporation and tax documents.",
+          "links": [
+            {
+              "label": "Business Verification",
+              "url": "https://developers.facebook.com/docs/development/release/business-verification"
+            }
+          ],
+          "sourceIds": [
+            "S11",
+            "S7"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "create-app",
+          "title": "Create the app with the ads use case",
+          "actor": "you",
+          "effort": "15 min",
+          "wait": null,
+          "details": "Go to **developers.facebook.com/apps/creation/**. Under **App details**, enter the app name and contact email, then click **Next**. Under **Use cases**, pick the Marketing API ads use case (e.g. 'Create & manage ads with Marketing API'); incompatible use cases are greyed out. Under **Business**, select your portfolio. Then go through **Requirements** and **Overview** and click **Go to dashboard**. Use cases can't be removed and app types can't be changed later. The result should be a Business-type app with Facebook Login for Business added automatically.",
+          "agentAssist": "Suggests an app name and icon that avoid Meta trademarks, which reviewers reject.",
+          "links": [
+            {
+              "label": "App creation",
+              "url": "https://developers.facebook.com/apps/creation/"
+            },
+            {
+              "label": "App Types",
+              "url": "https://developers.facebook.com/docs/development/create-an-app/app-dashboard/app-types"
+            }
+          ],
+          "sourceIds": [
+            "S11",
+            "S12",
+            "S2"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "configure",
+      "title": "Configure OAuth for Composio",
+      "outcome": "App ID and App Secret in hand, the Composio callback allow-listed, and the basic settings ready for review.",
+      "steps": [
+        {
+          "id": "copy-credentials",
+          "title": "Copy the App ID and App Secret",
+          "actor": "you",
+          "effort": "5 min",
+          "wait": null,
+          "details": "In **App settings → Basic**, copy the numeric **App ID** (this is the Client ID) and click **Show** to copy the **App Secret** (the Client Secret). Store the secret in a secret manager.",
+          "agentAssist": "Checks that the App ID is numeric. A non-numeric value gets 'Invalid app ID' at the authorize endpoint.",
+          "links": [],
+          "sourceIds": [
+            "S2",
+            "P1"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "redirect-uri",
+          "title": "Allow-list the Composio callback URL",
+          "actor": "you",
+          "effort": "5 min",
+          "wait": null,
+          "details": "In **Facebook Login for Business → Settings → Client OAuth settings → Valid OAuth Redirect URIs**, add `https://backend.composio.dev/api/v3/toolkits/auth/callback`. It must match exactly; only `state` is ignored. Keep **Strict Mode** and **Enforce HTTPS** on. Meta's docs name this path only for classic Facebook Login (Products → Facebook Login → Settings); the Business-login path comes from a third-party guide, so search Settings if the field isn't there. Composio's guide says 'App Settings → Advanced', but Meta checks the Valid OAuth Redirect URIs list.",
+          "agentAssist": "After setup, opens the authorize URL with your real App ID to confirm Facebook shows the consent screen and not a redirect error.",
+          "links": [
+            {
+              "label": "Facebook Login security: redirect URI checking",
+              "url": "https://developers.facebook.com/docs/facebook-login/security"
+            }
+          ],
+          "sourceIds": [
+            "S15",
+            "S21",
+            "S22",
+            "S3",
+            "S2"
+          ],
+          "confidence": "reported"
+        },
+        {
+          "id": "basic-settings",
+          "title": "Complete the Basic settings reviewers check",
+          "actor": "you",
+          "effort": "30–60 min",
+          "wait": null,
+          "details": "In **App settings → Basic**, set the **Privacy Policy URL** (public), a **1024×1024 App Icon** with no Meta logos, the **Category**, **App Domains** and **Contact email**. Check **App Review → Permissions and Features**: Marketing API Access Tier should show the default **Limited access**.",
+          "agentAssist": "Drafts a privacy policy section on Meta ads data (what is read, stored, retention and deletion) and checks that the URL is publicly reachable.",
+          "links": [],
+          "sourceIds": [
+            "S8",
+            "S5"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "test",
+      "title": "Wire into Composio and test with your own account",
+      "outcome": "A working metaads connection for your own Facebook user (a role user), plus logged API calls toward the review prerequisites.",
+      "steps": [
+        {
+          "id": "composio-auth-config",
+          "title": "Create the Composio auth config",
+          "actor": "agent",
+          "effort": "10 min",
+          "wait": null,
+          "details": "In the Composio dashboard, go to **Auth Configs → Create Auth Config → Meta Ads (`metaads`) → OAuth2 → Use your own developer authentication**. Paste the App ID and App Secret. Scopes: `ads_read,ads_management,business_management,pages_show_list,pages_read_engagement`. Click **Create** and copy the `ac_…` ID.",
+          "agentAssist": "Can create it through Composio's API or SDK with your API key, then echo back the redirect URI the dashboard shows so you can compare it with the one in Meta.",
+          "links": [
+            {
+              "label": "Managed vs custom auth",
+              "url": "https://docs.composio.dev/docs/authentication/custom-app-vs-managed-app"
+            }
+          ],
+          "sourceIds": [
+            "S4",
+            "S1",
+            "S2"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "connect-self",
+          "title": "Connect your own Facebook account and run read tools",
+          "actor": "you",
+          "effort": "15 min",
+          "wait": null,
+          "details": "Use **Connect Account** on the auth config, or a hosted connect link, logged in as a Facebook user who has a role on the app and is an admin or advertiser on a real ad account. Pick the ad accounts in Meta's picker. Then run `METAADS_GET_AD_ACCOUNTS` and `METAADS_GET_INSIGHTS`. Create any test campaigns as `PAUSED`, because calls hit production data at every access level.",
+          "agentAssist": "Runs the tool calls and confirms the act_ IDs and insights fields come back.",
+          "links": [],
+          "sourceIds": [
+            "S6",
+            "S5",
+            "S1"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "generate-calls",
+          "title": "Log enough successful calls to unlock review",
+          "actor": "agent",
+          "effort": "1–2 h to script",
+          "wait": "Up to 2 days for calls to log; the 500-call window is 15 days",
+          "details": "To unlock **Request advanced access**, make at least 1 successful call per requested permission within 30 days of submitting. For **Full access**, make at least **500 successful Marketing API calls in the last 15 days**, with an error rate under 15% over the last 500. Use read-only Insights and listing calls on your own ad account, spaced to stay under the Limited-tier score (reads cost 1 point, max 60).",
+          "agentAssist": "Writes and runs a throttled read-only call loop through the Composio connection and tracks the success rate.",
+          "links": [
+            {
+              "label": "Marketing API Authorization",
+              "url": "https://developers.facebook.com/docs/marketing-api/get-started/authorization"
+            }
+          ],
+          "sourceIds": [
+            "S5",
+            "S8",
+            "S16",
+            "S9"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "prepare-review",
+      "title": "Business Verification and review materials",
+      "outcome": "A verified business portfolio, plus screen recordings and per-permission descriptions ready to submit.",
+      "steps": [
+        {
+          "id": "business-verification",
+          "title": "Verify the business portfolio",
+          "actor": "you",
+          "effort": "30–60 min",
+          "wait": "Meta's Security Center states about 2 business days. Reports range from 10+ days to 3+ months.",
+          "details": "In **App settings → Basic → Verification**, click **Start Verification** to connect the app to the portfolio, then **Start Business Verification** to finish in Business Manager. Submit documents proving the legal name and the address or phone, and verify the website domain. Only a Business Admin can complete it. Don't edit business details while it is In Review.",
+          "agentAssist": "Builds a checklist that cross-checks the legal name, address, phone, website domain and email domain against the documents before you submit.",
+          "links": [
+            {
+              "label": "Business Verification",
+              "url": "https://developers.facebook.com/docs/development/release/business-verification"
+            }
+          ],
+          "sourceIds": [
+            "S7",
+            "S18",
+            "S19"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "review-materials",
+          "title": "Record screen recordings and write usage descriptions",
+          "actor": "you",
+          "effort": "3–6 h",
+          "wait": null,
+          "details": "For each permission, record at 1080p or better with an English UI and no audio. Show the full Facebook Login grant, then the data in your app (Impressions, Spend, Clicks, Reach). For `ads_management`, also show creating or editing a campaign. Write a distinct description per permission (no copy-paste). Set **App Purpose = Clients**. Give reviewers working test access instructions, not your personal Facebook credentials.",
+          "agentAssist": "Drafts each permission description from Meta's allowed-usage text and your real features, scripts the recording shot list, and runs a clean-browser check that the reviewer test login works.",
+          "links": [
+            {
+              "label": "App Review submission walkthrough",
+              "url": "https://developers.facebook.com/docs/app-review/submission-guide"
+            }
+          ],
+          "sourceIds": [
+            "S8",
+            "S10",
+            "S20"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "review",
+      "title": "Submit App Review and wait",
+      "outcome": "Advanced Access to the ads permissions and Full access to the Marketing API Access Tier.",
+      "steps": [
+        {
+          "id": "submit-review",
+          "title": "Request advanced access and submit",
+          "actor": "you",
+          "effort": "1 h",
+          "wait": null,
+          "details": "Go to **App Review → Permissions and Features**. Click **Request advanced access** for `ads_read`, `ads_management`, `business_management`, `pages_show_list`, `pages_read_engagement` and `public_profile` (Facebook Login for Business apps need Advanced Access to `public_profile` before go-live). Click **+Upgrade** for **Marketing API Access Tier** (Full access). Then **Continue the Request**, complete the Business Verification prompt and the data handling questions, then **Complete App Settings**, **Complete App Verification** and the usage descriptions. Click **Submit for Review** and accept the Platform Onboarding Terms.",
+          "agentAssist": "Pre-fills answers and checks that every requested permission has its own recording and description.",
+          "links": [],
+          "sourceIds": [
+            "S8",
+            "S5",
+            "S13",
+            "S16"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "meta-review",
+          "title": "Meta reviews the submission",
+          "actor": "provider",
+          "effort": "0",
+          "wait": "Meta: a decision within a week. Reports: 2–3 weeks in mid-2026, plus resubmission cycles.",
+          "details": "Meta tests your app by following the recordings. If it can't access the app, the whole submission is rejected. Decisions arrive by email to the primary contact and appear in **App Review → Requests**. If something is rejected, fix only the items cited and resubmit.",
+          "agentAssist": "Parses the rejection notes and maps each one to a fix in the recording, description or test access.",
+          "links": [],
+          "sourceIds": [
+            "S8",
+            "S20"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "go-live",
+      "title": "Go live in Composio",
+      "outcome": "Any advertiser can connect through your branded Meta app, and you meet the requirements to keep access.",
+      "steps": [
+        {
+          "id": "confirm-access",
+          "title": "Confirm advanced access (there's no Live toggle)",
+          "actor": "agent",
+          "effort": "10 min",
+          "wait": null,
+          "details": "Business apps have no Development or Live mode; access levels alone decide who can grant permissions. In **App Review → Permissions and Features**, confirm each permission shows Advanced access and the tier shows Full access. Then test with a Facebook user who has no role on the app.",
+          "agentAssist": "Runs a connect-and-read smoke test with a non-role test advertiser account.",
+          "links": [],
+          "sourceIds": [
+            "S12",
+            "S6"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "ship",
+          "title": "Ship connect links and keep the access",
+          "actor": "agent",
+          "effort": "1 h",
+          "wait": null,
+          "details": "Pass `authConfigs: { metaads: \"ac_…\" }` to `composio.create(userId, …)` and send users hosted connect links. Keep at least 500 successful calls per 15 days with under 15% errors to keep Full access. Complete the annual Data Use Checkup when prompted. Handle reconnects for expired or unused tokens.",
+          "agentAssist": "Adds monitoring for call volume, error rate and token-expiry errors, and alerts you before the tier lapses.",
+          "links": [
+            {
+              "label": "Managed vs custom auth",
+              "url": "https://docs.composio.dev/docs/authentication/custom-app-vs-managed-app"
+            }
+          ],
+          "sourceIds": [
+            "S4",
+            "S5",
+            "S10",
+            "S14"
+          ],
+          "confidence": "official"
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "item": "Facebook account registered as a Meta developer",
+      "neededFor": "registration",
+      "detail": "Needed to open the App Dashboard. The console needs a logged-in Facebook session.",
+      "sourceIds": [
+        "S11",
+        "P5"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "Business portfolio you administer",
+      "neededFor": "registration",
+      "detail": "Required to access data you don't own. It must be your own portfolio, separate from your clients' portfolios.",
+      "sourceIds": [
+        "S11",
+        "S13"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "Verified business (legal entity documents, address or phone, website)",
+      "neededFor": "review",
+      "detail": "Business Verification by a Business Admin. The documents' legal name must match the portfolio, and reports advise verifying the domain.",
+      "sourceIds": [
+        "S7",
+        "S19"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "Public privacy policy URL, 1024×1024 app icon and app category",
+      "neededFor": "review",
+      "detail": "Set in App settings → Basic. Meta shows the policy on the login dialog.",
+      "sourceIds": [
+        "S8"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "Reviewer-accessible app with test instructions and 1080p screen recordings",
+      "neededFor": "review",
+      "detail": "One recording and description per permission. Use test credentials, not your personal Facebook login.",
+      "sourceIds": [
+        "S8",
+        "S10"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "A real ad account with API traffic (500 successful calls in 15 days, under 15% errors)",
+      "neededFor": "review",
+      "detail": "Needed for Full access to the Marketing API Access Tier and to keep it. Also make at least 1 successful call per permission within 30 days before requesting advanced access.",
+      "sourceIds": [
+        "S5",
+        "S8",
+        "S16"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "Composio project with an auth config for metaads",
+      "neededFor": "testing",
+      "detail": "OAuth2 with your own App ID and App Secret. Pass the ac_ ID in session authConfigs.",
+      "sourceIds": [
+        "S4",
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "Ongoing compliance: annual Data Use Checkup and data handling questions",
+      "neededFor": "production",
+      "detail": "Required once permissions have Advanced Access. Missing them risks losing API access.",
+      "sourceIds": [
+        "S10",
+        "S17"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "scopes": [
+    {
+      "scope": "ads_read",
+      "purpose": "Read Ads Insights reports (impressions, spend, clicks, reach) for ad accounts the user grants. Also covers Conversions API events.",
+      "tier": "sensitive",
+      "note": "Standard access works only for role users. Other advertisers need Advanced Access through App Review and Business Verification.",
+      "sourceIds": [
+        "S10",
+        "S5"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "ads_management",
+      "purpose": "Create, edit and read campaigns, ad sets, ads and creatives.",
+      "tier": "restricted",
+      "note": "Depends on pages_read_engagement and pages_show_list. The recording must show the login grant and your app managing ads. Pair it with the Marketing API Access Tier feature.",
+      "sourceIds": [
+        "S10",
+        "S5"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "business_management",
+      "purpose": "Read and write the Business Manager API: list businesses, and reach ad accounts owned by a business portfolio.",
+      "tier": "restricted",
+      "note": "Needed because accounts owned by a business portfolio don't appear in /me/adaccounts. Depends on pages_read_engagement and pages_show_list.",
+      "sourceIds": [
+        "S10",
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "pages_show_list",
+      "purpose": "List the Pages the user manages, used to pick the Page that backs ad creatives.",
+      "tier": "sensitive",
+      "note": "A dependency of ads_management and business_management. Name the main permission in its review description.",
+      "sourceIds": [
+        "S10"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "pages_read_engagement",
+      "purpose": "Read Page content and metadata.",
+      "tier": "sensitive",
+      "note": "A dependency of ads_management and business_management.",
+      "sourceIds": [
+        "S10"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "pages_manage_ads",
+      "purpose": "Create and manage ads for a Page, including click-to-Messenger, Instagram Direct or WhatsApp ads.",
+      "tier": "sensitive",
+      "note": "Optional. Request it only if the agent builds Page or messaging ads.",
+      "sourceIds": [
+        "S10"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "leads_retrieval",
+      "purpose": "Read lead-form submissions from lead ads.",
+      "tier": "restricted",
+      "note": "Optional, with many dependencies, including the Marketing API Access Tier feature, ads_management and business_management.",
+      "sourceIds": [
+        "S10",
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "public_profile",
+      "purpose": "Basic profile of the connecting user. Granted automatically.",
+      "tier": "basic",
+      "note": "Facebook Login for Business apps need Advanced Access to it before going live. It can't be requested alone.",
+      "sourceIds": [
+        "S13",
+        "S10"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "blockers": [
+    {
+      "title": "'Request advanced access' is greyed out",
+      "symptom": "In App Review → Permissions and Features, the Request advanced access button is disabled for ads_read or ads_management, or the Marketing API Access Tier upgrade shows unmet requirements.",
+      "likelihood": "common",
+      "howToProceed": "Make at least 1 successful API call with each permission, and wait up to 2 days for it to log. For Full access, reach 500 successful Marketing API calls within 15 days with under 15% errors over the last 500. Use read-only calls through your own connection or Graph API Explorer.",
+      "escalation": {
+        "label": "Marketing API Authorization (requirements)",
+        "url": "https://developers.facebook.com/docs/marketing-api/get-started/authorization"
+      },
+      "sourceIds": [
+        "S8",
+        "S5",
+        "S16"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Business Verification stuck In Review",
+      "symptom": "The portfolio shows 'In Review' for 10+ days, or for months, and App Review can't complete. Support routes you to an automated assistant.",
+      "likelihood": "common",
+      "howToProceed": "Check that the legal name, address, phone and website match your documents exactly. Verify the website domain in Business Settings and use an email on that domain. Don't edit details while it is in review. Open a Meta Business Support case; bug reports are rejected for individual cases.",
+      "escalation": {
+        "label": "Meta Business Help Center",
+        "url": "https://www.facebook.com/business/help"
+      },
+      "sourceIds": [
+        "S18",
+        "S19"
+      ],
+      "confidence": "reported"
+    },
+    {
+      "title": "App Review rejection over recordings or reviewer access",
+      "symptom": "A permission comes back Rejected: the recording doesn't show the login grant or the data being used, or reviewers couldn't access or log in to the app.",
+      "likelihood": "common",
+      "howToProceed": "Re-record from the login screen, through Meta's permission grant, to the ads data shown in your UI (and campaign edits for ads_management). Request only the permissions you use, write a distinct description for each, and test the reviewer credentials in a clean browser before resubmitting.",
+      "escalation": {
+        "label": "App Review submission walkthrough",
+        "url": "https://developers.facebook.com/docs/app-review/submission-guide"
+      },
+      "sourceIds": [
+        "S8",
+        "S10",
+        "S20"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Outside advertisers can't grant permissions before approval",
+      "symptom": "A customer with no role on your app connects, but the ads permissions aren't granted and calls on their ad accounts fail with permission errors.",
+      "likelihood": "common",
+      "howToProceed": "Until Advanced Access is approved, add pilot customers under App roles as Testers. They must accept the invite. Otherwise wait for App Review and Business Verification.",
+      "escalation": {
+        "label": "Graph API Access Levels",
+        "url": "https://developers.facebook.com/docs/graph-api/overview/access-levels/"
+      },
+      "sourceIds": [
+        "S6",
+        "S8"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Throttling on the Limited tier",
+      "symptom": "Error 17/2446079 'User request limit reached', 613/1487742 'There have been too many calls from this ad-account', or 80000/80004 Business Use Case limits.",
+      "likelihood": "common",
+      "howToProceed": "On the Limited tier the maximum score is 60 (reads cost 1, writes 3), with a 300 s block. Back off using the X-Business-Use-Case header, batch reads, and upgrade to Full access (score 9000, 60 s block). Keep edits to the same object at least 30 s apart.",
+      "escalation": {
+        "label": "Marketing API Rate Limiting",
+        "url": "https://developers.facebook.com/documentation/ads-commerce/marketing-api/overview/rate-limiting"
+      },
+      "sourceIds": [
+        "S9"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Redirect URI not allow-listed",
+      "symptom": "Connect fails at Facebook with a redirect error instead of the consent screen.",
+      "likelihood": "occasional",
+      "howToProceed": "Add `https://backend.composio.dev/api/v3/toolkits/auth/callback` exactly to Valid OAuth Redirect URIs in the Facebook Login for Business settings, not only App Domains. It must also match the callback the Composio dashboard shows.",
+      "escalation": {
+        "label": "Composio KB: Facebook",
+        "url": "https://docs.composio.dev/kb/guide/toolkits-facebook"
+      },
+      "sourceIds": [
+        "S3",
+        "S15"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Wrong client ID in the auth config",
+      "symptom": "Facebook shows 'Invalid app ID — The provided app ID does not look like a valid app ID.' (or redirects to error_code=PLATFORM__INVALID_APP_ID). The token exchange returns OAuthException 101 'Missing or invalid client id.'",
+      "likelihood": "occasional",
+      "howToProceed": "Paste the numeric App ID from App settings → Basic as the Client ID and the App Secret as the Client Secret. Then recreate the connection.",
+      "escalation": {
+        "label": "Composio: custom auth configs",
+        "url": "https://docs.composio.dev/docs/authentication/custom-app-vs-managed-app"
+      },
+      "sourceIds": [
+        "P1",
+        "P2",
+        "S2"
+      ],
+      "confidence": "tested"
+    }
+  ],
+  "nuances": [
+    {
+      "title": "Two separate gates with confusingly renamed tiers",
+      "detail": "Permission access levels (Standard or Advanced for ads_read and ads_management) are separate from the Marketing API Access Tier feature. On May 4, 2026, Meta renamed that feature from 'Ads Management Standard Access' and its tiers to Limited and Full, and lowered the Full threshold from 1,500 to 500 calls. Older posts that say 'Standard Access' may mean either one.",
+      "sourceIds": [
+        "S5",
+        "S16"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Business apps have no Live toggle",
+      "detail": "Business-type apps don't have Development or Live modes; access levels alone decide who can grant permissions. Approval therefore takes effect without a mode switch.",
+      "sourceIds": [
+        "S12",
+        "S6"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Meta announced the end of Tech Provider Access Verification (Oct 9, 2026)",
+      "detail": "Meta's Oct 9, 2026 post says Access Verification 'will no longer be required' for apps that access client data, and that its dashboard form and API checks will be removed. It gives no separate effective date, so check your App Dashboard. Business Verification, App Review for advanced permissions, the Data Use Checkup and the data handling questions remain. Some Meta pages, such as the submission guide, still mention the old check.",
+      "sourceIds": [
+        "S17"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "User tokens expire and there is no refresh token",
+      "detail": "OAuth user tokens are short-lived; a long-lived token lasts about 60 days, and a permission unused for 90 days must be granted again. Plan reconnect prompts. For unattended jobs, Facebook Login for Business can issue system-user tokens that never expire, but that needs a config_id and response_type=code.",
+      "sourceIds": [
+        "S14",
+        "S10",
+        "S13"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Tokens are bound to the assets picked in Meta's dialog",
+      "detail": "The connection covers only the account, ad accounts and Pages the user selected. Composio can't repoint it server-side, so the user must reconnect and pick again.",
+      "sourceIds": [
+        "S3"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Ad accounts owned by a business portfolio are invisible to /me/adaccounts",
+      "detail": "Use business_management with the List Businesses tool and then the owned/client ad-account tools. Otherwise agencies' client accounts appear to be missing.",
+      "sourceIds": [
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Every call hits production data",
+      "detail": "There is no sandbox tier for the Marketing API: calls at any access level act on real ad accounts. Create test objects with status PAUSED to avoid spend.",
+      "sourceIds": [
+        "S5",
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "The tier upgrade no longer needs a recording, but permissions still do",
+      "detail": "Since May 2026, the Marketing API Access Tier upgrade doesn't require a screen recording upload. Advanced access to ads_read, ads_management and business_management still requires recordings.",
+      "sourceIds": [
+        "S16",
+        "S8",
+        "S10"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "composioSetup": {
+    "redirectUri": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+    "steps": [
+      "In the Composio dashboard, go to Auth Configs → Create Auth Config → choose Meta Ads (`metaads`) → OAuth2 → 'Use your own developer authentication'.",
+      "Paste the numeric App ID as the Client ID and the App Secret as the Client Secret.",
+      "Set the scopes to ads_read, ads_management, business_management, pages_show_list and pages_read_engagement. Add pages_manage_ads or leads_retrieval only if you use them and they are approved.",
+      "Check that the callback the dashboard shows is https://backend.composio.dev/api/v3/toolkits/auth/callback and that it is listed under Valid OAuth Redirect URIs in Meta's Facebook Login for Business settings.",
+      "Click Create, copy the auth config ID (ac_…), then use Connect Account to test as your Playground user, logged in as a Facebook user with a role on the app.",
+      "In code, call composio.create(userId, { authConfigs: { metaads: 'ac_…' } }) and send users hosted connect links. Without this, the session won't use your config.",
+      "After any scope change, users must reconnect for the new permissions to appear in their Meta grant."
+    ]
+  },
+  "evidence": {
+    "sources": [
+      {
+        "id": "S1",
+        "url": "https://docs.composio.dev/toolkits/metaads.md",
+        "title": "Meta Ads toolkit (Composio docs)",
+        "kind": "composio",
+        "accessedAt": "2026-10-28",
+        "note": "Auth: OAUTH2, API_KEY. Composio-managed OAuth available? No. 78 tools, 0 triggers, version 20261026_00."
+      },
+      {
+        "id": "S2",
+        "url": "https://composio.dev/auth/facebook",
+        "title": "How to create OAuth credentials for Meta apps (Facebook), Composio",
+        "kind": "composio",
+        "accessedAt": "2026-10-28",
+        "note": "Create the app linked to a business portfolio; copy App ID and Secret from App Settings → Basic; add the Composio callback."
+      },
+      {
+        "id": "S3",
+        "url": "https://docs.composio.dev/kb/guide/toolkits-facebook.md",
+        "title": "Facebook (Composio Knowledge Base)",
+        "kind": "composio",
+        "accessedAt": "2026-10-28",
+        "note": "Add the Composio redirect URI to the correct Meta redirect field. Tokens bind to the account chosen in Meta's picker and can't be repointed."
+      },
+      {
+        "id": "S4",
+        "url": "https://docs.composio.dev/docs/authentication/custom-app-vs-managed-app.md",
+        "title": "Managed vs custom auth (Composio docs)",
+        "kind": "composio",
+        "accessedAt": "2026-10-28",
+        "note": "Create Auth Config → toolkit → OAuth2, paste Client ID and Secret, then pass the ac_ ID in the session's authConfigs."
+      },
+      {
+        "id": "S5",
+        "url": "https://developers.facebook.com/docs/marketing-api/get-started/authorization",
+        "title": "Marketing API: Authorization",
+        "kind": "official",
+        "accessedAt": "2026-10-28",
+        "note": "Limited tier (development only) vs Full: 500 calls in 15 days, <15% errors. Others' ad accounts need advanced ads_read or ads_management."
+      },
+      {
+        "id": "S6",
+        "url": "https://developers.facebook.com/docs/graph-api/overview/access-levels/",
+        "title": "Graph API: Access Levels",
+        "kind": "official",
+        "accessedAt": "2026-10-28",
+        "note": "Standard Access permissions can only be requested from users with a role on the app. Advanced needs App Review per permission and Business Verification."
+      },
+      {
+        "id": "S7",
+        "url": "https://developers.facebook.com/docs/development/release/business-verification",
+        "title": "Business Verification",
+        "kind": "official",
+        "accessedAt": "2026-10-28",
+        "note": "Apps requesting advanced access must connect to a verified Business. Start at Settings → Basic → Verification; only a Business Admin completes it."
+      },
+      {
+        "id": "S8",
+        "url": "https://developers.facebook.com/docs/app-review/submission-guide",
+        "title": "App Review submission walkthrough",
+        "kind": "official",
+        "accessedAt": "2026-10-28",
+        "note": "At least 1 successful call per permission within 30 days; button greyed until logged (up to 2 days); decision 'within a week'."
+      },
+      {
+        "id": "S9",
+        "url": "https://developers.facebook.com/documentation/ads-commerce/marketing-api/overview/rate-limiting",
+        "title": "Marketing API Rate Limiting",
+        "kind": "official",
+        "accessedAt": "2026-10-28",
+        "note": "Limited tier: max score 60, 300 s block. Full: 9000, 60 s block. ads_management BUC: 300 vs 100000 calls per hour."
+      },
+      {
+        "id": "S10",
+        "url": "https://developers.facebook.com/docs/permissions",
+        "title": "Permissions Reference for Meta Technologies APIs",
+        "kind": "official",
+        "accessedAt": "2026-10-28",
+        "note": "ads_management depends on pages_read_engagement and pages_show_list. Business Verification is required for Advanced Access. Permissions unused for 90 days need a new grant."
+      },
+      {
+        "id": "S11",
+        "url": "https://developers.facebook.com/docs/development/create-an-app/",
+        "title": "Create an App with Meta",
+        "kind": "official",
+        "accessedAt": "2026-10-28",
+        "note": "/apps/creation/ flow: details → use cases → business portfolio. Use cases can't be removed. 15-app limit without a verified business."
+      },
+      {
+        "id": "S12",
+        "url": "https://developers.facebook.com/docs/development/create-an-app/app-dashboard/app-types",
+        "title": "App Types",
+        "kind": "official",
+        "accessedAt": "2026-10-28",
+        "note": "'Business apps do not have app modes and instead rely exclusively on access levels.' App types can't be changed."
+      },
+      {
+        "id": "S13",
+        "url": "https://developers.facebook.com/docs/facebook-login/facebook-login-for-business",
+        "title": "Facebook Login for Business",
+        "kind": "official",
+        "accessedAt": "2026-10-28",
+        "note": "Configurations issue user or system-user tokens, and config_id replaces scope. Other businesses need Advanced Access, and public_profile needs it before go-live."
+      },
+      {
+        "id": "S14",
+        "url": "https://developers.facebook.com/docs/facebook-login/guides/access-tokens/get-long-lived",
+        "title": "Long-lived access tokens (Facebook Login)",
+        "kind": "official",
+        "accessedAt": "2026-10-28",
+        "note": "Default tokens expire in hours; a long-lived user token lasts about 60 days. Latest Graph API version: v26.0."
+      },
+      {
+        "id": "S15",
+        "url": "https://developers.facebook.com/docs/facebook-login/security",
+        "title": "Facebook Login security",
+        "kind": "official",
+        "accessedAt": "2026-10-29",
+        "note": "redirect_uri must exactly match an entry in Valid OAuth Redirect URIs (state is ignored). 'Enabling Strict Mode is required for all apps.'"
+      },
+      {
+        "id": "S16",
+        "url": "https://developers.meta.com/blog/updates-to-ads-management-standard-access-feature/",
+        "title": "Update to Ads Management Standard Access: New Name, Revised Requirements, and More Transparency (Meta blog)",
+        "kind": "official",
+        "accessedAt": "2026-10-28",
+        "note": "May 4, 2026: renamed to Marketing API Access Tier (Limited and Full); threshold cut from 1,500 to 500 calls; screen recording upload no longer required."
+      },
+      {
+        "id": "S17",
+        "url": "https://developers.facebook.com/blog/post/2026/10/09/retiring-access-verification-for-tech-provider-apps",
+        "title": "Retiring Access Verification for Tech Provider Apps (Meta blog)",
+        "kind": "official",
+        "accessedAt": "2026-10-28",
+        "note": "Access Verification 'will no longer be required' in Tech Provider onboarding. Business Verification, App Review for advanced permissions, the Data Use Checkup and data handling obligations remain."
+      },
+      {
+        "id": "S18",
+        "url": "https://communityforums.atmeta.com/questions-and-discussions-26/business-verification-stuck-in-review-since-late-june-2026-requesting-manual-review-180601",
+        "title": "Business verification stuck in review since late June 2026 (Meta community forum)",
+        "kind": "community",
+        "accessedAt": "2026-10-28",
+        "note": "Oct 2026: portfolio In Review for about 3.5 months for developer permissions. The Security Center states 'about 2 business days'. Only automated support was reachable."
+      },
+      {
+        "id": "S19",
+        "url": "https://communityforums.atmeta.com/questions-and-discussions-26/business-verification-in-review-10-days-blocking-app-review-submission-177498",
+        "title": "Business verification in review 10+ days blocking App Review submission (Meta community forum)",
+        "kind": "community",
+        "accessedAt": "2026-10-28",
+        "note": "Apr–May 2026: verification blocked App Review. A reply says 10 days is 'not unusual anymore' and advises matching documents and verifying the domain."
+      },
+      {
+        "id": "S20",
+        "url": "https://bundle.social/blog/meta-app-review-20-days",
+        "title": "Meta App Review taking 20 days (bundle.social blog)",
+        "kind": "community",
+        "accessedAt": "2026-10-28",
+        "note": "Vendor blog, Aug 2026, not ads-specific: observed App Review times rose from 4–6 days in early 2026 to 17–20 days by mid-2026."
+      },
+      {
+        "id": "S21",
+        "url": "https://developers.facebook.com/docs/facebook-login/guides/advanced/manual-flow",
+        "title": "Manually Build a Login Flow (Facebook Login)",
+        "kind": "official",
+        "accessedAt": "2026-10-29",
+        "note": "Classic Facebook Login path: Products → Facebook Login → Settings → Client OAuth Settings → Valid OAuth redirect URIs."
+      },
+      {
+        "id": "S22",
+        "url": "https://developers.make.com/white-label-documentation/install-and-configure-apps/facebook-and-other-meta-apps/steps-on-the-meta-for-developers-portal",
+        "title": "Make: Steps on the Meta for Developers portal (third-party guide)",
+        "kind": "community",
+        "accessedAt": "2026-10-29",
+        "note": "For Facebook login for business: Client OAuth settings → Valid OAuth Redirect URIs → Save changes."
+      },
+      {
+        "id": "S23",
+        "url": "https://developers.facebook.com/docs/development/maintaining-data-access/data-protection-assessment",
+        "title": "Data Protection Assessment (Meta)",
+        "kind": "official",
+        "accessedAt": "2026-10-29",
+        "note": "A questionnaire, annual for apps accessing certain data; an app admin has 60 days to complete it. Not an external audit."
+      }
+    ],
+    "probes": [
+      {
+        "id": "P1",
+        "kind": "authorize-endpoint",
+        "target": "GET https://www.facebook.com/v26.0/dialog/oauth?response_type=code&client_id=oauth-runway-probe&redirect_uri=https://backend.composio.dev/api/v3/toolkits/auth/callback&scope=ads_read,ads_management,business_management&state=probe (Accept-Language: en-US); repeated with client_id=1",
+        "result": "pass",
+        "summary": "The v26.0 dialog is live. A non-numeric client_id renders 'Invalid app ID'; numeric client_id=1 gets a 302 to /oauth/error/?error_code=PLATFORM__INVALID_APP_ID.",
+        "detail": "HTTP 200 HTML: 'Invalid app ID — The provided app ID does not look like a valid app ID.' The fake numeric ID redirected to https://www.facebook.com/oauth/error/?error_code=PLATFORM__INVALID_APP_ID. The app ID is validated before any login, so only a real, numeric App ID gets past this check.",
+        "at": "2026-10-28T07:19:34Z"
+      },
+      {
+        "id": "P2",
+        "kind": "token-endpoint",
+        "target": "GET https://graph.facebook.com/v26.0/oauth/access_token?client_id=oauth-runway-probe&redirect_uri=https://backend.composio.dev/api/v3/toolkits/auth/callback&code=probe",
+        "result": "info",
+        "summary": "The token endpoint is live and rejects an unknown client with OAuthException code 101.",
+        "detail": "HTTP 400 {\"error\":{\"message\":\"Missing or invalid client id.\",\"type\":\"OAuthException\",\"code\":101}}",
+        "at": "2026-10-28T07:19:57Z"
+      },
+      {
+        "id": "P3",
+        "kind": "url-check",
+        "target": "GET https://graph.facebook.com/v26.0/me and GET https://graph.facebook.com/v26.0/me/adaccounts (no token)",
+        "result": "info",
+        "summary": "Graph API v26.0 is live. Unauthenticated calls return OAuthException 2500.",
+        "detail": "HTTP 400 {\"error\":{\"message\":\"An active access token must be used to query information about the current user.\",\"type\":\"OAuthException\",\"code\":2500}}. v24.0 returned the same error shape.",
+        "at": "2026-10-28T07:19:57Z"
+      },
+      {
+        "id": "P4",
+        "kind": "oauth-discovery",
+        "target": "GET https://www.facebook.com/.well-known/openid-configuration/",
+        "result": "info",
+        "summary": "OIDC discovery exists only for id_token flows (Limited Login). It lists no token endpoint, no code response type and no dynamic client registration.",
+        "detail": "HTTP 200: issuer https://www.facebook.com, authorization_endpoint https://facebook.com/dialog/oauth/, response_types_supported [id_token, token id_token]. No token_endpoint or registration_endpoint, so the Marketing API code flow isn't discoverable, and an app must be registered manually.",
+        "at": "2026-10-28T07:20:05Z"
+      },
+      {
+        "id": "P5",
+        "kind": "portal",
+        "target": "GET https://developers.facebook.com/apps/creation/ and GET https://developers.facebook.com/apps/ (logged out)",
+        "result": "info",
+        "summary": "Logged out, both return HTTP 200 with the page title 'Page Not Found - Meta for Developers' and login links. A human must log in with a Facebook account.",
+        "detail": "There is no redirect to a sign-up page, and the console content is withheld without a session. App creation requires a person to log in.",
+        "at": "2026-10-28T07:20:05Z"
+      },
+      {
+        "id": "P6",
+        "kind": "url-check",
+        "target": "GET marketing-api/get-started/authorization, graph-api/overview/access-levels/, development/release/business-verification, app-review/submission-guide (developers.facebook.com); docs.composio.dev/toolkits/metaads.md; composio.dev/auth/facebook",
+        "result": "pass",
+        "summary": "All six cited pages returned HTTP 200. Meta serves text/markdown versions to non-browser clients. composio.dev/auth/meta and /auth/metaads returned 404.",
+        "detail": "Sizes: 9.3 KB, 168 KB, 3.8 KB, 12 KB (Meta); 113 KB and 208 KB (Composio). The authorization page's own dialog example uses v26.0.",
+        "at": "2026-10-28T07:20:28Z"
+      }
+    ],
+    "openQuestions": [
+      {
+        "question": "Does Composio's metaads OAuth2 auth config support Facebook Login for Business `config_id` (needed for system-user tokens that don't expire), or only `scope`?",
+        "whyItMatters": "With scope-based user tokens, users must reconnect about every 60 days, which hurts unattended agents.",
+        "howToResolve": "Check the metaads auth config fields in the Composio dashboard or ask Composio support. Test a config_id flow against a Business app."
+      },
+      {
+        "question": "What is the exact label of the ads use case in the app-creation picker, and does it auto-add the Marketing API product?",
+        "whyItMatters": "Use cases can't be removed, so picking the wrong one means creating a new app. Meta's docs page didn't render the use-case table.",
+        "howToResolve": "Open developers.facebook.com/apps/creation/ while logged in and record the use-case list."
+      },
+      {
+        "question": "Will an ads app be enrolled in the annual Data Protection Assessment, and does any step carry cost or need an external auditor?",
+        "whyItMatters": "The security_assessment and paid_access factors are rated 'no' by inference. Meta's post lists the Data Protection Assessment among obligations that remain.",
+        "howToResolve": "Watch the App Dashboard Alert Inbox after approval and read Meta's Data Protection Assessment docs for the triggering data types."
+      },
+      {
+        "question": "What are current real-world review times for ads_management and ads_read specifically?",
+        "whyItMatters": "The community timelines we found cover Instagram and other permissions or Business Verification, not ads permissions.",
+        "howToResolve": "Search Meta's developer community forum and Stack Overflow for 2026 ads_management approvals, or ask Meta developer support."
+      },
+      {
+        "question": "What does the new `ads_mcp_management` permission (listed under Facebook Login for Business) cover, and would an agent product need it?",
+        "whyItMatters": "It may be Meta's intended permission for MCP or agent-driven ad management and could change which permissions to request.",
+        "howToResolve": "Read its entry in the Permissions Reference and in App Review → Permissions and Features once the app exists."
+      },
+      {
+        "question": "Where exactly does a Business-type app expose Valid OAuth Redirect URIs for Facebook Login for Business, and is 'Enforce HTTPS' a visible toggle there?",
+        "whyItMatters": "Meta's docs give the menu path only for classic Facebook Login, and Composio's guide says App Settings → Advanced. A wrong field means a redirect error at connect time.",
+        "howToResolve": "Open the app dashboard while logged in, go to Facebook Login for Business → Settings, and record the Client OAuth settings fields."
+      }
+    ],
+    "verification": {
+      "reviewedAt": "2026-10-29",
+      "method": "An independent agent re-read 16 cited sources (Meta docs and blog posts, Composio docs, community threads), added 3 sources and re-ran 3 probes on 2026-10-29.",
+      "items": [
+        {
+          "claim": "timeToProduction 2–10 weeks: Business Verification ~2 business days, App Review 'within a week', plus reports of longer waits",
+          "outcome": "corrected",
+          "note": "Stated times and report ranges check out, but minHours 240 (~10 days) contradicted the '2–10 weeks' label and a 3.5-month verification case exceeds the range. minHours → 336; basis now flags the outlier.",
+          "sourceIds": [
+            "S8",
+            "S18",
+            "S19",
+            "S20"
+          ]
+        },
+        {
+          "claim": "Advanced Access needs per-permission App Review plus a verified business portfolio (Business Verification)",
+          "outcome": "confirmed",
+          "note": "Access Levels and Business Verification docs agree: Advanced Access requires Business Verification; Standard works only for role users. The Settings → Basic → Verification → Start Verification path matches.",
+          "sourceIds": [
+            "S6",
+            "S7"
+          ]
+        },
+        {
+          "claim": "Full Marketing API tier needs 500 successful calls in 15 days with under 15% errors in the last 500",
+          "outcome": "confirmed",
+          "note": "The Authorization page and Meta's May 4, 2026 post agree: threshold cut from 1,500 to 500, error rate measured over the last 500 calls, and the tier upgrade no longer needs a recording. Same bar keeps Full access.",
+          "sourceIds": [
+            "S5",
+            "S16"
+          ]
+        },
+        {
+          "claim": "Before approval only app-role users can grant ads permissions; Limited tier maxes at score 60 with a 300 s block (Full: 9000, 60 s)",
+          "outcome": "confirmed",
+          "note": "Access Levels page: Standard-access permissions can only be requested from role users. Rate-limiting page lists the 60/300 s and 9000/60 s figures as written. Limited tier is for development only.",
+          "sourceIds": [
+            "S6",
+            "S9",
+            "S5"
+          ]
+        },
+        {
+          "claim": "Cost is free: no Meta fee for the app, App Review, Business Verification or Marketing API access",
+          "outcome": "unverifiable",
+          "note": "No Meta page found states pricing explicitly, and the Business Verification help article would not load. The guide already marks this inferred (paid_access, costDetail) and open question 3 covers it.",
+          "sourceIds": [
+            "S5",
+            "S23"
+          ]
+        },
+        {
+          "claim": "Tech Provider Access Verification was retired on Oct 9, 2026",
+          "outcome": "corrected",
+          "note": "The Oct 9 post says Access Verification 'will no longer be required' and its dashboard form 'will be removed', with no effective date. Reworded factor and nuance from 'retired' to 'announced'. Business Verification and App Review remain.",
+          "sourceIds": [
+            "S17"
+          ]
+        },
+        {
+          "claim": "Add the Composio callback under Facebook Login for Business → Settings → Valid OAuth Redirect URIs",
+          "outcome": "corrected",
+          "note": "Meta's security page confirms exact match and Strict Mode but gives no menu path; Composio says App Settings → Advanced. Added 'Client OAuth settings' (Meta classic path, Make guide), set step to reported, added open question.",
+          "sourceIds": [
+            "S15",
+            "S21",
+            "S22",
+            "S2"
+          ]
+        },
+        {
+          "claim": "No third-party security assessment; obligations are self-attested (data handling questions, Data Use Checkup, Data Protection Assessment)",
+          "outcome": "confirmed",
+          "note": "Meta's page calls the Data Protection Assessment a questionnaire an app admin completes within 60 days, and the Oct 9 post lists it and the Data Use Checkup as continuing. 'No external audit' stays inferred.",
+          "sourceIds": [
+            "S23",
+            "S17"
+          ]
+        },
+        {
+          "claim": "Probe re-run: P1 (v26.0 dialog/oauth, fake client IDs) and P2 (token endpoint) still return the recorded results",
+          "outcome": "confirmed",
+          "note": "On 2026-10-29, client_id=oauth-runway-probe rendered 'Invalid app ID'; client_id=1 got a 302 to PLATFORM__INVALID_APP_ID; token endpoint gave HTTP 400 OAuthException 101; P3 /me still returned code 2500.",
+          "sourceIds": [
+            "P1",
+            "P2",
+            "P3"
+          ]
+        }
+      ]
+    }
+  },
+  "meta": {
+    "generatedAt": "2026-10-29T06:32:38Z",
+    "generator": "library",
+    "model": "claude-opus-5-5 (research agent)",
+    "durationSec": null
+  }
+}

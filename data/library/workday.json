@@ -1,0 +1,1206 @@
+{
+  "schemaVersion": 1,
+  "slug": "workday",
+  "app": {
+    "name": "Workday",
+    "website": "https://www.workday.com",
+    "category": "HR / HCM",
+    "description": "Enterprise HCM and finance suite. Each customer runs its own tenant with REST and SOAP (Workday Web Services) APIs on tenant-specific, data-center-specific hosts.",
+    "developerPortalUrl": "https://developer.workday.com/",
+    "docsUrl": "https://community.workday.com/sites/default/files/file-hosting/restapi/index.html"
+  },
+  "composio": {
+    "toolkitSlug": "workday",
+    "managedOAuth": "not-available",
+    "authSchemes": [
+      "OAUTH2"
+    ],
+    "toolkitDocsUrl": "https://docs.composio.dev/toolkits/workday",
+    "requiredFields": [
+      {
+        "name": "Token URL",
+        "description": "Tenant token endpoint, e.g. https://wd2-impl-services1.workday.com/ccx/oauth2/{tenant}/token. Entered on the Composio connect screen."
+      },
+      {
+        "name": "Authorization URL",
+        "description": "Tenant authorization endpoint from View API Clients. It is on the tenant's UI host (e.g. https://impl.workday.com/{tenant}/authorize), not the services host."
+      },
+      {
+        "name": "REST API Endpoint",
+        "description": "Tenant REST base, e.g. https://wd2-impl-services1.workday.com/ccx/api/v1/{tenant}. Entered on the Composio connect screen."
+      },
+      {
+        "name": "Client ID / Client Secret (per tenant)",
+        "description": "Issued by Register API Client inside each customer's tenant, so you need one Composio custom auth config per customer tenant."
+      }
+    ],
+    "notes": [
+      "Composio-managed OAuth is not available for Workday; you must create a custom auth config with a client registered in the customer's tenant.",
+      "The toolkit has 588 tools and 13 triggers; many tool descriptions name the Workday scope (functional area) and security domains they need.",
+      "Composio's Workday setup guide shows the legacy redirect URI https://backend.composio.dev/api/v1/auth-apps/add; current custom configs use the v3 callback. Register whatever your auth config displays.",
+      "Composio recommends creating auth configs in code 'a config per customer', which fits Workday's per-tenant clients."
+    ]
+  },
+  "assumption": "An agent product sold to enterprises that reads worker profiles, time off and org data from each customer's own Workday tenant, with each employee connecting through Workday OAuth (Authorization Code Grant) via Composio.",
+  "verdict": {
+    "headline": "Gated: each customer's Workday admin has to register your API client inside their own tenant. A personal dev tenant (open beta) now covers build and test.",
+    "summary": "Workday doesn't review OAuth apps. Instead, each customer's Workday admin runs **Register API Client** in their own tenant. That produces a client ID, secret and tenant-specific endpoints. For your own build and test tenant, Workday's Developer Program (open-access beta, announced Oct 2026) lets an individual request one personal development tenant with sample data. Whether you can register a Composio-compatible API client there is unverified, and it is no substitute for a customer's tenant. Your first real-data connection still comes from a design-partner customer's Sandbox or Implementation tenant. After that, every customer is its own rollout: their security review, their admin, their client, and one Composio auth config per tenant.",
+    "difficulty": "gated",
+    "handsOnEffort": {
+      "label": "3–8 hours",
+      "minHours": 3,
+      "maxHours": 8,
+      "basis": "3–8 h for the first customer, ~1–2 h per additional customer (plus their admin's time)"
+    },
+    "timeToFirstConnection": {
+      "label": "Same day – 4 weeks",
+      "minHours": 4,
+      "maxHours": 672,
+      "basis": "Same day if a personal dev tenant (beta; Workday says ready in about 15 min once requested, approval time unpublished) supports Register API Client; up to ~4 weeks to line up a customer sandbox admin"
+    },
+    "timeToProduction": {
+      "label": "1–8 weeks per customer",
+      "minHours": 168,
+      "maxHours": 1344,
+      "basis": "~1–8 weeks per customer, driven by that customer's security review and admin change window (inferred)"
+    },
+    "longestPole": "Each customer's security approval and admin change window before their admin registers your API client. A first test tenant now comes from the personal-tenant beta or a design-partner sandbox.",
+    "cost": "No API fee found; personal dev tenant is beta",
+    "costDetail": "We found no Workday API fee for using a customer's own tenant. A personal development tenant is offered through the Developer Program open beta; its cost and commercial-use terms aren't stated on the pages we read. Partner-program (Innovation) tenants have unpublished fees and terms.",
+    "easierPaths": [
+      {
+        "condition": "Sample data is enough to build and test (no customer data needed yet)",
+        "effect": "Join the Workday Developer Program at developer.workday.com with a personal email and request one personal development tenant (open beta). Workday emails sign-in details, usually within 15 minutes of the request. It expires after 7 days without login. Whether Register API Client works there is unverified."
+      },
+      {
+        "condition": "You have one design-partner customer whose admin will register a client in their Sandbox/Implementation tenant",
+        "effect": "First connection in days. Validate scopes and security domains there before asking for production."
+      },
+      {
+        "condition": "A non-interactive, org-wide read sync is acceptable instead of per-employee consent",
+        "effect": "The customer can use Register API Client for Integrations plus an Integration System User (ISU) and Manage Refresh Tokens for Integrations, and one security group governs the data. Whether Composio's Workday toolkit accepts a pre-generated refresh token is unverified."
+      },
+      {
+        "condition": "You join Workday's partner program (Innovation Partners)",
+        "effect": "Partners report getting development tenants (Merge: 2) and partner integration architects, plus Marketplace listing. Fees and acceptance time are unpublished."
+      }
+    ]
+  },
+  "factors": [
+    {
+      "key": "self_serve_registration",
+      "value": "depends",
+      "detail": "In a customer tenant, only that tenant's admin can run Register API Client; there is no public portal for tenant API clients. Individuals can request a personal development tenant via the Developer Program open beta, where you would be the admin; whether Register API Client is available there is unverified.",
+      "sourceIds": [
+        "S2",
+        "S21",
+        "S22",
+        "P5"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "review_required",
+      "value": "no",
+      "detail": "Workday does not review the app. The client ID and secret are issued as soon as the tenant admin clicks OK. The gate is each customer's own admin and security team (see per_customer_setup).",
+      "sourceIds": [
+        "S2",
+        "S5",
+        "S6"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "business_verification",
+      "value": "depends",
+      "detail": "Workday does not verify you for an API client or a personal development tenant. Joining the partner program (a route to partner-level tenants) goes through a company application in Workday's prospect portal; its criteria are unpublished.",
+      "sourceIds": [
+        "S9",
+        "P5"
+      ],
+      "confidence": "inferred"
+    },
+    {
+      "key": "security_assessment",
+      "value": "depends",
+      "detail": "Workday doesn't require one. Enterprise customers' IT and security teams take part in setup and commonly vet vendors that get HR data, for example with SOC 2 reports, questionnaires and scope justification.",
+      "sourceIds": [
+        "S20"
+      ],
+      "confidence": "reported"
+    },
+    {
+      "key": "paid_access",
+      "value": "depends",
+      "detail": "Customers already license Workday, and we found no extra API fee for their tenant. A personal development tenant is offered through the Developer Program beta (pricing not stated); partner-program tenants have unpublished fees.",
+      "sourceIds": [
+        "S9",
+        "S13",
+        "S21"
+      ],
+      "confidence": "inferred"
+    },
+    {
+      "key": "partner_or_sales_gate",
+      "value": "yes",
+      "detail": "Production needs each customer's tenant and an admin who registers your client. For your own build and test tenant you can request a personal development tenant (open beta), or join a Workday partnership, which Workday's older partner page described as the only route (S10).",
+      "sourceIds": [
+        "S2",
+        "S10",
+        "S9",
+        "S13",
+        "S21",
+        "P5"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "user_cap_before_review",
+      "value": "no",
+      "detail": "No user cap is documented. Once a tenant's client exists, any worker in that tenant can connect. What each worker can read is limited by their Workday security groups.",
+      "sourceIds": [
+        "S2",
+        "S7"
+      ],
+      "confidence": "inferred"
+    },
+    {
+      "key": "per_customer_setup",
+      "value": "yes",
+      "detail": "Every customer tenant needs its own API client: client ID and secret, plus tenant-specific Authorization, Token and REST URLs. In Composio that means one custom auth config per customer.",
+      "sourceIds": [
+        "S2",
+        "S3",
+        "S20"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "phases": [
+    {
+      "id": "access",
+      "title": "Get access to a Workday tenant",
+      "outcome": "A named admin contact in a customer Sandbox/Implementation tenant (or your own personal or partner development tenant) who will register your client.",
+      "steps": [
+        {
+          "id": "access-0",
+          "title": "Optional: request a personal development tenant (beta)",
+          "actor": "you",
+          "effort": "15–30 min",
+          "wait": "Workday emails when ready (usually ~15 min after the request); approval time unpublished",
+          "details": "Join the Workday Developer Program at **developer.workday.com** with a personal email. Then go to **Console → Tenants**, and under **Development Tenants** click **+** to request a tenant. Workday emails the sign-in details (not shown on the Developer Site); sign in and change the password within 72 hours. Limits: 1 active tenant, it expires after 7 consecutive days without login, it holds GMS sample data only (no PII), and the program is a beta. Unverified: whether **Register API Client** (Authorization Code, with Composio's redirect URI) is available to the admin of that tenant. If it is, you can run the register and connect phases below on sample data yourself.",
+          "agentAssist": "After first sign-in, search for the Register API Client task and report whether it appears. Set a login reminder inside the 7-day expiry.",
+          "links": [
+            {
+              "label": "Workday Developer Program announcement",
+              "url": "https://blog.workday.com/en-us/workday-open-developer-platform-generally-available.html"
+            }
+          ],
+          "sourceIds": [
+            "S21",
+            "S22",
+            "S23"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "access-1",
+          "title": "Line up a design-partner customer's Sandbox tenant",
+          "actor": "you",
+          "effort": "1–2 h",
+          "wait": "Days to weeks for the customer to assign a Workday admin",
+          "details": "Use this route for real customer data and the customer's own configuration. A personal development tenant holds only GMS sample data, and Workday's older partner page said *tenant and sandbox access is not provided outside of a formal partnership*. Ask a customer for an admin in their **Sandbox** or **Implementation** tenant (hosts like `wd2-impl` / `impl.workday.com`), not production. Get the tenant name and the admin's availability.",
+          "agentAssist": "Draft the request email and a one-page integration brief listing functional areas, read-only intent and data handling.",
+          "links": [
+            {
+              "label": "Workday partner program",
+              "url": "https://www.workday.com/en-us/company/partners/partner-program-overview.html"
+            }
+          ],
+          "sourceIds": [
+            "S10",
+            "S9",
+            "S23",
+            "P5"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "access-2",
+          "title": "Prepare the customer security packet",
+          "actor": "agent",
+          "effort": "1–2 h",
+          "wait": null,
+          "details": "Prepare a packet with:\n- the exact functional areas you need (Staffing, Time Off and Leave, Organizations and Roles, and others)\n- the security domains behind each endpoint (from the public REST directory)\n- a read-only statement\n- the data flow through Composio, retention, and your SOC 2 / security questionnaire answers\n\nCustomers' Workday, HR and IT security teams are involved in setup.",
+          "agentAssist": "Generate the scope-to-endpoint-to-domain table from the REST directory's OpenAPI files, for example GET /staffing/v7/workers secured by Worker Data: Public Worker Reports.",
+          "links": [
+            {
+              "label": "Workday REST API directory",
+              "url": "https://community.workday.com/sites/default/files/file-hosting/restapi/index.html"
+            }
+          ],
+          "sourceIds": [
+            "S7",
+            "S20"
+          ],
+          "confidence": "reported"
+        }
+      ]
+    },
+    {
+      "id": "register",
+      "title": "Customer admin registers your API client",
+      "outcome": "A registered Authorization Code Grant API client in the tenant, with the client ID, secret and the three tenant URLs saved.",
+      "steps": [
+        {
+          "id": "register-1",
+          "title": "Enable OAuth 2.0 clients in the tenant",
+          "actor": "you",
+          "effort": "15 min (customer admin)",
+          "wait": "Customer change window",
+          "details": "The admin opens **Edit Tenant Setup – Security** and checks **OAuth 2.0 Settings → OAuth 2.0 Clients Enabled**. They need access to the **Set Up: Tenant Setup – Security** and **Security Administration** domains in the System functional area.",
+          "agentAssist": "Send the admin a checklist with the exact task and field names.",
+          "links": [],
+          "sourceIds": [
+            "S17",
+            "S6"
+          ],
+          "confidence": "reported"
+        },
+        {
+          "id": "register-2",
+          "title": "Run Register API Client with Composio's values",
+          "actor": "you",
+          "effort": "20–30 min (with customer admin)",
+          "wait": null,
+          "details": "Search the task **Register API Client**. Use the plain task, not *Register API Client for Integrations* and not *Register External OAuth Client*. Set these fields:\n- **Client Name**: e.g. `Acme Agent`\n- **Client Grant Type**: `Authorization Code Grant`\n- **Access Token Type**: `Bearer`\n- **Redirection URI**: exactly what your Composio auth config shows (`https://backend.composio.dev/api/v3/toolkits/auth/callback` by default)\n- **Support PKCE**: leave off\n- **Non-Expiring Refresh Tokens**: checked\n- **Scope (Functional Areas)**: Staffing, Time Off and Leave, Organizations and Roles, Personal Data, Contact Information (add System only for WQL)\n- **Include Workday Owned Scope**: checked\n- **Enforce 60 Minute Access Token Expiry**: leave cleared\n\nThen click **OK**.",
+          "agentAssist": "Pre-fill the value sheet. Check the summary screen against it: Authorization Code Grant, PKCE No, Bearer, the redirect URI, and Non-Expiring Refresh Tokens Yes.",
+          "links": [
+            {
+              "label": "Composio Workday setup guide",
+              "url": "https://composio.dev/auth/workday"
+            }
+          ],
+          "sourceIds": [
+            "S2",
+            "S5",
+            "S16",
+            "S3",
+            "S7"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "register-3",
+          "title": "Copy the five values before leaving the page",
+          "actor": "you",
+          "effort": "5 min",
+          "wait": null,
+          "details": "Copy the **Client ID**, **Client Secret**, **Authorization Endpoint**, **Token Endpoint** and **REST API Endpoint** into a secrets manager. The secret is masked once you navigate away. The endpoints can be looked up again later in **View API Clients**. The Authorization Endpoint is on the UI host (`https://<ui-host>/<tenant>/authorize`). The Token and REST endpoints are on the services host (`https://wdN-…-services1.workday.com/ccx/...`).",
+          "agentAssist": "Parse the host and tenant from the REST endpoint and check that the three URLs share the same tenant name.",
+          "links": [],
+          "sourceIds": [
+            "S2",
+            "S15",
+            "S16",
+            "P2"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "register-4",
+          "title": "Confirm connecting users hold the needed security domains",
+          "actor": "you",
+          "effort": "30–60 min (customer admin)",
+          "wait": null,
+          "details": "Each endpoint is secured by domains, for example:\n- `GET /staffing/v7/workers`: Worker Data: Public Worker Reports / Self-Service: Current Staffing Information\n- time off: Self-Service: Time Off or Worker Data: Time Off\n\nThe admin grants these to the right security groups in **Maintain Permissions for Security Group** and then runs **Activate Pending Security Policy Changes**.",
+          "agentAssist": "List the domains each planned tool needs, using the Composio tool descriptions and the REST directory.",
+          "links": [],
+          "sourceIds": [
+            "S7",
+            "S2",
+            "S1"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "connect",
+      "title": "Wire into Composio and test with one account",
+      "outcome": "An ACTIVE Workday connected account in Composio for a test worker in the sandbox tenant.",
+      "steps": [
+        {
+          "id": "connect-1",
+          "title": "Create a custom auth config for this tenant",
+          "actor": "agent",
+          "effort": "10 min",
+          "wait": null,
+          "details": "You can do this in the dashboard or in code:\n- **Dashboard:** go to **Auth Configs → + Create Auth Config**, pick **Workday (OAUTH2)**, then paste the client ID and secret.\n- **Code:** call `auth_configs.create({type: 'use_custom_auth', auth_scheme: 'OAUTH2', credentials: {client_id, client_secret, oauth_redirect_uri}})`, and use `get_auth_config_creation_fields` to see what else the toolkit wants.\n\nStore the `ac_…` ID against this customer.",
+          "agentAssist": "Script auth config creation per customer and save the customer → ac_ ID mapping.",
+          "links": [
+            {
+              "label": "Programmatic auth configs",
+              "url": "https://docs.composio.dev/docs/authentication/programmatic-auth-configs"
+            }
+          ],
+          "sourceIds": [
+            "S2",
+            "S3"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "connect-2",
+          "title": "Connect a test worker account",
+          "actor": "you",
+          "effort": "10 min",
+          "wait": null,
+          "details": "1. Click **Connect Account** with a stable External User ID.\n2. On Composio's connect screen, enter the tenant's **Token URL**, **Authorization URL** and **REST API Endpoint**.\n3. Sign in to Workday (SSO/MFA as the tenant requires).\n4. Approve.\n\nThe connected account should show **ACTIVE** with toolkit **WORKDAY**.",
+          "agentAssist": "Pre-fill the three URLs from the saved values and watch the connection status.",
+          "links": [],
+          "sourceIds": [
+            "S2",
+            "S5"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "connect-3",
+          "title": "Smoke-test the read tools you'll ship",
+          "actor": "agent",
+          "effort": "30 min",
+          "wait": null,
+          "details": "Run the worker, organization and time-off read tools (for example list workers, time-off details and balances). Confirm that results match what this worker is allowed to see. Treat 401/403 responses as scope or domain gaps and send them back to the admin.",
+          "agentAssist": "Run the calls and produce a scope/domain gap report for the admin.",
+          "links": [],
+          "sourceIds": [
+            "S1",
+            "S7"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "rollout",
+      "title": "Customer approval and production rollout",
+      "outcome": "Production tenant clients for each customer, with any of their workers able to connect.",
+      "steps": [
+        {
+          "id": "rollout-1",
+          "title": "Clear each customer's vendor security review",
+          "actor": "you",
+          "effort": "2–6 h per customer",
+          "wait": "~1–8 weeks per customer (inferred; no public data)",
+          "details": "Submit the security packet, answer the questionnaire, and agree on the scope list and any constrained security groups. Production registration usually waits on this.",
+          "agentAssist": "Draft questionnaire answers and the scope justifications.",
+          "links": [],
+          "sourceIds": [
+            "S20"
+          ],
+          "confidence": "reported"
+        },
+        {
+          "id": "rollout-2",
+          "title": "Repeat registration in the production tenant",
+          "actor": "you",
+          "effort": "1–2 h per customer",
+          "wait": "Customer change window",
+          "details": "Sandbox clients and URLs don't carry over. The admin repeats **Register API Client** in production with the same values. You create a new auth config and route that customer's users to its `ac_…` ID.",
+          "agentAssist": "Generate the admin checklist and create the production auth config.",
+          "links": [],
+          "sourceIds": [
+            "S2",
+            "S3"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "rollout-3",
+          "title": "Monitor token health and Workday releases",
+          "actor": "agent",
+          "effort": "Ongoing",
+          "wait": null,
+          "details": "Alert on `invalid_client` (client lockouts) and on `401 {\"error\":\"Invalid access token.\"}`, then prompt the user to reconnect. Re-test after each twice-yearly Workday release (R1/R2).",
+          "agentAssist": "Watch connection status and error rates, and open a ticket for the customer admin when a client locks.",
+          "links": [],
+          "sourceIds": [
+            "S18",
+            "S19",
+            "S20"
+          ],
+          "confidence": "reported"
+        }
+      ]
+    },
+    {
+      "id": "partner",
+      "title": "Optional: Workday partnership",
+      "outcome": "Your own development tenants and a possible Marketplace listing.",
+      "steps": [
+        {
+          "id": "partner-1",
+          "title": "Apply to the Workday partner program",
+          "actor": "you",
+          "effort": "1–2 h",
+          "wait": "Unknown; acceptance time and fees are unpublished",
+          "details": "Go to **Partner Program Overview → Start Your Partner Journey** (prospect portal at workday.my.site.com/prospectportal). The program types are Innovation (Build), Sales and Services. Merge reports that Innovation Silver status came with 2 development tenants and a Marketplace listing. Workday's developer console and partner resources sit behind logins.",
+          "agentAssist": "Draft the application rationale and Marketplace positioning.",
+          "links": [
+            {
+              "label": "Become a Workday partner",
+              "url": "https://workday.my.site.com/prospectportal/become-a-partner"
+            }
+          ],
+          "sourceIds": [
+            "S9",
+            "S13",
+            "P5"
+          ],
+          "confidence": "official"
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "item": "Access to a Workday tenant (customer Sandbox/Implementation, personal development tenant, or partner development tenant)",
+      "neededFor": "registration",
+      "detail": "There is no sandbox for arbitrary use. Tenant access comes from a customer, a partnership, or a personal development tenant (Developer Program open beta, sample data only).",
+      "sourceIds": [
+        "S10",
+        "S9",
+        "S22",
+        "S23"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "A customer Workday admin with tenant security rights",
+      "neededFor": "registration",
+      "detail": "The admin needs Set Up: Tenant Setup – Security and Security Administration (System functional area). Without them, Register API Client may not appear in search.",
+      "sourceIds": [
+        "S6",
+        "S2",
+        "S16"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "Per-tenant client ID, secret, Authorization, Token and REST URLs",
+      "neededFor": "testing",
+      "detail": "These are copied at registration. The secret is masked after you leave the page.",
+      "sourceIds": [
+        "S2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "One Composio custom auth config per customer tenant",
+      "neededFor": "testing",
+      "detail": "Composio-managed OAuth isn't offered. Composio recommends one config per customer.",
+      "sourceIds": [
+        "S1",
+        "S3",
+        "S4"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "A test worker login in the tenant with the right security groups",
+      "neededFor": "testing",
+      "detail": "The user signs in to the tenant, including MFA if enrolled. What the user can read depends on their domains.",
+      "sourceIds": [
+        "S5",
+        "S7"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "A security packet (SOC 2 / questionnaire, data flow, least-privilege scope list)",
+      "neededFor": "review",
+      "detail": "Customers' Workday, HR and IT security teams take part in setup.",
+      "sourceIds": [
+        "S20"
+      ],
+      "confidence": "reported"
+    }
+  ],
+  "scopes": [
+    {
+      "scope": "Staffing",
+      "purpose": "Workers, jobs, positions (GET /staffing/v7/workers, /common/v1 job data)",
+      "tier": "sensitive",
+      "note": "Domains: Worker Data: Public Worker Reports, Self-Service: Current Staffing Information.",
+      "sourceIds": [
+        "S7",
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "Time Off and Leave",
+      "purpose": "Time-off details, balances, leaves of absence (absenceManagement API)",
+      "tier": "sensitive",
+      "note": "Domains include Self-Service: Time Off and Worker Data: Time Off.",
+      "sourceIds": [
+        "S7",
+        "S16"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "Organizations and Roles",
+      "purpose": "Supervisory organizations and org assignments (/common/v1/organizations)",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "S7",
+        "S16"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "Personal Data",
+      "purpose": "Personal information such as marital status and military service (person v4)",
+      "tier": "restricted",
+      "note": "Request only if needed; this is the most sensitive HR data.",
+      "sourceIds": [
+        "S7",
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "Contact Information",
+      "purpose": "Home and work addresses, emails and phones (person v4)",
+      "tier": "sensitive",
+      "note": null,
+      "sourceIds": [
+        "S7",
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "Worker Profile and Skills",
+      "purpose": "Skills and profile items on worker records",
+      "tier": "basic",
+      "note": "Optional.",
+      "sourceIds": [
+        "S7",
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "System",
+      "purpose": "Workday Query Language (WQL) data sources (/wql/v1)",
+      "tier": "admin",
+      "note": "The System area also covers tenant-level tasks. Add it only if you use WQL.",
+      "sourceIds": [
+        "S7",
+        "S14"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "Tenant Non-Configurable",
+      "purpose": "Reference data such as currencies",
+      "tier": "basic",
+      "note": "Often added together with Include Workday Owned Scope.",
+      "sourceIds": [
+        "S7",
+        "S14"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "blockers": [
+    {
+      "title": "No tenant to build or test against",
+      "symptom": "Until you request one, you have no tenant. developer.workday.com/console redirects to a login, there is no API-client signup page, and the personal development tenant is a beta that Workday provisions by email.",
+      "likelihood": "common",
+      "howToProceed": "Join the Workday Developer Program and request a personal development tenant (beta, sample data). In parallel, get a design-partner customer to register a client in their Sandbox tenant, and optionally apply to the partner program.",
+      "escalation": {
+        "label": "Workday partner program",
+        "url": "https://www.workday.com/en-us/company/partners/partner-program-overview.html"
+      },
+      "sourceIds": [
+        "S21",
+        "S22",
+        "S10",
+        "S9",
+        "P5"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Register API Client task not found",
+      "symptom": "Searching 'Register API Client' in the tenant returns nothing, or the admin can't save the client.",
+      "likelihood": "common",
+      "howToProceed": "Use an admin with Set Up: Tenant Setup – Security and Security Administration rights, and make sure OAuth 2.0 Clients Enabled is checked in Edit Tenant Setup – Security.",
+      "escalation": {
+        "label": "Customer's Workday security admin (Composio guide)",
+        "url": "https://composio.dev/auth/workday"
+      },
+      "sourceIds": [
+        "S2",
+        "S6",
+        "S17"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Redirect URI mismatch",
+      "symptom": "The connection fails with `redirect_uri_mismatch` after Workday sign-in.",
+      "likelihood": "common",
+      "howToProceed": "Copy the redirect URI shown in your Composio auth config: the v3 callback by default, though the older Composio guide shows the legacy `https://backend.composio.dev/api/v1/auth-apps/add`. Edit the API client's Redirection URI to match it character for character.",
+      "escalation": {
+        "label": "Composio programmatic auth configs",
+        "url": "https://docs.composio.dev/docs/authentication/programmatic-auth-configs"
+      },
+      "sourceIds": [
+        "S2",
+        "S3"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Wrong authorize host or tenant name",
+      "symptom": "On the services host, `/ccx/oauth2/{tenant}/authorize` returns 404 `{\"error\":\"The requested resource is not available\"}`. A bad tenant on the UI host redirects to community.workday.com/invalid-url with 'The URL you have provided is invalid.'",
+      "likelihood": "occasional",
+      "howToProceed": "Use the exact Authorization Endpoint from View API Clients, which is on the UI host as `/{tenant}/authorize`. Keep the token and REST URLs on the services host. Don't build the URLs by hand.",
+      "escalation": {
+        "label": "Customer's Workday admin (View API Clients)",
+        "url": "https://composio.dev/auth/workday"
+      },
+      "sourceIds": [
+        "P1",
+        "P2",
+        "S15"
+      ],
+      "confidence": "tested"
+    },
+    {
+      "title": "403s or missing workers and time off",
+      "symptom": "Tools return 403 or permission denied, or come back with partial or empty lists for some workers.",
+      "likelihood": "common",
+      "howToProceed": "Two fixes, depending on the cause:\n- If the functional area is missing, add it to the API client.\n- If the domain is missing (e.g. Worker Data: Time Off), have the admin grant it to the user's security group and run Activate Pending Security Policy Changes.\n\nThen reconnect.",
+      "escalation": {
+        "label": "Workday REST directory (domains per endpoint)",
+        "url": "https://community.workday.com/sites/default/files/file-hosting/restapi/index.html"
+      },
+      "sourceIds": [
+        "S7",
+        "S5",
+        "S2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "API client keeps locking with invalid_client",
+      "symptom": "All calls fail with `{\"error\": \"invalid_client\"}`. The admin unlocks the client, and it relocks within hours.",
+      "likelihood": "occasional",
+      "howToProceed": "Look for stale credentials elsewhere, such as another environment still using the old secret. Then regenerate the secret, update the Composio auth config, and have the admin check the client's sign-on audit.",
+      "escalation": {
+        "label": "Community report (Moveworks)",
+        "url": "https://community.moveworks.com/agent-studio-6/workday-oauth2-refresh-token-grant-api-client-repeatedly-locks-recurring-error-invalid-client-3664"
+      },
+      "sourceIds": [
+        "S18"
+      ],
+      "confidence": "reported"
+    },
+    {
+      "title": "Connections die after hours or days",
+      "symptom": "Calls start returning `401 {\"error\":\"Invalid access token.\"}`, or refresh fails when the 30-day Refresh Token Timeout expires.",
+      "likelihood": "occasional",
+      "howToProceed": "Edit the API client: check Non-Expiring Refresh Tokens and clear Enforce 60 Minute Access Token Expiry. Then reconnect the affected users.",
+      "escalation": {
+        "label": "Community report (Vercel)",
+        "url": "https://community.vercel.com/t/connect-returns-stale-workday-token-same-fingerprint-future-expiresat-401/46626"
+      },
+      "sourceIds": [
+        "S19",
+        "S5"
+      ],
+      "confidence": "reported"
+    },
+    {
+      "title": "Customer security review stalls",
+      "symptom": "The customer's IT or HR security team asks for SOC 2 and questionnaires, then goes quiet, so no admin registers the production client.",
+      "likelihood": "common",
+      "howToProceed": "Send the packet up front, ask only for read-only functional areas, offer a constrained security group, and propose a sandbox pilot first.",
+      "escalation": {
+        "label": "Your customer champion / Workday admin",
+        "url": "https://unified.to/blog/workday_api_integration_what_to_know_before_you_build"
+      },
+      "sourceIds": [
+        "S20"
+      ],
+      "confidence": "reported"
+    }
+  ],
+  "nuances": [
+    {
+      "title": "Authorize and token endpoints live on different hosts",
+      "detail": "The authorize endpoint is on the tenant's UI host (`https://impl.workday.com/{tenant}/authorize`, which redirects to `/wday/authgwy/...`). The token and REST endpoints are on the services host (`wd2-impl-services1.workday.com/ccx/...`). The OpenAPI specs list them as separate `tenantAuthorizationHostname` and `tenantHostname` values.",
+      "sourceIds": [
+        "P1",
+        "P2",
+        "S15",
+        "S7"
+      ],
+      "confidence": "tested"
+    },
+    {
+      "title": "One auth config per customer plus three URLs per connection",
+      "detail": "Client credentials are per tenant, so you create one custom auth config per customer. The Composio connect screen also asks for Token URL, Authorization URL and REST API Endpoint, so your onboarding should pre-fill them.",
+      "sourceIds": [
+        "S2",
+        "S3"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "The token acts as the signed-in worker",
+      "detail": "With Authorization Code Grant, data access follows the connecting user's security groups, so a manager sees more than an individual contributor. For org-wide sync, customers usually set up an ISU with Register API Client for Integrations and Manage Refresh Tokens for Integrations instead.",
+      "sourceIds": [
+        "S6",
+        "S7",
+        "S2"
+      ],
+      "confidence": "inferred"
+    },
+    {
+      "title": "Workday Extend is a different auth system",
+      "detail": "Clients on developer.workday.com use auth.api.workday.com with 60-minute tokens and are for Extend apps. Composio's toolkit uses tenant API clients from Register API Client instead.",
+      "sourceIds": [
+        "S12",
+        "S2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "No discovery, no dynamic registration",
+      "detail": "There is no `.well-known/openid-configuration` on the tenant or the host, and no DCR. A GET on the token endpoint returns 400 `Invalid request`. Unknown tenants on REST return 401 `Unauthorized`, so tenant typos only show up later.",
+      "sourceIds": [
+        "P3",
+        "P4",
+        "P6"
+      ],
+      "confidence": "tested"
+    },
+    {
+      "title": "API reference is public; admin docs mostly aren't",
+      "detail": "The REST directory (OpenAPI files dated 2026-10-03) and the SOAP WWS directory (v47.0 / 2026R2) are public. The Workday Community, the partner resources hub and the developer console require login. Some admin-guide pages on doc.workday.com are public.",
+      "sourceIds": [
+        "S7",
+        "S8",
+        "P6",
+        "P5"
+      ],
+      "confidence": "tested"
+    },
+    {
+      "title": "Rate limits unpublished; two releases a year",
+      "detail": "Throttling is per tenant and not documented publicly. Workday ships R1 and R2 releases each year, so plan regression testing after each one.",
+      "sourceIds": [
+        "S20"
+      ],
+      "confidence": "reported"
+    },
+    {
+      "title": "Workday is building its own agent ecosystem",
+      "detail": "Workday has an Agent Partner Network and Marketplace and announced plans in Nov 2025 to acquire Pipedream (agent connectors). Expect customers to ask whether you're a Workday partner.",
+      "sourceIds": [
+        "S11",
+        "S9"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "composioSetup": {
+    "redirectUri": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+    "steps": [
+      "For each customer tenant, create a custom auth config: Auth Configs → + Create Auth Config → Workday (OAUTH2). Paste that tenant's Client ID and Client Secret, or call auth_configs.create({type: 'use_custom_auth', auth_scheme: 'OAUTH2', credentials: {client_id, client_secret, oauth_redirect_uri}}).",
+      "Check that the redirect URI in the auth config exactly matches the API client's Redirection URI in Workday. The v3 callback is the default; some older configs and guides show the legacy https://backend.composio.dev/api/v1/auth-apps/add.",
+      "Store a customer → auth config ID (ac_…) mapping and pass the right ID for the WORKDAY toolkit when you create sessions or initiate connections.",
+      "Initiate a connection with a stable external user ID. On the connect screen, supply the tenant's Token URL, Authorization URL and REST API Endpoint, taken from View API Clients.",
+      "Verify the connected account shows ACTIVE with toolkit WORKDAY, then run a read tool (workers, organizations or time off) to confirm scopes and security domains."
+    ]
+  },
+  "evidence": {
+    "sources": [
+      {
+        "id": "S1",
+        "url": "https://docs.composio.dev/toolkits/workday.md",
+        "title": "Composio toolkit: Workday",
+        "kind": "composio",
+        "accessedAt": "2026-10-28",
+        "note": "Auth: OAUTH2; 'Composio-managed OAuth available? No'; 588 tools, 13 triggers; tool descriptions cite required Workday scopes and domains."
+      },
+      {
+        "id": "S2",
+        "url": "https://composio.dev/auth/workday",
+        "title": "How to create Workday OAuth2 credentials and configure it in Composio",
+        "kind": "composio",
+        "accessedAt": "2026-10-28",
+        "note": "Register API Client: Authorization Code, PKCE No, Bearer, Non-Expiring Refresh Tokens; connect screen needs Token URL, Authorization URL, REST API Endpoint."
+      },
+      {
+        "id": "S3",
+        "url": "https://docs.composio.dev/docs/authentication/programmatic-auth-configs.md",
+        "title": "Composio: Programmatic auth configs",
+        "kind": "composio",
+        "accessedAt": "2026-10-29",
+        "note": "'a config per customer'; register v3 callback; some toolkit defaults use legacy /api/v1/auth-apps/add."
+      },
+      {
+        "id": "S4",
+        "url": "https://docs.composio.dev/docs/authentication.md",
+        "title": "Composio: Authentication",
+        "kind": "composio",
+        "accessedAt": "2026-10-29",
+        "note": "Custom auth config needed to use your own OAuth app; connected accounts hold each user's tokens."
+      },
+      {
+        "id": "S5",
+        "url": "https://doc.workday.com/admin-guide/en-us/workday-studio/integration-deployment/multifactor-authentication-in-workday-studio/kuh1623937418623.html",
+        "title": "Workday Admin Guide: OAuth 2.0 for Workday Studio (Register API Client)",
+        "kind": "official",
+        "accessedAt": "2026-10-28",
+        "note": "Scope must cover every web service: 'Authentication fails if you omit any relevant web service.' Leave Enforce 60 Minute Access Token Expiry cleared."
+      },
+      {
+        "id": "S6",
+        "url": "https://doc.workday.com/admin-guide/en-us/workday-data-cloud/data-out/workday-data-lake/register-api-client-for-data-lake--refresh-token-g.html",
+        "title": "Workday Admin Guide: Register API Client for Data Lake (Refresh Token Grant)",
+        "kind": "official",
+        "accessedAt": "2026-10-28",
+        "note": "Requires Set Up: Tenant Setup – Security and Security Administration; Register API Client for Integrations; Manage Refresh Tokens for Integrations with ISU."
+      },
+      {
+        "id": "S7",
+        "url": "https://community.workday.com/sites/default/files/file-hosting/restapi/index.html",
+        "title": "Workday REST API Directory (public OpenAPI files, 2026-10-03)",
+        "kind": "official",
+        "accessedAt": "2026-10-28",
+        "note": "GET /workers 'Scope: Staffing'; time off 'Scope: Time Off and Leave'; authorizationUrl uses separate tenantAuthorizationHostname."
+      },
+      {
+        "id": "S8",
+        "url": "https://community.workday.com/sites/default/files/file-hosting/productionapi/index.html",
+        "title": "Workday Web Services (WWS) Directory v47.0 / 2026R2",
+        "kind": "official",
+        "accessedAt": "2026-10-28",
+        "note": "Public SOAP directory for v47.0 (2026R2), including Absence_Management and Human_Resources services."
+      },
+      {
+        "id": "S9",
+        "url": "https://www.workday.com/en-us/company/partners/partner-program-overview.html",
+        "title": "Workday Partner Program Overview",
+        "kind": "official",
+        "accessedAt": "2026-10-28",
+        "note": "Innovation (Build), Sales, Services partners; Marketplace; 'Start Your Partner Journey' via prospect portal. No tenant terms listed."
+      },
+      {
+        "id": "S10",
+        "url": "https://workday.com/en-us/company/partners/become-a-partner.html",
+        "title": "Workday: Become a partner (older search snippet; page now redirects; superseded Oct 2026 by the Developer Program)",
+        "kind": "official",
+        "accessedAt": "2026-10-28",
+        "note": "Older snippet: 'tenant and sandbox access is not provided outside of a formal partnership.' URL now 301s to program overview; S21/S22 show a personal-tenant route."
+      },
+      {
+        "id": "S11",
+        "url": "https://s21.q4cdn.com/950027458/files/doc_news/Workday-Expands-Its-Open-Ecosystem-with-New-Global-Developer-Network-and-Google-BigQuery-Partnership-11-19-2025-2025.pdf",
+        "title": "Workday news release: Global Developer Network (Nov 19, 2025)",
+        "kind": "official",
+        "accessedAt": "2026-10-28",
+        "note": "Developer network live early 2026 with universities and staffing partners; planned Pipedream acquisition for agent connectors."
+      },
+      {
+        "id": "S12",
+        "url": "https://developer.workday.com/doc/axg1518029552225.md",
+        "title": "Workday Extend: Authorization Flows",
+        "kind": "official",
+        "accessedAt": "2026-10-28",
+        "note": "Extend token endpoint https://auth.api.workday.com/v1/token; 'All Workday Extend access tokens expire after 60 minutes.'"
+      },
+      {
+        "id": "S13",
+        "url": "https://merge.dev/blog/workday-partnership",
+        "title": "Merge: Workday partnership announcement",
+        "kind": "community",
+        "accessedAt": "2026-10-28",
+        "note": "Innovation Silver Partner; receives '2 Workday development tenants', Marketplace listing, partner integration architects."
+      },
+      {
+        "id": "S14",
+        "url": "https://nango.dev/docs/api-integrations/workday-oauth/how-to-register-your-own-workday-oauth-app.md",
+        "title": "Nango: Register your own Workday OAuth app",
+        "kind": "community",
+        "accessedAt": "2026-10-28",
+        "note": "Authorization Code Grant, Bearer, Non-Expiring Refresh Tokens; scopes incl. System - WQL, HRIS, Staffing, Tenant Non-Configurable."
+      },
+      {
+        "id": "S15",
+        "url": "https://nango.dev/docs/api-integrations/workday-oauth/connect.md",
+        "title": "Nango: Connect Workday (OAuth)",
+        "kind": "community",
+        "accessedAt": "2026-10-28",
+        "note": "Authorization domain (e.g. impl.workday.com/{tenant}/authorize) differs from token domain (wd2-impl-services1…/ccx/oauth2/{tenant}/token); see View API Clients."
+      },
+      {
+        "id": "S16",
+        "url": "https://developers.frontegg.com/agen-for-work/connectors/marketplace/workday",
+        "title": "Frontegg: Workday connector setup",
+        "kind": "community",
+        "accessedAt": "2026-10-28",
+        "note": "Use Register API Client, not '…for Integrations' or 'Register External OAuth Client'; scopes Staffing, Organizations and Roles, Time Off and Leave."
+      },
+      {
+        "id": "S17",
+        "url": "https://www.servicenow.com/docs/r/7LhbZn3yz3Q58qhjZoU9iQ/aJ48i7eEfLEdngs3VlRrPw",
+        "title": "ServiceNow: Configure Workday for external content indexing",
+        "kind": "community",
+        "accessedAt": "2026-10-29",
+        "note": "Edit Tenant Setup – Security → OAuth 2.0 Clients Enabled; enables Non-Expiring Refresh Tokens and Grant Administrative Consent."
+      },
+      {
+        "id": "S18",
+        "url": "https://community.moveworks.com/agent-studio-6/workday-oauth2-refresh-token-grant-api-client-repeatedly-locks-recurring-error-invalid-client-3664",
+        "title": "Moveworks Community: Workday API client repeatedly locks (invalid_client)",
+        "kind": "community",
+        "accessedAt": "2026-10-28",
+        "note": "June 2026: client relocks with {\"error\": \"invalid_client\"} after credential rotation; no resolution posted."
+      },
+      {
+        "id": "S19",
+        "url": "https://community.vercel.com/t/connect-returns-stale-workday-token-same-fingerprint-future-expiresat-401/46626",
+        "title": "Vercel Community: stale Workday token returns 401",
+        "kind": "community",
+        "accessedAt": "2026-10-28",
+        "note": "July 2026: 401 {\"error\":\"Invalid access token.\"}; Refresh Token Timeout 30 days, non-expiring tokens off."
+      },
+      {
+        "id": "S20",
+        "url": "https://unified.to/blog/workday_api_integration_what_to_know_before_you_build.md",
+        "title": "Unified.to: Workday API integration, what to know before you build",
+        "kind": "community",
+        "accessedAt": "2026-10-28",
+        "note": "'There is no global Workday endpoint'; setup needs customer admin, HR and IT security; rate limits unpublished; R1/R2 releases."
+      },
+      {
+        "id": "S21",
+        "url": "https://blog.workday.com/en-us/workday-open-developer-platform-generally-available.html",
+        "title": "Workday blog: The Workday Developer Program Is Open",
+        "kind": "official",
+        "accessedAt": "2026-10-29",
+        "note": "'Join the Workday Developer Program with a personal email'; 'through our open access beta, request your own personal development tenant.' No cost or usage terms stated."
+      },
+      {
+        "id": "S22",
+        "url": "https://developer.workday.com/doc/GUID-4f875963-a845-43b5-868a-0f77e6261eb7-enHYPHENus.md",
+        "title": "Workday Developer Site: Create and Manage Personal Account Development Tenants",
+        "kind": "official",
+        "accessedAt": "2026-10-29",
+        "note": "Personal Account developers in the Open Developer Platform program can request 1 Development Tenant; email when ready (usually 15 min); expires after 7 days without login."
+      },
+      {
+        "id": "S23",
+        "url": "https://developer.workday.com/doc/wqd1574121373563.md",
+        "title": "Workday Developer Site: Concept: WCP Development Tenants",
+        "kind": "official",
+        "accessedAt": "2026-10-29",
+        "note": "Development tenants hold GMS sample data and are for app development and testing only; never use PII. Personal Account tenants expire after 7 days idle."
+      }
+    ],
+    "probes": [
+      {
+        "id": "P1",
+        "kind": "authorize-endpoint",
+        "target": "GET https://wd2-impl-services1.workday.com/ccx/oauth2/oauthrunwayprobe/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=probe",
+        "result": "fail",
+        "summary": "404 {\"error\": \"The requested resource is not available\"}. The authorize endpoint is not under /ccx/oauth2 on the services host.",
+        "detail": "HTTP/1.1 404, Content-Type application/json. This corrects the common assumption that authorize lives beside /token on the services host.",
+        "at": "2026-10-28T07:20:13Z"
+      },
+      {
+        "id": "P2",
+        "kind": "authorize-endpoint",
+        "target": "GET https://impl.workday.com/oauthrunwayprobe/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=probe (also wd2-impl.workday.com)",
+        "result": "pass",
+        "summary": "302 to /wday/authgwy/oauthrunwayprobe/authorize, then 302 to community.workday.com/invalid-url: 'The URL you have provided is invalid.'",
+        "detail": "The UI-host authorize pattern is live (Cloudflare-fronted). An unknown tenant is rejected before any client_id or redirect check, so we could not observe client or redirect errors without a real tenant.",
+        "at": "2026-10-28T07:20:15Z"
+      },
+      {
+        "id": "P3",
+        "kind": "token-endpoint",
+        "target": "GET https://wd2-impl-services1.workday.com/ccx/oauth2/oauthrunwayprobe/token",
+        "result": "info",
+        "summary": "400 {\"error\": \"Invalid request\"}. The token path exists on the services host (expects POST).",
+        "detail": null,
+        "at": "2026-10-28T07:20:41Z"
+      },
+      {
+        "id": "P4",
+        "kind": "oauth-discovery",
+        "target": "GET https://wd2-impl-services1.workday.com/ccx/oauth2/oauthrunwayprobe/.well-known/openid-configuration and GET https://wd2-impl-services1.workday.com/.well-known/openid-configuration",
+        "result": "fail",
+        "summary": "Both 404 ('The requested resource is not available' / 'Not Available'). There is no discovery document, so DCR isn't available.",
+        "detail": null,
+        "at": "2026-10-28T07:20:41Z"
+      },
+      {
+        "id": "P5",
+        "kind": "portal",
+        "target": "GET https://www.workday.com/en-us/company/partners/become-a-partner.html; GET https://workday.my.site.com/prospectportal/become-a-partner; GET https://developer.workday.com/console; GET https://community-content.workday.com/en-us/collections/learn/workday-partner-resources-hub.html",
+        "result": "info",
+        "summary": "The become-a-partner URL 301s to the program overview. The prospect portal (200) is a Salesforce app with Register/Login. The developer console 307s to /login, and the partner hub serves a SAML login.",
+        "detail": "There is no anonymous path to a tenant or API client. A human must apply or log in.",
+        "at": "2026-10-29T06:20:45Z"
+      },
+      {
+        "id": "P6",
+        "kind": "url-check",
+        "target": "GET https://wd2-impl-services1.workday.com/ccx/api/v1/oauthrunwayprobe/workers; GET REST directory + openApiFiles (staffing_v7, absenceManagement_v5, common_v1, person_v4, wql_v1); GET WWS directory; GET doc.workday.com admin-guide pages",
+        "result": "pass",
+        "summary": "The REST call returns 401 {\"error\": \"Unauthorized\"} even for a fake tenant. The REST and WWS directories, the OpenAPI files and the cited doc.workday.com admin-guide pages return 200 without login.",
+        "detail": "The OpenAPI files carry '<b>Scope:</b>' (functional area) and 'Secured By Domain' for every operation.",
+        "at": "2026-10-28T07:23:00Z"
+      }
+    ],
+    "openQuestions": [
+      {
+        "question": "Can the admin of a personal development tenant (Developer Program open beta) run Register API Client with Authorization Code against its REST APIs, and are there approval delays or commercial-use terms?",
+        "whyItMatters": "If yes, you can build and test the Composio toolkit without any customer or partner. If not, a customer sandbox remains the only way to test.",
+        "howToResolve": "Request a tenant at developer.workday.com (Console → Tenants), search for Register API Client after sign-in, and read the program terms."
+      },
+      {
+        "question": "Does Workday's Innovation partner program currently accept AI-agent vendors, and with what fees, criteria, timeline and development tenant allotment?",
+        "whyItMatters": "This is the route to a partner-level tenant and Marketplace listing, beyond the personal-tenant beta. It decides how 'certified' you look to buyers.",
+        "howToResolve": "Apply via workday.my.site.com/prospectportal/become-a-partner and ask the partner manager. You can also ask existing partners (e.g. Merge) about their onboarding."
+      },
+      {
+        "question": "Can Composio's Workday toolkit use an ISU refresh token from Register API Client for Integrations instead of the interactive Authorization Code flow?",
+        "whyItMatters": "Many enterprises prefer one ISU-scoped integration over per-employee OAuth, and it changes whose permissions govern data access.",
+        "howToResolve": "Call get_auth_config_creation_fields for WORKDAY and ask Composio support. Then test in a sandbox tenant."
+      },
+      {
+        "question": "How long do enterprise security reviews for Workday API access typically take?",
+        "whyItMatters": "This drives time to production per customer. Our 1–8 week estimate is inferred, because we found no public data.",
+        "howToResolve": "Track it with design-partner customers, and ask Workday partner peers or implementation consultants."
+      },
+      {
+        "question": "What do Register API Client options such as 'Grant Administrative Consent' and 'Support PKCE' change for a Composio connection?",
+        "whyItMatters": "Admin consent could remove per-user consent prompts. PKCE settings must match what Composio sends.",
+        "howToResolve": "Read the Register API Client reference on doc.workday.com (login-gated; we could not see it) or ask the customer admin to check the field help. Then test both settings in a sandbox."
+      }
+    ],
+    "verification": {
+      "reviewedAt": "2026-10-29",
+      "method": "An independent agent re-read 9 cited sources, added 3 new official ones, and re-ran 5 probes (P1, P2, P3, P5, P6) on 2026-10-29.",
+      "items": [
+        {
+          "claim": "Production time of 1–8 weeks per customer, set by each customer's security review and admin change window",
+          "outcome": "unverifiable",
+          "note": "No source gives a timeline. The basis is already labelled inferred, the rollout step is 'reported' (Unified.to says IT and security take part in setup), and an open question covers it.",
+          "sourceIds": [
+            "S20"
+          ]
+        },
+        {
+          "claim": "There is no self-serve route to a Workday tenant; tenant and sandbox access only through a formal partnership",
+          "outcome": "corrected",
+          "note": "Workday's Oct 2026 Developer Program lets individuals request 1 personal dev tenant (open beta, sample data, 7-day idle expiry). Rewrote headline, summary, cost, factors, steps, blocker. Difficulty stays gated via the customer-tenant gate.",
+          "sourceIds": [
+            "S21",
+            "S22",
+            "S23",
+            "S10"
+          ]
+        },
+        {
+          "claim": "The authorize endpoint is on the tenant UI host (impl.workday.com/{tenant}/authorize), not the services host",
+          "outcome": "confirmed",
+          "note": "Re-run: services-host /ccx/oauth2/.../authorize still 404; UI host 302s to /wday/authgwy/.... Nango's connect guide shows the same two hosts. The OpenAPI hostname fields in S7 were not re-read.",
+          "sourceIds": [
+            "P1",
+            "P2",
+            "S15"
+          ]
+        },
+        {
+          "claim": "Cost: no Workday API fee for using a customer's own tenant",
+          "outcome": "unverifiable",
+          "note": "No Workday page states API pricing either way; the guide says 'we found no fee' and paid_access is inferred. The Developer Program pages also state no price or terms for personal tenants.",
+          "sourceIds": [
+            "S21",
+            "S9",
+            "S13"
+          ]
+        },
+        {
+          "claim": "No user cap before review: any worker in a tenant with a registered client can connect",
+          "outcome": "unverifiable",
+          "note": "Nothing found stating a cap or its absence. The factor is already 'inferred'. Access follows the connecting worker's security groups per the REST directory's domain notes.",
+          "sourceIds": [
+            "S2",
+            "S7"
+          ]
+        },
+        {
+          "claim": "Console path: Edit Tenant Setup – Security → OAuth 2.0 Clients Enabled, needing Set Up: Tenant Setup – Security domains",
+          "outcome": "confirmed",
+          "note": "ServiceNow's Workday guide gives the same task and checkbox (steps 2.1–2.2). Workday's Register API Client admin guide lists both domains in the System functional area.",
+          "sourceIds": [
+            "S17",
+            "S6"
+          ]
+        },
+        {
+          "claim": "Register API Client values: Authorization Code, PKCE off, Bearer, Non-Expiring Refresh Tokens, 60-minute expiry cleared",
+          "outcome": "confirmed",
+          "note": "Composio's guide matches the first four; Workday's Studio guide says leave 60-minute expiry unchecked. Composio shows the legacy v1 redirect URI, already flagged. Added S7 as source for the Personal Data and Contact Information scopes.",
+          "sourceIds": [
+            "S2",
+            "S5",
+            "S7"
+          ]
+        },
+        {
+          "claim": "Workday Extend clients on developer.workday.com use auth.api.workday.com with 60-minute tokens, separate from tenant API clients",
+          "outcome": "confirmed",
+          "note": "The Developer Site doc lists the Extend token and authorize endpoints at auth.api.workday.com/v1 and a 60-minute expiry. Composio's toolkit takes tenant URLs, so tenant clients remain the relevant path.",
+          "sourceIds": [
+            "S12",
+            "S2"
+          ]
+        },
+        {
+          "claim": "Probes P1, P2, P3, P5 and P6 still return what was recorded",
+          "outcome": "confirmed",
+          "note": "Re-run 2026-10-29: P1 404; P2 302 to /wday/authgwy/... then community.workday.com/invalid-url; P3 400 Invalid request; P5 become-a-partner 301 and console 307 to /login; P6 REST 401. All unchanged.",
+          "sourceIds": [
+            "P1",
+            "P2",
+            "P3",
+            "P5",
+            "P6"
+          ]
+        }
+      ]
+    }
+  },
+  "meta": {
+    "generatedAt": "2026-10-29T06:40:00Z",
+    "generator": "library",
+    "model": "claude-opus-5-5 (research agent)",
+    "durationSec": null
+  }
+}

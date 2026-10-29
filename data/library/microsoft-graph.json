@@ -1,0 +1,658 @@
+{
+  "schemaVersion": 1,
+  "slug": "microsoft-graph",
+  "app": {
+    "name": "Microsoft OneNote, Word & To Do (Microsoft Graph)",
+    "website": "https://www.microsoft.com/microsoft-365",
+    "category": "productivity",
+    "description": "OneNote notebooks, Word/PowerPoint files in OneDrive, To Do tasks and Bookings, all reached through Microsoft Graph with one Microsoft Entra app registration.",
+    "developerPortalUrl": "https://entra.microsoft.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade",
+    "docsUrl": "https://learn.microsoft.com/en-us/graph/permissions-reference"
+  },
+  "composio": {
+    "toolkitSlug": "onenote",
+    "managedOAuth": "not-available",
+    "authSchemes": ["OAUTH2"],
+    "toolkitDocsUrl": "https://docs.composio.dev/toolkits/onenote",
+    "requiredFields": [],
+    "notes": [
+      "This guide covers the five Microsoft toolkits with no Composio-managed OAuth: onenote, microsoft_word, microsoft_todo, microsoft_powerpoint and microsoft_bookings. As of 2026-10-28 each toolkit page lists Auth OAUTH2 and 'Composio-managed OAuth available? No'.",
+      "Outlook, Microsoft Teams, OneDrive (one_drive), Excel and SharePoint (share_point) do have managed OAuth. One Entra app registration (same client ID and secret) can serve all ten toolkits. Create one Composio auth config per toolkit with the same credentials and that toolkit's scopes.",
+      "Composio has a step-by-step guide for OneNote (composio.dev/auth/onenote) and Outlook only. composio.dev/auth/microsoft_word returns 404.",
+      "Put offline_access in the Entra app and in every auth config's scopes. Without it Microsoft returns no refresh token and connections can't be refreshed.",
+      "After a tenant admin grants consent, each user must start a fresh connection. If an admin completes a user's connection flow, Composio connects the admin's own account.",
+      "Microsoft Bookings works only for work or school accounts in a tenant licensed for Bookings. Personal accounts cannot use it."
+    ]
+  },
+  "assumption": "An agent product that reads and writes OneNote notebooks, Word documents in OneDrive and To Do tasks for users in any organisation (work/school accounts) and for personal Microsoft accounts. It uses one multitenant Entra app with delegated Microsoft Graph permissions.",
+  "verdict": {
+    "headline": "Registering and testing takes about an hour. Publisher verification and each customer tenant's admin consent decide when work accounts can connect.",
+    "summary": "Microsoft never reviews the app itself. You register it in Entra ID (you need a tenant), add delegated Graph permissions and a client secret, and personal accounts can connect right away. Work and school users are different. Unverified multitenant apps are often flagged as risky or limited to admin consent. Microsoft's managed default consent policy blocks user consent for Files.ReadWrite.All and, since June–July 2026, for Tasks.* (To Do); tenants with a custom consent policy are unaffected. Plan to complete publisher verification, a Partner Center business verification (3–5 business days officially; some developers report 10 days to over a month), and to send admin-consent links to customer IT.",
+    "difficulty": "formal-review",
+    "handsOnEffort": { "label": "2–5 hours", "minHours": 2, "maxHours": 5, "basis": "About 1 h for the Entra app and Composio auth configs, plus 1–3 h of Partner Center enrollment paperwork for publisher verification." },
+    "timeToFirstConnection": { "label": "1 hour – 1 day", "minHours": 1, "maxHours": 24, "basis": "Same day with an existing work tenant. Longer if you first need an Azure free account to get a tenant." },
+    "timeToProduction": { "label": "1–6 weeks", "minHours": 168, "maxHours": 1008, "basis": "Partner Center states 3–5 business days, longer if it requests more information. Community reports: pending 10+ days (Mar 2026) and over a month before approval after escalation (Jul–Sep 2026). Each customer tenant's admin consent (To Do, *.All scopes) adds time on top." },
+    "longestPole": "Microsoft AI Cloud Partner Program business verification, which publisher verification requires. Then each work tenant's admin consent for To Do (Tasks.ReadWrite) and any *.All scopes.",
+    "cost": "Free (Azure sign-up needs a card if no tenant)",
+    "costDetail": "No Microsoft fees. App registration, delegated Graph calls for these toolkits and publisher verification are free. Without an existing tenant, the Azure free-account sign-up needs a phone and a non-prepaid card for identity checks (temporary ~$1 hold). Bookings needs a Microsoft 365 business plan that includes Bookings on the customer's side.",
+    "easierPaths": [
+      { "condition": "Only personal Microsoft accounts (Outlook.com/Hotmail users)", "effect": "No publisher verification or admin consent needed. Notes.ReadWrite, Files.ReadWrite and Tasks.ReadWrite are user-consentable, so you go live the same day." },
+      { "condition": "Only users in your own organisation", "effect": "Register as 'Single tenant only' and click Grant admin consent once in API permissions. No Partner Center verification is needed." },
+      { "condition": "Drop To Do and any *.All scopes (OneNote with Notes.ReadWrite, Word/PowerPoint with Files.ReadWrite only)", "effect": "Microsoft's default consent policy lets users consent to these, so far fewer 'Need admin approval' screens appear. Publisher verification is still advised for org users." },
+      { "condition": "You also need Outlook, OneDrive, Excel, Teams or SharePoint", "effect": "Those have Composio-managed OAuth. Bring your own app only for OneNote/Word/To Do/PowerPoint/Bookings, or reuse the same app everywhere for consistent branding." }
+    ]
+  },
+  "factors": [
+    {
+      "key": "self_serve_registration",
+      "value": "yes",
+      "detail": "App registration is free and self-serve in the Microsoft Entra admin center. It must live in an Entra tenant because creating apps under a personal account outside a directory is deprecated. With no tenant, an Azure free account (phone + card) creates one.",
+      "sourceIds": ["S5", "S16", "S17", "S20"],
+      "confidence": "official"
+    },
+    {
+      "key": "review_required",
+      "value": "yes",
+      "detail": "Microsoft doesn't review the app, but it gates user consent on publisher verification. Risk-based step-up consent (on by default, and only matters where user consent is enabled) stops users in other tenants consenting to newly registered, unverified multitenant apps that ask for more than basic sign-in. They see AADSTS90094 or AADSTS900941 'App is considered risky'. A tenant admin can still grant consent. Personal accounts need no review.",
+      "sourceIds": ["S8", "S13", "S21"],
+      "confidence": "official"
+    },
+    {
+      "key": "business_verification",
+      "value": "yes",
+      "detail": "Publisher verification needs a Microsoft AI Cloud Partner Program partner global account that has passed verification: business registration documents, a business email, domain ownership documents and the contact's government ID. Its email domain must match a DNS-verified domain on your tenant.",
+      "sourceIds": ["S8", "S11"],
+      "confidence": "official"
+    },
+    {
+      "key": "security_assessment",
+      "value": "no",
+      "detail": "No security assessment is required. Microsoft 365 Publisher Attestation and App Certification are optional programs that build on publisher verification.",
+      "sourceIds": ["S8"],
+      "confidence": "official"
+    },
+    {
+      "key": "paid_access",
+      "value": "no",
+      "detail": "Publisher verification has no charge or license. App registration and delegated Graph access to OneNote, OneDrive and To Do are free. The Azure free account needs a card for identity checks but doesn't charge it. Bookings data requires the customer's Bookings-capable Microsoft 365 plan.",
+      "sourceIds": ["S8", "S17"],
+      "confidence": "official"
+    },
+    {
+      "key": "partner_or_sales_gate",
+      "value": "no",
+      "detail": "No sales contact or partner tier is needed. Enrolling in the AI Cloud Partner Program for publisher verification is free and self-serve for a registered business; its document checks are counted under business_verification.",
+      "sourceIds": ["S8", "S11", "S24"],
+      "confidence": "official"
+    },
+    {
+      "key": "user_cap_before_review",
+      "value": "no",
+      "detail": "There is no test-user or connection cap. An unverified app works at once for personal accounts and for tenants whose policy allows the consent. Org users elsewhere may be blocked (see review_required), but nothing is capped.",
+      "sourceIds": ["S8", "S12"],
+      "confidence": "official"
+    },
+    {
+      "key": "per_customer_setup",
+      "value": "depends",
+      "detail": "Depends on the scopes and each tenant's consent policy. Microsoft's default policy now blocks user consent for Tasks.Read/ReadWrite (To Do) and Files.ReadWrite.All, so those tenants need admin consent. Notes.ReadWrite and Files.ReadWrite stay user-consentable unless the tenant restricts consent.",
+      "sourceIds": ["S12", "S19", "S3", "S14"],
+      "confidence": "official"
+    }
+  ],
+  "phases": [
+    {
+      "id": "register",
+      "title": "Get a tenant and register the app",
+      "outcome": "A multitenant + personal-account app registration with its Application (client) ID.",
+      "steps": [
+        {
+          "id": "tenant",
+          "title": "Get an Entra tenant where you can register apps",
+          "actor": "you",
+          "effort": "5–30 min",
+          "wait": null,
+          "details": "Best option: sign in with your company's Microsoft 365 / Entra **work account** in the tenant you'll use for Partner Center, since publisher verification requires a work-account registration. You need at least the **Application Developer** role, or user app registration must be allowed. With no tenant, sign up for an **Azure free account**: phone + non-prepaid credit/debit card, temporary ~$1 hold. That creates a *Default Directory*. Don't register under a personal Microsoft account. Those apps land in 'Applications from personal account', can't be moved to a tenant and can't be publisher-verified. Free or trial tenants also can't create more tenants.",
+          "agentAssist": "Check which tenant you're signed into (Settings → Directories) and whether it already has a DNS-verified custom domain, which publisher verification needs later.",
+          "links": [
+            { "label": "Azure free account", "url": "https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account" },
+            { "label": "Register an app (prerequisites)", "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app" }
+          ],
+          "sourceIds": ["S5", "S16", "S17", "S20", "S10"],
+          "confidence": "official"
+        },
+        {
+          "id": "register-app",
+          "title": "Create the app registration",
+          "actor": "you",
+          "effort": "5 min",
+          "wait": null,
+          "details": "In **entra.microsoft.com → Entra ID → App registrations → New registration**:\n- **Name**: your product name. It is shown on the consent screen.\n- **Supported account types**: **Any Entra ID Tenant + Personal Microsoft accounts** (manifest `signInAudience` = `AzureADandPersonalMicrosoftAccount`).\n- **Redirect URI**: platform **Web**, `https://backend.composio.dev/api/v3/toolkits/auth/callback`.\n\nClick **Register**, then copy the **Application (client) ID** from Overview.",
+          "agentAssist": "Pre-fill the name and redirect URI. After you register, confirm the account type in **Manifest** (`signInAudience`).",
+          "links": [
+            { "label": "Entra App registrations", "url": "https://entra.microsoft.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade" },
+            { "label": "Composio OneNote OAuth guide", "url": "https://composio.dev/auth/onenote" }
+          ],
+          "sourceIds": ["S5", "S2", "P5"],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "configure",
+      "title": "Configure permissions, secret and publisher domain",
+      "outcome": "Delegated Graph permissions, a client secret and a verified publisher domain.",
+      "steps": [
+        {
+          "id": "redirect",
+          "title": "Confirm the Web redirect URI",
+          "actor": "you",
+          "effort": "2 min",
+          "wait": null,
+          "details": "Go to **Authentication → Redirect URI configuration → Add Redirect URI**. Make sure `https://backend.composio.dev/api/v3/toolkits/auth/callback` is under **Web**, not *Single-page application*. Composio redeems codes server-side, and SPA refresh tokens expire after 24 h. A missing or misspelled URI fails with **AADSTS50011**.",
+          "agentAssist": "Compare the registered URI with the auth config's redirect URI character by character.",
+          "links": [{ "label": "Add a redirect URI", "url": "https://learn.microsoft.com/en-us/entra/identity-platform/how-to-add-redirect-uri" }],
+          "sourceIds": ["S2", "S18"],
+          "confidence": "official"
+        },
+        {
+          "id": "permissions",
+          "title": "Add delegated Microsoft Graph permissions",
+          "actor": "you",
+          "effort": "10 min",
+          "wait": null,
+          "details": "Go to **API permissions → Add a permission → Microsoft Graph → Delegated permissions**. Add `offline_access`, `Notes.ReadWrite`, `Files.ReadWrite` and `Tasks.ReadWrite`. `User.Read` is pre-added. Add `Notes.ReadWrite.All` / `Files.ReadWrite.All` only for group/SharePoint notebooks or shared files, and Bookings permissions only if you use Bookings. Apps that accept personal accounts allow **at most 30 permissions per API**, so keep the union of all toolkits under that.",
+          "agentAssist": "Map each Composio tool you enable to its least-privilege Graph scope and produce the deduplicated list (≤30).",
+          "links": [{ "label": "Graph permissions reference", "url": "https://learn.microsoft.com/en-us/graph/permissions-reference" }],
+          "sourceIds": ["S2", "S15", "S7", "S3"],
+          "confidence": "official"
+        },
+        {
+          "id": "secret",
+          "title": "Create a client secret",
+          "actor": "you",
+          "effort": "3 min",
+          "wait": null,
+          "details": "Go to **Certificates & secrets → Client secrets → New client secret**, add a description, pick an expiry (24 months maximum; Microsoft recommends under 12) and click **Add**. Copy the **Value** right away; it is shown only once. Apps that accept personal accounts can hold **only two secrets**, so delete an old one before you can add a rotation secret.",
+          "agentAssist": "Store the secret in your secret manager and create a rotation reminder 30 days before expiry.",
+          "links": [{ "label": "Add credentials", "url": "https://learn.microsoft.com/en-us/entra/identity-platform/how-to-add-credentials" }],
+          "sourceIds": ["S6", "S7", "S2"],
+          "confidence": "official"
+        },
+        {
+          "id": "publisher-domain",
+          "title": "Verify a custom domain and set the publisher domain",
+          "actor": "you",
+          "effort": "15–30 min",
+          "wait": "DNS propagation, minutes to hours",
+          "details": "Go to **App registrations → your app → Branding & properties → Publisher domain** and set a DNS-verified custom domain on the tenant. It must match the email domain of your Partner Center primary contact. `*.onmicrosoft.com` can't be publisher-verified, and a mismatch fails with **PublisherDomainMismatch**.",
+          "agentAssist": "Generate the DNS TXT record instructions and check propagation with a DNS lookup.",
+          "links": [{ "label": "Publisher verification requirements", "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview" }],
+          "sourceIds": ["S8", "S10"],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "test",
+      "title": "Wire into Composio and test with your own accounts",
+      "outcome": "Active OneNote, Word and To Do connections for a personal and a work test account.",
+      "steps": [
+        {
+          "id": "auth-configs",
+          "title": "Create one custom auth config per toolkit",
+          "actor": "agent",
+          "effort": "10 min",
+          "wait": null,
+          "details": "In the Composio dashboard, go to **Auth Configs → Create**, search **OneNote**, then choose **OAuth 2.0**. Paste the client ID and secret, set **Redirect URI** to the Composio callback and click **Create Auth Config**. Repeat with the same credentials for **Microsoft Word**, **Microsoft To Do** (and PowerPoint/Bookings). Copy each `ac_…` ID.",
+          "agentAssist": "Can be scripted with `composio.auth_configs.create(..., type='use_custom_auth', auth_scheme='OAUTH2')` and per-toolkit comma-separated scopes.",
+          "links": [{ "label": "Composio OneNote OAuth guide", "url": "https://composio.dev/auth/onenote" }],
+          "sourceIds": ["S2", "S1"],
+          "confidence": "official"
+        },
+        {
+          "id": "connect-own",
+          "title": "Connect a personal and a home-tenant work account",
+          "actor": "you",
+          "effort": "10 min",
+          "wait": null,
+          "details": "Open each auth config, click **Connect Account**, sign in, review the permissions, click **Accept** and check that status is **Active**. Test a personal account (Outlook.com) too. If it fails with *'unauthorized_client: The client does not exist or is not enabled for consumers'*, the account type is wrong.",
+          "agentAssist": "Run a read tool per toolkit (e.g. list notebooks, list To Do lists) to confirm tokens work.",
+          "links": [],
+          "sourceIds": ["S2", "P4"],
+          "confidence": "official"
+        },
+        {
+          "id": "connect-foreign",
+          "title": "Test a work account from a different tenant",
+          "actor": "you",
+          "effort": "15 min",
+          "wait": null,
+          "details": "This is what customers will see. Expect one of three outcomes:\n- A normal consent screen, with an 'unverified' publisher label until you finish verification.\n- **AADSTS90094**, 'needs permission… only an admin can grant'. A scope such as Tasks.ReadWrite or the tenant policy needs admin consent.\n- **AADSTS900941**, 'App is considered risky'. The app is unverified.",
+          "agentAssist": "Record which scopes triggered admin approval so you can trim them or document them for customer IT.",
+          "links": [{ "label": "Consent error reference", "url": "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/application-sign-in-unexpected-user-consent-error" }],
+          "sourceIds": ["S13", "S12"],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "verify",
+      "title": "Get publisher-verified",
+      "outcome": "A blue 'verified' badge on the consent screen, which lets user consent pass in verified-publisher-only tenants.",
+      "steps": [
+        {
+          "id": "cpp-enroll",
+          "title": "Enroll in the Microsoft AI Cloud Partner Program",
+          "actor": "you",
+          "effort": "1–2 h",
+          "wait": null,
+          "details": "In Partner Center, sign in with a work account from the app's tenant and enroll your **legal business**. The primary contact must use a business email at your verified domain. Upload formation documents (certificate of incorporation or business license), domain registration documents and a government ID that matches the contact's name.",
+          "agentAssist": "Prepare a checklist and check that legal name/address match registration records exactly. Abbreviations cause rejections.",
+          "links": [{ "label": "Partner Center verification process", "url": "https://learn.microsoft.com/en-us/partner-center/enroll/understand-the-verification-process" }],
+          "sourceIds": ["S11", "S8"],
+          "confidence": "official"
+        },
+        {
+          "id": "cpp-wait",
+          "title": "Wait for Partner Center verification",
+          "actor": "provider",
+          "effort": "0",
+          "wait": "3–5 business days officially; community reports run from 10 days to over a month",
+          "details": "Watch **Account settings → Legal info → Verification Summary**. Only the primary contact gets the emails asking for more information, so answer them quickly.",
+          "agentAssist": "Poll the Verification Summary status and flag any 'more information required' email.",
+          "links": [],
+          "sourceIds": ["S11", "S22", "S23"],
+          "confidence": "official"
+        },
+        {
+          "id": "mark-verified",
+          "title": "Mark the app as publisher verified",
+          "actor": "you",
+          "effort": "10 min",
+          "wait": "Minutes for the badge to replicate",
+          "details": "Sign in **with MFA** as an Application Administrator or Cloud Application Administrator who is also CPP Partner Admin or Account Admin. Open **App registrations → your app → Branding & properties → Add Partner ID to verify publisher**, enter the **Partner One ID of the partner global account** (location IDs aren't accepted) and click **Verify and save**.",
+          "agentAssist": "Re-test with `prompt=consent` from a foreign tenant to confirm the blue badge shows.",
+          "links": [{ "label": "Mark an app as publisher verified", "url": "https://learn.microsoft.com/en-us/entra/identity-platform/mark-app-as-publisher-verified" }],
+          "sourceIds": ["S9", "S8"],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "golive",
+      "title": "Go live: tenant consent and operations",
+      "outcome": "Customers' users connect on their own, and you have a process for admin consent and secret rotation.",
+      "steps": [
+        {
+          "id": "admin-consent",
+          "title": "Give customer IT an admin-consent link",
+          "actor": "you",
+          "effort": "5 min per customer",
+          "wait": "Depends on each customer's IT",
+          "details": "Send `https://login.microsoftonline.com/{tenant-id-or-domain}/adminconsent?client_id={client-id}`. Alternatively, an admin goes to **Entra ID → Enterprise apps → your app → Security → Permissions → Grant admin consent**. Cloud Application Administrator is enough for delegated Graph scopes. Afterwards, each user starts a **fresh** connection.",
+          "agentAssist": "Generate per-customer links plus a one-page permission justification for IT reviewers.",
+          "links": [{ "label": "Grant tenant-wide admin consent", "url": "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/grant-admin-consent" }],
+          "sourceIds": ["S14", "S3", "S4"],
+          "confidence": "official"
+        },
+        {
+          "id": "sessions",
+          "title": "Use the auth configs in sessions and plan secret rotation",
+          "actor": "agent",
+          "effort": "15 min",
+          "wait": null,
+          "details": "Pass `auth_configs={\"onenote\": \"ac_…\", \"microsoft_word\": \"ac_…\", \"microsoft_todo\": \"ac_…\"}` to `composio.create(user_id, …)`. Before the secret expires, delete the older secret (two-secret limit), add a new one and update **every** auth config that uses the app. An expired secret fails refreshes with **AADSTS7000222**.",
+          "agentAssist": "Script the auth-config secret update across all Microsoft toolkits and alert on `composio.connected_account.expired`.",
+          "links": [],
+          "sourceIds": ["S2", "S6", "S7", "S18"],
+          "confidence": "official"
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "item": "A Microsoft Entra tenant and an account allowed to register apps (Application Developer or higher)",
+      "neededFor": "registration",
+      "detail": "Your company's Microsoft 365 tenant, or the Default Directory an Azure free account creates. Personal-account-only registration is deprecated.",
+      "sourceIds": ["S5", "S20"],
+      "confidence": "official"
+    },
+    {
+      "item": "Phone number and non-prepaid credit/debit card (only if you must create an Azure account)",
+      "neededFor": "registration",
+      "detail": "Used for identity verification, with a possible ~$1 temporary hold. Free or trial tenants can't create more tenants.",
+      "sourceIds": ["S17", "S16"],
+      "confidence": "official"
+    },
+    {
+      "item": "A DNS-verified custom domain on the tenant matching your business email domain",
+      "neededFor": "review",
+      "detail": "The publisher domain can't be *.onmicrosoft.com and must match the Partner Center primary contact's email domain.",
+      "sourceIds": ["S8", "S10"],
+      "confidence": "official"
+    },
+    {
+      "item": "A registered legal business with formation documents, domain documents and the contact's government ID",
+      "neededFor": "review",
+      "detail": "Needed for AI Cloud Partner Program verification, which publisher verification requires. Use the partner global account, not a location ID.",
+      "sourceIds": ["S11", "S8"],
+      "confidence": "official"
+    },
+    {
+      "item": "An MFA-enabled admin holding Application/Cloud Application Administrator in Entra and CPP Partner Admin or Account Admin in Partner Center",
+      "neededFor": "review",
+      "detail": "The same person must hold both roles and use MFA in the same session (otherwise InteractionRequired).",
+      "sourceIds": ["S8", "S9", "S10"],
+      "confidence": "official"
+    },
+    {
+      "item": "A contact in each customer's IT who can grant admin consent",
+      "neededFor": "production",
+      "detail": "Needed wherever user consent is disabled or the scopes (Tasks.*, *.All) are excluded by the tenant's consent policy.",
+      "sourceIds": ["S12", "S14"],
+      "confidence": "official"
+    }
+  ],
+  "scopes": [
+    {
+      "scope": "User.Read",
+      "purpose": "Sign-in and basic profile, so Composio can identify the connected account",
+      "tier": "basic",
+      "note": "Pre-added on new registrations; available for personal accounts.",
+      "sourceIds": ["S15", "S2"],
+      "confidence": "official"
+    },
+    {
+      "scope": "offline_access",
+      "purpose": "Refresh tokens so connections survive past the access token's life",
+      "tier": "basic",
+      "note": "Must be requested explicitly on the v2 endpoint. It is missing from the discovery doc's PKCE fields but listed in scopes_supported.",
+      "sourceIds": ["S3", "S15", "P1"],
+      "confidence": "official"
+    },
+    {
+      "scope": "Notes.ReadWrite",
+      "purpose": "Read, create and edit the user's own OneNote notebooks, sections and pages",
+      "tier": "sensitive",
+      "note": "User-consentable (admin consent not required, not on Microsoft's default exclusion list). Available for personal accounts.",
+      "sourceIds": ["S15", "S12"],
+      "confidence": "official"
+    },
+    {
+      "scope": "Files.ReadWrite",
+      "purpose": "Read and write the user's own OneDrive files (Word .docx and PowerPoint .pptx toolkits)",
+      "tier": "sensitive",
+      "note": "User-consentable and available for personal accounts. For work accounts it doesn't cover files shared with the user or SharePoint libraries; for personal accounts it also covers files shared with the user.",
+      "sourceIds": ["S15", "S12"],
+      "confidence": "official"
+    },
+    {
+      "scope": "Tasks.ReadWrite",
+      "purpose": "Create, read, update and delete the user's To Do task lists and tasks",
+      "tier": "admin",
+      "note": "Graph marks it user-consentable, but Microsoft's managed default consent policy has blocked user consent for it since June–July 2026. Expect admin consent in work tenants on that policy (the default for new tenants); tenants with a custom policy are unaffected. Personal accounts can consent.",
+      "sourceIds": ["S15", "S12", "S19"],
+      "confidence": "official"
+    },
+    {
+      "scope": "Files.ReadWrite.All",
+      "purpose": "Word/PowerPoint files shared with the user or stored in SharePoint",
+      "tier": "admin",
+      "note": "Only if needed. It is on Microsoft's managed default user-consent exclusion list, so it triggers admin approval in tenants on that policy.",
+      "sourceIds": ["S15", "S12"],
+      "confidence": "official"
+    },
+    {
+      "scope": "Notes.ReadWrite.All",
+      "purpose": "OneNote notebooks in Microsoft 365 groups and SharePoint sites the user can access",
+      "tier": "sensitive",
+      "note": "Delegated admin consent isn't required by default, but it's not available for personal accounts. Add it only for group/site notebook tools.",
+      "sourceIds": ["S15"],
+      "confidence": "official"
+    }
+  ],
+  "blockers": [
+    {
+      "title": "Org users get 'Need admin approval'",
+      "symptom": "AADSTS90094: '<app> needs permission to access resources in your organization that only an admin can grant.' Or AADSTS90093: 'An administrator of <tenant> set a policy that prevents you from granting <app> the permissions it's requesting.'",
+      "likelihood": "common",
+      "howToProceed": "Find which scope triggered it (usually Tasks.ReadWrite or a *.All scope under Microsoft's default policy, or user consent disabled tenant-wide). Send the tenant admin the /adminconsent link, or ask them to use Enterprise apps → Permissions → Grant admin consent. Then have the user start a fresh connection. Don't let the admin finish the user's flow, because that connects the admin's account.",
+      "escalation": { "label": "Grant tenant-wide admin consent (Microsoft Learn)", "url": "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/grant-admin-consent" },
+      "sourceIds": ["S13", "S12", "S14", "S3", "S4"],
+      "confidence": "official"
+    },
+    {
+      "title": "Unverified app flagged as risky",
+      "symptom": "AADSTS900941: 'Administrator consent is required. App is considered risky.' Or the consent screen shows the app as unverified.",
+      "likelihood": "common",
+      "howToProceed": "Complete publisher verification (Partner Center verification, then Branding & properties → Add Partner ID). Until then, ask the tenant admin to grant consent. Users can't override a risky-app block.",
+      "escalation": { "label": "Publisher verification overview", "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview" },
+      "sourceIds": ["S13", "S8"],
+      "confidence": "official"
+    },
+    {
+      "title": "Personal Microsoft accounts rejected",
+      "symptom": "login.live.com shows: 'unauthorized_client: The client does not exist or is not enabled for consumers.'",
+      "likelihood": "occasional",
+      "howToProceed": "The app's account type excludes personal accounts. Change Supported account types to 'Any Entra ID Tenant + Personal Microsoft accounts' (manifest signInAudience = AzureADandPersonalMicrosoftAccount). First reduce to at most two secrets and 30 Graph permissions, or the change is rejected.",
+      "escalation": { "label": "Validation differences by account type", "url": "https://learn.microsoft.com/en-us/entra/identity-platform/supported-accounts-validation" },
+      "sourceIds": ["P4", "S7"],
+      "confidence": "tested"
+    },
+    {
+      "title": "Other tenants rejected by a single-tenant app",
+      "symptom": "AADSTS50194: 'Application … isn't configured as a multitenant application. Usage of the /common endpoint isn't supported…'",
+      "likelihood": "occasional",
+      "howToProceed": "Switch Supported account types to the multitenant + personal option. Composio uses the /common endpoint.",
+      "escalation": { "label": "AADSTS error codes", "url": "https://learn.microsoft.com/en-us/entra/identity-platform/reference-error-codes" },
+      "sourceIds": ["S18", "P1"],
+      "confidence": "official"
+    },
+    {
+      "title": "No tenant to register the app in",
+      "symptom": "Portal lists your apps under 'Applications from personal account' with 'The ability to create applications outside of a directory has been deprecated.' Or Manage tenants → Create is unavailable on a free/trial tenant.",
+      "likelihood": "occasional",
+      "howToProceed": "Use your company's work tenant (ask IT for the Application Developer role), or sign up for an Azure free account, which creates a Default Directory. Re-create the app there. Personal-account apps can't be moved.",
+      "escalation": { "label": "Create a new tenant (Microsoft Learn)", "url": "https://learn.microsoft.com/en-us/entra/fundamentals/create-new-tenant" },
+      "sourceIds": ["S20", "S16", "S17"],
+      "confidence": "official"
+    },
+    {
+      "title": "Publisher verification fails",
+      "symptom": "MPNAccountNotVetted ('hasn't completed the vetting process'), PublisherDomainMismatch, MSANotSupported or InteractionRequired when clicking Verify and save.",
+      "likelihood": "occasional",
+      "howToProceed": "Finish the Partner Center verification first. Use the partner global (not location) ID. Make the publisher domain match the primary contact's email domain. Register the app with a work account, not a personal account. Sign in with MFA in the same session. For 'UnableToAddPublisher' (risk check), retry the next day.",
+      "escalation": { "label": "Troubleshoot publisher verification", "url": "https://learn.microsoft.com/en-us/entra/identity-platform/troubleshoot-publisher-verification" },
+      "sourceIds": ["S10", "S8"],
+      "confidence": "official"
+    },
+    {
+      "title": "Client secret expired",
+      "symptom": "Token refresh fails with AADSTS7000222: 'The provided client secret keys are expired.' Tool calls fail across every Microsoft toolkit that shares the app.",
+      "likelihood": "common",
+      "howToProceed": "Create a new secret (delete the oldest first if two exist) and update it in every Composio auth config using this client ID. Rotate before the 24-month maximum. Microsoft recommends under 12 months.",
+      "escalation": { "label": "Add credentials (Microsoft Learn)", "url": "https://learn.microsoft.com/en-us/entra/identity-platform/how-to-add-credentials" },
+      "sourceIds": ["S18", "S6", "S7"],
+      "confidence": "official"
+    }
+  ],
+  "nuances": [
+    {
+      "title": "To Do became admin-consent-only in tenants on Microsoft's managed consent policy in mid-2026",
+      "detail": "Microsoft added Tasks.Read, Tasks.ReadWrite and their .Shared variants (plus Contacts/People) to its managed default user-consent policy (rollout early June to early July 2026; MC1304287). 'Let Microsoft manage your consent settings' is the default for new tenants. Tenants with custom user-consent policies aren't affected, and existing user consents keep working.",
+      "sourceIds": ["S12", "S19"],
+      "confidence": "official"
+    },
+    {
+      "title": "One app for all Microsoft toolkits, within personal-account limits",
+      "detail": "Reusing one registration across OneNote, Word, To Do, PowerPoint, Bookings (and Outlook, OneDrive and others if you want your own branding) is fine. Because it accepts personal accounts, it's capped at 30 permissions per API and two client secrets.",
+      "sourceIds": ["S7"],
+      "confidence": "official"
+    },
+    {
+      "title": "Verified publisher doesn't remove admin consent",
+      "detail": "Verification adds the blue badge and satisfies 'verified publishers only' consent policies. Tenants that disable user consent, or scopes on Microsoft's exclusion list, still need an admin.",
+      "sourceIds": ["S4", "S8", "S12"],
+      "confidence": "official"
+    },
+    {
+      "title": "Problems with an unregistered or misconfigured app surface only after sign-in",
+      "detail": "On /common, an unknown but well-formed client ID still shows the normal 'Sign in to your account' page. The tenant isn't known yet, so registration errors appear only after the user picks an account. Always test end to end.",
+      "sourceIds": ["P3", "P2"],
+      "confidence": "tested"
+    },
+    {
+      "title": "No dynamic client registration",
+      "detail": "Microsoft's v2 discovery document has no registration_endpoint, so every app must be registered by hand in Entra. It advertises client_secret_basic/post, private_key_jwt and self_signed_tls_client_auth.",
+      "sourceIds": ["P1"],
+      "confidence": "tested"
+    },
+    {
+      "title": "Some scopes don't work for personal accounts",
+      "detail": "Notes.ReadWrite, Files.ReadWrite, Tasks.ReadWrite and User.Read are marked available for personal accounts. Notes.ReadWrite.All and the Bookings permissions are not, so group notebooks and Bookings are work/school only.",
+      "sourceIds": ["S15"],
+      "confidence": "official"
+    }
+  ],
+  "composioSetup": {
+    "redirectUri": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+    "steps": [
+      "In the Entra app, register `https://backend.composio.dev/api/v3/toolkits/auth/callback` under the **Web** platform (Authentication → Add Redirect URI).",
+      "Composio dashboard: **Auth Configs → Create**, search **OneNote**, enter a Config Name, click **Next**.",
+      "Authentication Method **OAuth 2.0**: paste the Application (client) ID and the client secret Value. Click the edit icon next to **Redirect URI** and set the Composio callback above. Set scopes, e.g. `User.Read,offline_access,Notes.ReadWrite`. Click **Create Auth Config** and copy the `ac_…` ID.",
+      "Repeat with the same client ID and secret for **Microsoft Word** (`User.Read,offline_access,Files.ReadWrite`), **Microsoft To Do** (`User.Read,offline_access,Tasks.ReadWrite`), and PowerPoint/Bookings if used.",
+      "Click **Connect Account** on each auth config with a personal and a work test account. Status should be **Active**.",
+      "In code, pass the IDs: `composio.create(user_id, auth_configs={\"onenote\": \"ac_…\", \"microsoft_word\": \"ac_…\", \"microsoft_todo\": \"ac_…\"})`. Toolkits you leave out fall back to managed auth, which these five don't have.",
+      "Subscribe to the `composio.connected_account.expired` webhook and keep a secret-rotation reminder. One expired secret breaks refresh for every auth config sharing the app."
+    ]
+  },
+  "evidence": {
+    "sources": [
+      { "id": "S1", "url": "https://docs.composio.dev/toolkits/onenote", "title": "Microsoft OneNote toolkit — Composio docs", "kind": "composio", "accessedAt": "2026-10-28", "note": "Auth: OAUTH2. Composio-managed OAuth available? No. 84 tools. Word, To Do, PowerPoint, Bookings pages show the same." },
+      { "id": "S2", "url": "https://composio.dev/auth/onenote", "title": "How to create OAuth credentials for OneNote and configure it in Composio", "kind": "composio", "accessedAt": "2026-10-28", "note": "Choose 'Any Entra ID Tenant + Personal Microsoft accounts', Web redirect URI, Notes.ReadWrite + offline_access, client secret, then Composio auth config." },
+      { "id": "S3", "url": "https://docs.composio.dev/kb/guide/platform-microsoft-oauth", "title": "Microsoft OAuth scopes and tenant consent — Composio KB", "kind": "composio", "accessedAt": "2026-10-28", "note": "Include offline_access for refresh tokens; 'Needs Admin Approval' needs a tenant admin; user then starts a fresh connection." },
+      { "id": "S4", "url": "https://docs.composio.dev/toolkits/outlook", "title": "Outlook toolkit FAQ — Composio docs", "kind": "composio", "accessedAt": "2026-10-28", "note": "Verified publisher may reduce consent friction but 'does not remove the admin-consent requirement in every tenant'; admin sign-in may connect admin's mailbox." },
+      { "id": "S5", "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app", "title": "Register an application in Microsoft Entra ID", "kind": "official", "accessedAt": "2026-10-28", "note": "Entra ID > App registrations > New registration; account type 'Any Entra ID Tenant + Personal Microsoft accounts'; needs a tenant, Application Developer role." },
+      { "id": "S6", "url": "https://learn.microsoft.com/en-us/entra/identity-platform/how-to-add-credentials", "title": "Add credentials to your application", "kind": "official", "accessedAt": "2026-10-28", "note": "Client secret lifetime limited to 24 months; Microsoft recommends under 12 months; value shown once." },
+      { "id": "S7", "url": "https://learn.microsoft.com/en-us/entra/identity-platform/supported-accounts-validation", "title": "Validation differences by supported account types", "kind": "official", "accessedAt": "2026-10-29", "note": "AzureADandPersonalMicrosoftAccount: maximum of two client secrets; max 30 permissions per resource, 200 total." },
+      { "id": "S8", "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview", "title": "Publisher verification overview", "kind": "official", "accessedAt": "2026-10-28", "note": "Since Nov 2020, with risk-based step-up consent, users can't consent to most unverified multitenant apps; needs verified CPP account; free." },
+      { "id": "S9", "url": "https://learn.microsoft.com/en-us/entra/identity-platform/mark-app-as-publisher-verified", "title": "Mark an app as publisher verified", "kind": "official", "accessedAt": "2026-10-28", "note": "Branding & properties > Add Partner ID to verify publisher > Verify and save; MFA; Application/Cloud App Admin + CPP admin roles." },
+      { "id": "S10", "url": "https://learn.microsoft.com/en-us/entra/identity-platform/troubleshoot-publisher-verification", "title": "Troubleshoot publisher verification", "kind": "official", "accessedAt": "2026-10-28", "note": "Errors MPNAccountNotVetted, PublisherDomainMismatch, MSANotSupported, InteractionRequired, UnableToAddPublisher (risk; retry next day)." },
+      { "id": "S11", "url": "https://learn.microsoft.com/en-us/partner-center/enroll/understand-the-verification-process", "title": "Understand the Partner Center verification process", "kind": "official", "accessedAt": "2026-10-28", "note": "Email, identity, employment (domain docs) and business (formation docs) checks; 'In most cases, the process takes three to five business days'." },
+      { "id": "S12", "url": "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/manage-app-consent-policies", "title": "Manage app consent policies", "kind": "official", "accessedAt": "2026-10-28", "note": "Microsoft-managed default (new tenants): users can't consent to Files.ReadWrite.All, Sites.*, Mail.*, Calendars.*, Tasks.Read/ReadWrite, etc." },
+      { "id": "S13", "url": "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/application-sign-in-unexpected-user-consent-error", "title": "Unexpected error when performing consent to an application", "kind": "official", "accessedAt": "2026-10-28", "note": "AADSTS90094 admin-only permissions; AADSTS90093 policy; AADSTS900941 'App is considered risky', e.g. no verified publisher." },
+      { "id": "S14", "url": "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/grant-admin-consent", "title": "Grant tenant-wide admin consent to an application", "kind": "official", "accessedAt": "2026-10-28", "note": "URL https://login.microsoftonline.com/{organization}/adminconsent?client_id={client-id}; Enterprise apps > Permissions > Grant admin consent." },
+      { "id": "S15", "url": "https://learn.microsoft.com/en-us/graph/permissions-reference", "title": "Microsoft Graph permissions reference", "kind": "official", "accessedAt": "2026-10-28", "note": "Notes.ReadWrite, Files.ReadWrite, Tasks.ReadWrite delegated: admin consent No, available for personal accounts; Bookings and Notes.ReadWrite.All lack personal-account note." },
+      { "id": "S16", "url": "https://learn.microsoft.com/en-us/entra/fundamentals/create-new-tenant", "title": "Create a new tenant in Microsoft Entra ID", "kind": "official", "accessedAt": "2026-10-28", "note": "'Only paid customers can create a new Workforce tenant'; free or trial tenants should sign up for a free account instead." },
+      { "id": "S17", "url": "https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account", "title": "Azure free account FAQ", "kind": "official", "accessedAt": "2026-10-28", "note": "Need a phone number, a credit or debit card (non-prepaid), and a Microsoft or GitHub account; ~$1 temporary hold." },
+      { "id": "S18", "url": "https://learn.microsoft.com/en-us/entra/identity-platform/reference-error-codes", "title": "Microsoft Entra authentication and authorization error codes", "kind": "official", "accessedAt": "2026-10-28", "note": "AADSTS50011 reply URL mismatch; AADSTS50194 not multitenant; AADSTS7000222 client secret expired; AADSTS700082 refresh token inactive." },
+      { "id": "S19", "url": "https://mc.merill.net/message/MC1304287", "title": "MC1304287 — Upcoming secure-by-default changes for Exchange APIs (Message Center archive)", "kind": "community", "accessedAt": "2026-10-28", "note": "Third-party archive of Microsoft MC post (May 8, 2026): Tasks.*, Contacts, People added to the managed consent policy; rollout early June–early July 2026; existing consents unaffected." },
+      { "id": "S20", "url": "https://learn.microsoft.com/en-us/answers/questions/2127352/how-to-move-an-azure-application-created-under-a-p", "title": "How to move an Azure application created under a personal account to a directory? (Microsoft Q&A)", "kind": "community", "accessedAt": "2026-10-28", "note": "Portal: 'The ability to create applications outside of a directory has been deprecated.' Apps can't be moved; re-create in a tenant." },
+      { "id": "S21", "url": "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/configure-risk-based-step-up-consent", "title": "Configure risk-based step-up consent", "kind": "official", "accessedAt": "2026-10-29", "note": "Step-up is enabled by default but changes behavior only when user consent is enabled; unverified multitenant apps with nonbasic permissions are risky; AADSTS90094 shown." },
+      { "id": "S22", "url": "https://learn.microsoft.com/en-us/answers/questions/5828987/partner-center-account-verification-still-pending", "title": "Partner Center account verification still pending after 10 days (Microsoft Q&A)", "kind": "community", "accessedAt": "2026-10-29", "note": "Mar 2026: company account verification still pending after about 10 days, though documents were submitted and the verification call completed." },
+      { "id": "S23", "url": "https://community.osr.com/t/partner-center-business-verification-stuck-for-over-a-month-and-no-way-to-contact-support/60181", "title": "Partner Center business verification stuck for over a month (OSR Developer Community)", "kind": "community", "accessedAt": "2026-10-29", "note": "Jul 2026: stalled over a month; approved 29 Sep 2026 after escalation. Cause was a legal-name versus publisher-name mismatch." },
+      { "id": "S24", "url": "https://learn.microsoft.com/en-us/partner-center/intro-to-cloud-partner-program-membership", "title": "Microsoft AI Cloud Partner Program membership overview", "kind": "official", "accessedAt": "2026-10-29", "note": "To join, go to the sign-in page and select Become a partner. No sales contact or tier is listed as a prerequisite." }
+    ],
+    "probes": [
+      {
+        "id": "P1",
+        "kind": "oauth-discovery",
+        "target": "GET https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
+        "result": "pass",
+        "summary": "200. authorize https://login.microsoftonline.com/common/oauth2/v2.0/authorize, token …/common/oauth2/v2.0/token. No registration_endpoint (no DCR).",
+        "detail": "issuer https://login.microsoftonline.com/{tenantid}/v2.0; scopes_supported [openid, profile, email, offline_access]; token_endpoint_auth_methods_supported [client_secret_post, private_key_jwt, client_secret_basic, self_signed_tls_client_auth]; code_challenge_methods_supported not advertised; device_authorization_endpoint …/devicecode.",
+        "at": "2026-10-28T07:17:08Z"
+      },
+      {
+        "id": "P2",
+        "kind": "authorize-endpoint",
+        "target": "GET https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=00000000-0000-0000-0000-000000000000&response_type=code&redirect_uri=https://backend.composio.dev/api/v3/toolkits/auth/callback&scope=Notes.ReadWrite%20offline_access&state=probe",
+        "result": "info",
+        "summary": "200 error page: 'AADSTS700038: 00000000-0000-0000-0000-000000000000 is not a valid application identifier.'",
+        "detail": "Header x-ms-clientdata: e|700038. Malformed or all-zero IDs are rejected before sign-in. A non-GUID client_id ('oauth-runway-probe') instead rendered the sign-in page (sErrorCode 50059).",
+        "at": "2026-10-28T07:17:17Z"
+      },
+      {
+        "id": "P3",
+        "kind": "authorize-endpoint",
+        "target": "GET https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=3f2a9c1e-7b4d-4e8a-9c2f-1a2b3c4d5e6f&response_type=code&redirect_uri=https://backend.composio.dev/api/v3/toolkits/auth/callback&scope=Notes.ReadWrite%20offline_access&state=probe (also /organizations and /microsoft.onmicrosoft.com)",
+        "result": "info",
+        "summary": "200 'Sign in to your account' for an unregistered random GUID. App existence and redirect URI aren't validated until the user picks an account.",
+        "detail": "/common and /organizations: embedded sErrorCode 50059 (no tenant info yet). Tenant-specific /microsoft.onmicrosoft.com: sErrorCode 50058. No AADSTS700016 shown pre-sign-in.",
+        "at": "2026-10-28T07:17:34Z"
+      },
+      {
+        "id": "P4",
+        "kind": "authorize-endpoint",
+        "target": "GET https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize?client_id=3f2a9c1e-7b4d-4e8a-9c2f-1a2b3c4d5e6f&response_type=code&redirect_uri=https://backend.composio.dev/api/v3/toolkits/auth/callback&scope=Notes.ReadWrite%20offline_access&state=probe",
+        "result": "info",
+        "summary": "302 to login.live.com, which returns 'unauthorized_client: The client does not exist or is not enabled for consumers.'",
+        "detail": "The page adds: 'If you are the application developer, configure a new application through the App Registrations in the Azure Portal at https://go.microsoft.com/fwlink/?linkid=2083908.' Personal-account users of an org-only app see this.",
+        "at": "2026-10-28T07:17:57Z"
+      },
+      {
+        "id": "P5",
+        "kind": "portal",
+        "target": "GET https://entra.microsoft.com/ ; GET https://portal.azure.com/ ; GET https://go.microsoft.com/fwlink/?linkid=2083908",
+        "result": "info",
+        "summary": "Plain curl gets 403 (bot protection). With a browser User-Agent, 200 SPA shells ('Microsoft Entra admin center', 'Microsoft Azure') that bootstrap login.microsoftonline.com sign-in.",
+        "detail": "The fwlink 302s to portal.azure.com App registrations blade. A human Microsoft work/school sign-in is required from here on.",
+        "at": "2026-10-28T07:18:25Z"
+      },
+      {
+        "id": "P6",
+        "kind": "url-check",
+        "target": "GET Composio toolkit .md pages (onenote, microsoft_word, microsoft_todo), composio.dev/auth/onenote and /auth/microsoft_word, Composio KB, three Learn pages, backend.composio.dev/api/v3/toolkits/onenote",
+        "result": "pass",
+        "summary": "All cited docs returned 200. composio.dev/auth/microsoft_word returned 404 (no Word guide). The Composio toolkit API returned 401 without an API key.",
+        "detail": "200: docs.composio.dev/toolkits/{onenote,microsoft_word,microsoft_todo}.md, composio.dev/auth/onenote, docs.composio.dev/kb/guide/platform-microsoft-oauth, learn quickstart-register-app, manage-app-consent-policies, publisher-verification-overview. 401 Auth_NoAuthProvided from backend API.",
+        "at": "2026-10-29T06:30:31Z"
+      }
+    ],
+    "openQuestions": [
+      {
+        "question": "Which default scopes do Composio's onenote, microsoft_word, microsoft_todo, microsoft_powerpoint and microsoft_bookings auth configs request, e.g. does Word ask for Files.ReadWrite.All or Sites.ReadWrite.All?",
+        "whyItMatters": "Any *.All, Sites.* or Tasks.* scope means admin approval in work tenants on Microsoft's managed consent policy. Least-privilege scopes decide whether users can self-consent.",
+        "howToResolve": "With a Composio API key, call GET /api/v3.1/toolkits/{slug} or composio.toolkits.recommend_scopes(...). Or read the default scopes field when creating each auth config in the dashboard."
+      },
+      {
+        "question": "Does updating the client secret on an existing Composio auth config keep existing connected accounts alive, without users reconnecting?",
+        "whyItMatters": "Every connection depends on the secret for token refresh. With a two-secret cap, rotation has to be planned.",
+        "howToResolve": "Test with a throwaway connection: rotate the secret in Entra, edit the auth config, run a tool after the access token expires. Or ask Composio support."
+      },
+      {
+        "question": "How long does AI Cloud Partner Program verification take for a new startup in late 2026?",
+        "whyItMatters": "It is the longest pole for org users. Microsoft says 3–5 business days; we found two 2026 community reports of 10+ days and over a month.",
+        "howToResolve": "Check the Partner Center Verification Summary after enrolling, and search the Microsoft Tech Community Partner Compliance forum for recent reports."
+      },
+      {
+        "question": "With Notes.ReadWrite and Files.ReadWrite only, how often does an unverified multitenant app hit risk-based step-up consent (AADSTS900941) in tenants on the Microsoft-managed policy?",
+        "whyItMatters": "It decides whether you can launch to org users before publisher verification completes.",
+        "howToResolve": "Test from a second, default-configured tenant (e.g. a separate Azure free-account tenant) before and after verification."
+      }
+    ],
+    "verification": {
+      "reviewedAt": "2026-10-29",
+      "method": "An independent agent re-read 12 cited sources, added 4 new ones, and re-ran 3 probes (P1, P2, P4) on 2026-10-29.",
+      "items": [
+        { "claim": "timeToProduction 1–3 weeks: Partner Center verification (3–5 business days) plus customer-tenant consent", "outcome": "corrected", "note": "Microsoft's 3–5 business days is confirmed, but 2026 community reports show 10+ days pending and over a month before approval. Widened to 1–6 weeks and fixed minHours (72 → 168) to match the label.", "sourceIds": ["S11", "S22", "S23"] },
+        { "claim": "review_required = yes: org users can't consent to unverified multitenant apps (AADSTS900941 'risky')", "outcome": "corrected", "note": "Kept 'yes'. Step-up is on by default but only bites where user consent is enabled, for post-Nov-2020 multitenant apps asking beyond basic scopes, and admins can still consent. Detail tightened; AADSTS90094 added.", "sourceIds": ["S8", "S13", "S21"] },
+        { "claim": "business_verification = yes: publisher verification needs a verified Microsoft AI Cloud Partner Program account", "outcome": "confirmed", "note": "Overview requires a Partner One ID for a verified partner global account (not a location ID), a matching DNS-verified domain and MFA. Partner Center checks email, identity, employment and business documents.", "sourceIds": ["S8", "S11"] },
+        { "claim": "partner_or_sales_gate = no, although the AI Cloud Partner Program is required for publisher verification", "outcome": "confirmed", "note": "No tier, sponsorship or sales contact is listed; Microsoft states no charges for the prerequisites, and joining is 'Become a partner'. Kept 'no'; the document checks are counted under business_verification.", "sourceIds": ["S8", "S11", "S24"] },
+        { "claim": "Cost is free: no publisher-verification fee; Azure free-account sign-up needs a non-prepaid card (~$1 hold)", "outcome": "confirmed", "note": "Microsoft charges nothing and needs no license for publisher verification. Azure FAQ: phone, non-prepaid card, Microsoft or GitHub account; a one-dollar hold is removed and nothing is charged at sign-up.", "sourceIds": ["S8", "S17"] },
+        { "claim": "Tasks.* scopes have been excluded from user consent by Microsoft's default policy since June–July 2026", "outcome": "corrected", "note": "Confirmed (S12 list; MC1304287 rollout June–July 2026) but only for tenants on the Microsoft-managed policy; custom policies are unaffected, and Files.ReadWrite.All isn't part of that change. Reworded the 'most tenants' claims.", "sourceIds": ["S12", "S19"] },
+        { "claim": "Graph flags: Notes.ReadWrite, Files.ReadWrite and Tasks.ReadWrite need no admin consent and work for personal accounts", "outcome": "corrected", "note": "Permissions reference confirms both flags; Notes.ReadWrite.All and Bookings.* lack the personal-account marker. Fixed the Files.ReadWrite note: for personal accounts it also covers files shared with the user.", "sourceIds": ["S15"] },
+        { "claim": "Console path: App registrations → New registration; Branding & properties → Add Partner ID to verify publisher → Verify and save", "outcome": "confirmed", "note": "Quickstart and 'Mark an app as publisher verified' match these labels, including 'Any Entra ID Tenant + Personal Microsoft accounts'. Personal-account limits (two secrets, 30 permissions per resource) also match S7.", "sourceIds": ["S5", "S9", "S7"] },
+        { "claim": "Probes P1, P2 and P4 still return what was recorded", "outcome": "confirmed", "note": "Re-run 2026-10-29: discovery returns 200 with no registration_endpoint; an all-zero client_id gives AADSTS700038; /consumers redirects to login.live.com with 'unauthorized_client … not enabled for consumers'. Unchanged.", "sourceIds": ["P1", "P2", "P4"] }
+      ]
+    }
+  },
+  "meta": {
+    "generatedAt": "2026-10-29T06:35:00Z",
+    "generator": "library",
+    "model": "claude-opus-5-5 (research agent)",
+    "durationSec": null
+  }
+}
