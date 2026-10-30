@@ -28,7 +28,6 @@ export const env = {
     apiKey: process.env.LLM_API_KEY || '',
     baseURL: process.env.LLM_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta/openai/',
     model: process.env.LLM_MODEL || 'gemini-3.5-flash-lite',
-    /** Optional stronger model for the final write-up; defaults to LLM_MODEL. */
     // On Gemini, write with the stronger Flash model by default (the evaluated setup); chat() falls back to LLM_MODEL if it's busy or out of quota.
     composeModel:
       process.env.LLM_COMPOSE_MODEL ||
