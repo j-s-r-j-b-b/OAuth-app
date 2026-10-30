@@ -29,7 +29,12 @@ export const env = {
     baseURL: process.env.LLM_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta/openai/',
     model: process.env.LLM_MODEL || 'gemini-3.5-flash-lite',
     /** Optional stronger model for the final write-up; defaults to LLM_MODEL. */
-    composeModel: process.env.LLM_COMPOSE_MODEL || process.env.LLM_MODEL || 'gemini-3.5-flash-lite',
+    // On Gemini, write with the stronger Flash model by default (the evaluated setup); chat() falls back to LLM_MODEL if it's busy or out of quota.
+    composeModel:
+      process.env.LLM_COMPOSE_MODEL ||
+      ((process.env.LLM_BASE_URL || 'generativelanguage.googleapis.com').includes('generativelanguage.googleapis.com') ? 'gemini-3.6-flash' : '') ||
+      process.env.LLM_MODEL ||
+      'gemini-3.5-flash-lite',
     /** Client-side throttle so free-tier RPM limits don't turn into 429 storms. */
     rpm: num(process.env.LLM_RPM, 12),
   },
