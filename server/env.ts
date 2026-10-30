@@ -10,6 +10,12 @@ if (existsSync('.env')) {
   }
 }
 
+// Values pasted into hosting dashboards often carry a trailing newline or quotes, which break HTTP headers.
+for (const key of ['LLM_API_KEY', 'LLM_BASE_URL', 'LLM_MODEL', 'LLM_COMPOSE_MODEL', 'COMPOSIO_API_KEY', 'DATA_DIR']) {
+  const v = process.env[key];
+  if (v !== undefined) process.env[key] = v.trim().replace(/^['"]|['"]$/g, '');
+}
+
 const num = (v: string | undefined, d: number) => (v && !Number.isNaN(Number(v)) ? Number(v) : d);
 
 export const env = {
