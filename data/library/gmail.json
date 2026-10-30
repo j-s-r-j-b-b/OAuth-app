@@ -932,6 +932,131 @@
       "confidence": "tested"
     }
   ],
+  "profiles": [
+    {
+      "id": "google-signin-only",
+      "label": "Google sign-in only (no mail access)",
+      "description": "Sign users in with their Google account (openid, email, profile) without reading, drafting or sending any mail.",
+      "scopes": [
+        "openid email profile"
+      ],
+      "factorOverrides": {
+        "review_required": "no",
+        "security_assessment": "no"
+      },
+      "timeToProduction": {
+        "label": "Same day",
+        "minHours": 1,
+        "maxHours": 8,
+        "basis": "Project, consent screen and client take about an hour. Brand verification is optional: minutes when automated, 2–3 business days if manual."
+      },
+      "handsOnEffort": {
+        "label": "1–2 hours",
+        "minHours": 1,
+        "maxHours": 2,
+        "basis": "Create the project, consent screen and Web client, then connect through Composio (5–15 minutes per step). No demo video, justifications or CASA."
+      },
+      "note": "No Gmail data is requested, so there is no scope verification and no CASA assessment, and test-user grants don't expire after 7 days. Brand verification is only needed if you want your app name and logo shown.",
+      "sourceIds": [
+        "S9",
+        "S7",
+        "S10"
+      ],
+      "confidence": "official"
+    },
+    {
+      "id": "gmail-send-only",
+      "label": "Send only (gmail.send)",
+      "description": "The agent only sends email on the user's behalf; it never reads inbox content or creates drafts.",
+      "scopes": [
+        "https://www.googleapis.com/auth/gmail.send",
+        "openid email profile"
+      ],
+      "factorOverrides": {
+        "security_assessment": "no"
+      },
+      "timeToProduction": {
+        "label": "2–4 weeks",
+        "minHours": 336,
+        "maxHours": 672,
+        "basis": "Google's FAQ lists about 2–3 business days for brand verification and about 10 business days for sensitive scopes, with no assessment. Add your own prep of the homepage, policy and demo video."
+      },
+      "handsOnEffort": {
+        "label": "1–2 days",
+        "minHours": 8,
+        "maxHours": 16,
+        "basis": "The default steps without the 2–5 day CASA assessment and the restricted-scope justifications."
+      },
+      "note": "gmail.send is a sensitive scope, so Google still verifies branding and the scope (demo video, justification) but no CASA security assessment is needed, which removes the annual lab fee. The timeline is still over two weeks, so the rating stays formal review.",
+      "sourceIds": [
+        "S5",
+        "S10",
+        "S6"
+      ],
+      "confidence": "official"
+    },
+    {
+      "id": "gmail-internal-workspace",
+      "label": "Internal: your own Workspace org only",
+      "description": "Every user belongs to your own Google Workspace organization and the app's Audience is set to Internal.",
+      "scopes": [
+        "https://www.googleapis.com/auth/gmail.readonly",
+        "https://www.googleapis.com/auth/gmail.compose",
+        "https://www.googleapis.com/auth/gmail.send",
+        "https://www.googleapis.com/auth/gmail.modify",
+        "https://www.googleapis.com/auth/gmail.labels",
+        "openid email profile"
+      ],
+      "factorOverrides": {
+        "review_required": "no",
+        "security_assessment": "no",
+        "user_cap_before_review": "no"
+      },
+      "timeToProduction": {
+        "label": "Same day",
+        "minHours": 1,
+        "maxHours": 8,
+        "basis": "Project and client take under an hour; an Internal audience needs no verification."
+      },
+      "handsOnEffort": {
+        "label": "1–2 hours",
+        "minHours": 1,
+        "maxHours": 2,
+        "basis": "Create the project, consent screen and Web client, then connect through Composio. No verification package."
+      },
+      "note": "An Internal app needs no Google verification or CASA assessment and has no user cap, but anyone outside the organization gets an org_internal error. It only suits users in your own org.",
+      "sourceIds": [
+        "S9",
+        "S10",
+        "S12"
+      ],
+      "confidence": "official"
+    },
+    {
+      "id": "gmail-full-agent",
+      "label": "Full agent: read, draft, send (default)",
+      "description": "The guide's default use case: read, draft and send mail for any Google user, covering every Gmail scope the guide lists.",
+      "scopes": [
+        "https://www.googleapis.com/auth/gmail.readonly",
+        "https://www.googleapis.com/auth/gmail.compose",
+        "https://www.googleapis.com/auth/gmail.send",
+        "https://www.googleapis.com/auth/gmail.modify",
+        "https://mail.google.com/",
+        "https://www.googleapis.com/auth/gmail.metadata",
+        "https://www.googleapis.com/auth/gmail.settings.basic",
+        "https://www.googleapis.com/auth/gmail.labels",
+        "openid email profile"
+      ],
+      "factorOverrides": {},
+      "note": "The restricted Gmail scopes require Google verification plus an annual CASA security assessment from a paid lab, as in the default verdict.",
+      "sourceIds": [
+        "S5",
+        "S6",
+        "S11"
+      ],
+      "confidence": "official"
+    }
+  ],
   "composioSetup": {
     "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
     "steps": [

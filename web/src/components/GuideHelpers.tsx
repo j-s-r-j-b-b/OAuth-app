@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DIFFICULTY_INFO, profileForScopes, rateProfile, type Guide, type Step } from '../../../shared/schema.ts';
+import { DIFFICULTY_INFO, rateProfile, type Guide, type Step } from '../../../shared/schema.ts';
 import { renderInline, renderMd } from '../lib/md.ts';
 import { ActorChip, DifficultyPill, Evidence } from './ui.tsx';
 
@@ -178,8 +178,15 @@ export function TailorPanel({ g, onCite }: { g: Guide; onCite: (id: string) => v
   const [profileId, setProfileId] = useState<string | null>(null);
   const [picked, setPicked] = useState<string[]>([]);
   if (!g.profiles.length) return null;
-  const byScopes = picked.length ? profileForScopes(g, picked) : null;
-  const profile = picked.length ? byScopes : (g.profiles.find((p) => p.id === profileId) ?? null);
+  // Every use case that covers the ticked scopes, lightest first; the developer picks the one matching their audience.
+  const ORDER = ['self-serve', 'light-review', 'formal-review', 'gated'];
+  const covering = picked.length
+    ? g.profiles
+        .filter((p) => picked.every((sc) => p.scopes.includes(sc)))
+        .map((p) => ({ p, r: rateProfile(g, p) }))
+        .sort((a, b) => ORDER.indexOf(a.r.difficulty) - ORDER.indexOf(b.r.difficulty) || a.r.timeToProduction.maxHours - b.r.timeToProduction.maxHours)
+    : [];
+  const profile = g.profiles.find((p) => p.id === profileId) ?? null;
   const r = profile ? rateProfile(g, profile) : null;
   const tierCls: Record<string, string> = {
     restricted: 'text-rose-700 dark:text-rose-300',
@@ -192,6 +199,7 @@ export function TailorPanel({ g, onCite }: { g: Guide; onCite: (id: string) => v
     setProfileId(null);
     setPicked((p) => (p.includes(sc) ? p.filter((x) => x !== sc) : [...p, sc]));
   };
+  const showDetail = Boolean(profile && (!picked.length || covering.some((c) => c.p.id === profile.id)));
   return (
     <div className="card p-4 sm:p-5">
       <div className="font-semibold text-slate-900 dark:text-white">Rate it for your use case</div>
@@ -206,7 +214,7 @@ export function TailorPanel({ g, onCite }: { g: Guide; onCite: (id: string) => v
               setPicked([]);
               setProfileId(profileId === p.id ? null : p.id);
             }}
-            className={`rounded-full px-3 py-1 text-xs font-semibold ${profile?.id === p.id && !picked.length ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'}`}
+            className={`rounded-full px-3 py-1 text-xs font-semibold ${profile?.id === p.id ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'}`}
           >
             {p.label}
           </button>
@@ -225,12 +233,28 @@ export function TailorPanel({ g, onCite }: { g: Guide; onCite: (id: string) => v
           ))}
         </div>
       </details>
-      {picked.length > 0 && !profile && (
+      {picked.length > 0 && covering.length === 0 && (
         <p className="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-500/10 dark:text-amber-200">
-          No researched profile covers that exact combination, so plan for the full path in the verdict above. Its heaviest requirement applies.
+          No researched use case covers that exact combination, so plan for the full path in the verdict above. Its heaviest requirement applies.
         </p>
       )}
-      {profile && r && (
+      {covering.length > 0 && (
+        <div className="mt-3">
+          <div className="text-xs font-semibold text-slate-500">Use cases that cover these scopes. Pick the one that matches who will connect:</div>
+          <ul className="mt-1 divide-y divide-slate-100 rounded-lg border border-slate-200 dark:divide-slate-800 dark:border-slate-700">
+            {covering.map(({ p, r: cr }) => (
+              <li key={p.id}>
+                <button onClick={() => setProfileId(p.id)} className={`flex w-full flex-wrap items-center gap-2 px-3 py-2 text-left text-sm ${profileId === p.id ? 'bg-slate-50 dark:bg-slate-800/60' : ''}`}>
+                  <DifficultyPill d={cr.difficulty} />
+                  <span className="font-medium">{p.label}</span>
+                  <span className="ml-auto text-xs text-slate-500">{cr.timeToProduction.label}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {showDetail && profile && r && (
         <div className="mt-3 rounded-lg border border-slate-200 p-3 dark:border-slate-700">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-semibold">{profile.label}:</span>

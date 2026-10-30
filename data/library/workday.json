@@ -833,6 +833,85 @@
       "confidence": "tested"
     }
   ],
+  "profiles": [
+    {
+      "id": "workday-internal-own-tenant",
+      "label": "Internal: your own Workday tenant",
+      "description": "An HR agent for your own company, in the Workday tenant you administer, with one API client and one Composio auth config.",
+      "scopes": [
+        "Staffing",
+        "Time Off and Leave",
+        "Organizations and Roles",
+        "Contact Information",
+        "Worker Profile and Skills",
+        "Tenant Non-Configurable"
+      ],
+      "factorOverrides": {
+        "per_customer_setup": "no"
+      },
+      "timeToProduction": {
+        "label": "1–8 weeks (one tenant)",
+        "minHours": 168,
+        "maxHours": 1344,
+        "basis": "The guide's per-customer estimate applies once, to your own tenant (inferred; no public data)."
+      },
+      "note": "This stays gated: your own admin still has to run Register API Client and your security team has to sign off. With a single tenant there is one API client and one auth config, so the per-customer rollout disappears.",
+      "sourceIds": [
+        "S2",
+        "S3",
+        "S20"
+      ],
+      "confidence": "inferred"
+    },
+    {
+      "id": "workday-design-partner-sandbox",
+      "label": "Design-partner Sandbox tenant",
+      "description": "One design-partner customer's admin registers your API client in their Sandbox or Implementation tenant to validate scopes and security domains.",
+      "scopes": [
+        "Staffing",
+        "Time Off and Leave",
+        "Organizations and Roles",
+        "Worker Profile and Skills",
+        "Tenant Non-Configurable"
+      ],
+      "factorOverrides": {},
+      "timeToProduction": {
+        "label": "Days (one Sandbox tenant)",
+        "minHours": 24,
+        "maxHours": 168,
+        "basis": "The guide's first-connection estimate once a design partner's admin agrees; production per customer still takes 1–8 weeks."
+      },
+      "note": "This stays gated because the customer's admin has to run Register API Client. A single Sandbox connection can happen in days, which is where you validate scopes and security domains before asking for production.",
+      "sourceIds": [
+        "S2",
+        "S20"
+      ],
+      "confidence": "inferred"
+    },
+    {
+      "id": "workday-per-customer-default",
+      "label": "Per-customer rollout (default)",
+      "description": "The guide's default: an agent sold to enterprises, with each customer's Workday admin registering your API client in their own tenant.",
+      "scopes": [
+        "Staffing",
+        "Time Off and Leave",
+        "Organizations and Roles",
+        "Personal Data",
+        "Contact Information",
+        "Worker Profile and Skills",
+        "System",
+        "Tenant Non-Configurable"
+      ],
+      "factorOverrides": {},
+      "note": "Each customer's admin registers your API client after their own security review, and you create one Composio auth config per tenant.",
+      "sourceIds": [
+        "S2",
+        "S3",
+        "S20"
+      ],
+      "confidence": "official"
+    }
+  ],
   "composioSetup": {
     "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
     "steps": [

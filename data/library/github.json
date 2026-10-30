@@ -784,6 +784,85 @@
       "confidence": "tested"
     }
   ],
+  "profiles": [
+    {
+      "id": "github-personal-or-unrestricted",
+      "label": "Personal repos or unrestricted orgs",
+      "description": "Users work in their own repositories or in orgs without OAuth app access restrictions, through an OAuth App.",
+      "scopes": [
+        "repo",
+        "read:user / user:email"
+      ],
+      "factorOverrides": {
+        "per_customer_setup": "no"
+      },
+      "note": "Nothing needs approving or installing, so there is no per-customer step. Org owners only matter once an org turns on OAuth app access restrictions, which are on by default for new orgs.",
+      "sourceIds": [
+        "S13",
+        "S14"
+      ],
+      "confidence": "official"
+    },
+    {
+      "id": "github-public-repos",
+      "label": "Public repos only (OAuth App)",
+      "description": "The agent only touches public repositories, using the narrower public_repo scope instead of repo.",
+      "scopes": [
+        "public_repo",
+        "read:org",
+        "read:user / user:email"
+      ],
+      "factorOverrides": {},
+      "note": "The rating is unchanged: public_repo is a smaller ask for org owners to weigh, but orgs that restrict OAuth app access still withhold private data and privileged writes from unapproved apps.",
+      "sourceIds": [
+        "S8",
+        "S13"
+      ],
+      "confidence": "official"
+    },
+    {
+      "id": "github-app-least-privilege",
+      "label": "GitHub App, least privilege",
+      "description": "A GitHub App with fine-grained Contents, Issues and Pull requests permissions, installed by an owner on each org or account.",
+      "scopes": [
+        "GitHub App: Contents, Issues, Pull requests (Read & write)",
+        "offline_access"
+      ],
+      "factorOverrides": {
+        "per_customer_setup": "yes"
+      },
+      "note": "A GitHub App isn't subject to org OAuth app restrictions, but an org owner must install it on every org and pick the repos. Composio doesn't show users the install link, so you build that step yourself.",
+      "sourceIds": [
+        "S5",
+        "S9",
+        "S16",
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "id": "github-full-agent",
+      "label": "Full agent, all scopes (default)",
+      "description": "The guide's default: read and write issues, pull requests and contents across users' repos and orgs, including CI workflow edits, with either app type.",
+      "scopes": [
+        "repo",
+        "public_repo",
+        "read:org",
+        "read:user / user:email",
+        "workflow",
+        "offline_access",
+        "GitHub App: Contents, Issues, Pull requests (Read & write)"
+      ],
+      "factorOverrides": {},
+      "note": "GitHub has no review, but each customer org owner must approve your OAuth App or install your GitHub App before the agent can reach org repos.",
+      "sourceIds": [
+        "S5",
+        "S13",
+        "S16"
+      ],
+      "confidence": "official"
+    }
+  ],
   "composioSetup": {
     "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
     "steps": [

@@ -800,6 +800,121 @@
       "confidence": "tested"
     }
   ],
+  "profiles": [
+    {
+      "id": "msgraph-personal-only",
+      "label": "Personal Microsoft accounts only",
+      "description": "Only consumer Microsoft accounts (Outlook.com, Hotmail) connect, so no work tenant, publisher verification or admin consent is involved.",
+      "scopes": [
+        "User.Read",
+        "offline_access",
+        "Notes.ReadWrite",
+        "Files.ReadWrite",
+        "Tasks.ReadWrite"
+      ],
+      "factorOverrides": {
+        "review_required": "no",
+        "business_verification": "no",
+        "per_customer_setup": "no"
+      },
+      "timeToProduction": {
+        "label": "Same day",
+        "minHours": 1,
+        "maxHours": 8,
+        "basis": "Register the app and connect; personal accounts need no publisher verification or admin consent."
+      },
+      "handsOnEffort": {
+        "label": "1–2 hours",
+        "minHours": 1,
+        "maxHours": 2,
+        "basis": "Tenant sign-up if needed, app registration, permissions, secret and Composio auth config (about 55–80 minutes of steps)."
+      },
+      "note": "Notes.ReadWrite, Files.ReadWrite and Tasks.ReadWrite are user-consentable and available for personal accounts, so there is no publisher verification or tenant admin consent. Work and school users can't connect through this path.",
+      "sourceIds": [
+        "S8",
+        "S15",
+        "S12"
+      ],
+      "confidence": "official"
+    },
+    {
+      "id": "msgraph-single-tenant",
+      "label": "Your own organisation (single tenant)",
+      "description": "Register the app as 'Single tenant only' and use it only for users in your own Entra tenant.",
+      "scopes": [
+        "User.Read",
+        "offline_access",
+        "Notes.ReadWrite",
+        "Files.ReadWrite",
+        "Tasks.ReadWrite"
+      ],
+      "factorOverrides": {
+        "review_required": "no",
+        "business_verification": "no"
+      },
+      "timeToProduction": {
+        "label": "Same day",
+        "minHours": 1,
+        "maxHours": 8,
+        "basis": "Register as single tenant and click Grant admin consent once; no Partner Center verification."
+      },
+      "handsOnEffort": {
+        "label": "1–2 hours",
+        "minHours": 1,
+        "maxHours": 2,
+        "basis": "Register, add permissions, secret, Composio auth config and one admin consent."
+      },
+      "note": "Risk-based step-up consent and publisher verification target multitenant apps, so a single-tenant app needs only one Grant admin consent click in your own tenant. Personal accounts and other tenants can't use it.",
+      "sourceIds": [
+        "S5",
+        "S8",
+        "S21",
+        "S14"
+      ],
+      "confidence": "official"
+    },
+    {
+      "id": "msgraph-work-no-todo",
+      "label": "Work accounts without To Do or .All",
+      "description": "OneNote and Word/PowerPoint for users in any organisation, requesting only Notes.ReadWrite and Files.ReadWrite.",
+      "scopes": [
+        "User.Read",
+        "offline_access",
+        "Notes.ReadWrite",
+        "Files.ReadWrite"
+      ],
+      "factorOverrides": {},
+      "note": "These scopes are user-consentable under Microsoft's default consent policy, so far fewer tenants show 'Need admin approval'. It is still a multitenant app, so the publisher verification gate for users in other tenants remains.",
+      "sourceIds": [
+        "S12",
+        "S15",
+        "S8"
+      ],
+      "confidence": "official"
+    },
+    {
+      "id": "msgraph-all-scopes",
+      "label": "All scopes, any account (default)",
+      "description": "The guide's default: OneNote, Word, To Do and OneDrive files for personal and work accounts, including To Do and the .All scopes.",
+      "scopes": [
+        "User.Read",
+        "offline_access",
+        "Notes.ReadWrite",
+        "Files.ReadWrite",
+        "Tasks.ReadWrite",
+        "Files.ReadWrite.All",
+        "Notes.ReadWrite.All"
+      ],
+      "factorOverrides": {},
+      "note": "To Do and the .All scopes need admin consent in tenants on Microsoft's managed consent policy, on top of publisher verification and its Partner Center business check.",
+      "sourceIds": [
+        "S12",
+        "S19",
+        "S8"
+      ],
+      "confidence": "official"
+    }
+  ],
   "composioSetup": {
     "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
     "steps": [

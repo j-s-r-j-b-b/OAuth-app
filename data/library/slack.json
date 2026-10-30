@@ -805,6 +805,122 @@
       "confidence": "tested"
     }
   ],
+  "profiles": [
+    {
+      "id": "slack-post-only",
+      "label": "Post and react only (no history reads)",
+      "description": "The agent posts messages and reacts to mentions and events but never calls conversations.history or conversations.replies.",
+      "scopes": [
+        "chat:write",
+        "channels:read",
+        "app_mentions:read"
+      ],
+      "factorOverrides": {
+        "review_required": "depends",
+        "user_cap_before_review": "no"
+      },
+      "timeToProduction": {
+        "label": "Same day",
+        "minHours": 1,
+        "maxHours": 8,
+        "basis": "Create the app, add the Composio redirect URL and click Activate Public Distribution; no review applies to posting-only use."
+      },
+      "handsOnEffort": {
+        "label": "1–2 hours",
+        "minHours": 1,
+        "maxHours": 2,
+        "basis": "Create the app, scopes, redirect URL, Composio auth config and first connection (about 70 minutes of steps)."
+      },
+      "note": "The 1 request/min throttle only targets the two history methods, so an unlisted app runs at normal limits right away. Slack's API Terms still expect a Marketplace listing for commercial distribution, so this is self-serve technically but not contractually.",
+      "sourceIds": [
+        "S7",
+        "S11",
+        "S12"
+      ],
+      "confidence": "official"
+    },
+    {
+      "id": "slack-internal-one-customer",
+      "label": "Internal app for one customer workspace",
+      "description": "An internal, customer-built app in a single workspace that reads channel history and posts, with one Composio auth config per customer.",
+      "scopes": [
+        "channels:history",
+        "groups:history",
+        "im:history / mpim:history",
+        "channels:read",
+        "chat:write",
+        "app_mentions:read"
+      ],
+      "factorOverrides": {
+        "review_required": "no",
+        "user_cap_before_review": "no"
+      },
+      "timeToProduction": {
+        "label": "Same day",
+        "minHours": 1,
+        "maxHours": 8,
+        "basis": "Install in the customer workspace right after creating the app; no Marketplace review or throttle for internal apps."
+      },
+      "handsOnEffort": {
+        "label": "1–3 hours",
+        "minHours": 1,
+        "maxHours": 3,
+        "basis": "Per customer: create the app, scopes, redirect URL, Composio auth config and install."
+      },
+      "note": "Internal customer-built apps keep Tier 3 limits (50+ requests/min, 1,000 objects per call) and the commercial-distribution restriction doesn't apply, so there's no Marketplace review. A template app you hand to many customers still counts as commercial distribution.",
+      "sourceIds": [
+        "S7",
+        "S11"
+      ],
+      "confidence": "official"
+    },
+    {
+      "id": "slack-marketplace-agent",
+      "label": "Commercial agent, Marketplace-listed",
+      "description": "The guide's default: a commercial agent that reads history (public, private, DMs) and posts in any customer's workspace.",
+      "scopes": [
+        "channels:history",
+        "groups:history",
+        "im:history / mpim:history",
+        "channels:read",
+        "chat:write",
+        "app_mentions:read"
+      ],
+      "factorOverrides": {},
+      "note": "Full history limits need Marketplace approval: 10+ active installs first, then a preliminary review and a functional review of up to 10 weeks, with enhanced scrutiny of the *:history scopes.",
+      "sourceIds": [
+        "S7",
+        "S8",
+        "S9",
+        "S10"
+      ],
+      "confidence": "official"
+    },
+    {
+      "id": "slack-admin-or-search",
+      "label": "With admin.* or search:read scopes",
+      "description": "As the default, plus admin.* and/or search:read (user), which Slack treats as partner-only or unsuitable for the Marketplace.",
+      "scopes": [
+        "channels:history",
+        "groups:history",
+        "im:history / mpim:history",
+        "channels:read",
+        "chat:write",
+        "app_mentions:read",
+        "search:read (user)",
+        "admin.*"
+      ],
+      "factorOverrides": {
+        "partner_or_sales_gate": "yes"
+      },
+      "note": "admin.* scopes are effectively reserved for Slack's partner program, and search:read is unsuitable for the Marketplace without a clear Real-time Search or MCP use case. Plan on a partner agreement, so the rating becomes gated.",
+      "sourceIds": [
+        "S9",
+        "S10"
+      ],
+      "confidence": "official"
+    }
+  ],
   "composioSetup": {
     "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
     "steps": [

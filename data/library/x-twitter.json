@@ -846,6 +846,65 @@
       "confidence": "tested"
     }
   ],
+  "profiles": [
+    {
+      "id": "x-public-data-only",
+      "label": "Public data only (app-only token)",
+      "description": "Search and look up public posts and users with the app-only Bearer Token, without acting as any user.",
+      "scopes": [],
+      "factorOverrides": {
+        "review_required": "no"
+      },
+      "note": "There is no user consent and nothing is posted, so X's approval rule for AI-generated replies and content doesn't apply, but reads are still billed per resource.",
+      "sourceIds": [
+        "S2",
+        "S5",
+        "S11"
+      ],
+      "confidence": "inferred"
+    },
+    {
+      "id": "x-read-only",
+      "label": "Read timeline and mentions (no posting)",
+      "description": "The agent reads users' home timelines and mentions to summarize or alert, and never publishes to X.",
+      "scopes": [
+        "tweet.read",
+        "users.read",
+        "offline.access"
+      ],
+      "factorOverrides": {
+        "review_required": "no"
+      },
+      "note": "Nothing AI-generated is published, so the prior-approval requirement for AI replies and content doesn't apply. Your users' timeline reads still bill at $0.005 per post.",
+      "sourceIds": [
+        "S11",
+        "S5"
+      ],
+      "confidence": "inferred"
+    },
+    {
+      "id": "x-read-and-post",
+      "label": "Read and post for any user (default)",
+      "description": "The guide's default: read timelines and mentions and publish posts on users' behalf, optionally with media and DMs.",
+      "scopes": [
+        "tweet.read",
+        "users.read",
+        "tweet.write",
+        "offline.access",
+        "media.write",
+        "dm.read",
+        "dm.write"
+      ],
+      "factorOverrides": {},
+      "note": "OAuth is self-serve, but X's guidelines require prior approval for AI-generated replies and content, and replies are accepted only when the author summoned the account.",
+      "sourceIds": [
+        "S11",
+        "S7",
+        "S12"
+      ],
+      "confidence": "official"
+    }
+  ],
   "composioSetup": {
     "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
     "steps": [

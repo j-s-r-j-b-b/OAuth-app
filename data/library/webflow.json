@@ -846,6 +846,138 @@
       "confidence": "reported"
     }
   ],
+  "profiles": [
+    {
+      "id": "webflow-own-workspace",
+      "label": "Own Workspace only (no external users)",
+      "description": "The agent only works on sites in your own Webflow Workspace, such as internal tooling or an agency's client sites hosted there.",
+      "scopes": [
+        "sites:read",
+        "sites:write",
+        "cms:read",
+        "cms:write",
+        "pages:read / pages:write",
+        "site_config:read / site_config:write",
+        "authorized_user:read"
+      ],
+      "factorOverrides": {
+        "review_required": "no",
+        "user_cap_before_review": "no"
+      },
+      "timeToProduction": {
+        "label": "Same day",
+        "minHours": 1,
+        "maxHours": 8,
+        "basis": "Register the App, tick scopes and install it in your own Workspace; no Marketplace review for Workspace members."
+      },
+      "handsOnEffort": {
+        "label": "1–3 hours",
+        "minHours": 1,
+        "maxHours": 3,
+        "basis": "Developer Workspace, app, credentials, optional redirect forwarder, Composio auth config and first connection."
+      },
+      "note": "A new app is installable by anyone in its own Workspace right away, so Marketplace review only matters once users outside the Workspace need to install it.",
+      "sourceIds": [
+        "S4",
+        "S10"
+      ],
+      "confidence": "official"
+    },
+    {
+      "id": "webflow-site-token",
+      "label": "One customer site via Site Token",
+      "description": "A single customer and site connects through Composio's API_KEY scheme with a Site Token the customer creates in their site settings.",
+      "scopes": [
+        "sites:read",
+        "sites:write",
+        "cms:read",
+        "cms:write",
+        "pages:read / pages:write",
+        "site_config:read / site_config:write"
+      ],
+      "factorOverrides": {
+        "review_required": "no",
+        "user_cap_before_review": "no",
+        "per_customer_setup": "yes"
+      },
+      "timeToProduction": {
+        "label": "Same day",
+        "minHours": 1,
+        "maxHours": 8,
+        "basis": "The customer creates a Site Token; there is no app to review."
+      },
+      "handsOnEffort": {
+        "label": "1–2 hours",
+        "minHours": 1,
+        "maxHours": 2,
+        "basis": "Create the API_KEY auth config and connect one site; the customer creates the token in site settings."
+      },
+      "note": "No Webflow App is involved, so there is no Marketplace review, but each site needs its own token and Site Tokens can't reach custom_code endpoints. Webflow describes Site Tokens as best suited to internal tools and single-site integrations.",
+      "sourceIds": [
+        "S1",
+        "S6",
+        "S8"
+      ],
+      "confidence": "inferred"
+    },
+    {
+      "id": "webflow-pilot-5-testers",
+      "label": "Pilot: up to 5 external testers",
+      "description": "A pilot with five or fewer external customers, added as test users by Webflow Support.",
+      "scopes": [
+        "sites:read",
+        "sites:write",
+        "cms:read",
+        "cms:write",
+        "pages:read / pages:write",
+        "site_config:read / site_config:write",
+        "authorized_user:read"
+      ],
+      "factorOverrides": {
+        "review_required": "no"
+      },
+      "timeToProduction": {
+        "label": "Same day to 3 days",
+        "minHours": 1,
+        "maxHours": 72,
+        "basis": "Webflow Support adds test users by email and states no turnaround, so this is an estimate."
+      },
+      "handsOnEffort": {
+        "label": "1–4 hours",
+        "minHours": 1,
+        "maxHours": 4,
+        "basis": "Own-Workspace setup plus 15 minutes to file the tester request."
+      },
+      "note": "Webflow Support can add up to 5 external test users by email before launch, so a small pilot needs no Marketplace review. More than five users, or a public listing, needs the full review.",
+      "sourceIds": [
+        "S10",
+        "S4"
+      ],
+      "confidence": "official"
+    },
+    {
+      "id": "webflow-marketplace-default",
+      "label": "Marketplace app, all scopes (default)",
+      "description": "The guide's default: a Marketplace-approved Data Client app that any customer can install, including custom_code.",
+      "scopes": [
+        "sites:read",
+        "sites:write",
+        "cms:read",
+        "cms:write",
+        "pages:read / pages:write",
+        "site_config:read / site_config:write",
+        "authorized_user:read",
+        "custom_code:read / custom_code:write"
+      ],
+      "factorOverrides": {},
+      "note": "This needs Marketplace review: a testing site, a demo video showing OAuth approved and denied, policy URLs and token attestations. Webflow aims to decide within 10 business days, and custom_code is treated as elevated risk.",
+      "sourceIds": [
+        "S11",
+        "S12"
+      ],
+      "confidence": "official"
+    }
+  ],
   "composioSetup": {
     "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
     "steps": [

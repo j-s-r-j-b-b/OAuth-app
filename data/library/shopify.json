@@ -881,6 +881,121 @@
       "confidence": "tested"
     }
   ],
+  "profiles": [
+    {
+      "id": "shopify-own-org",
+      "label": "Your own Shopify org only",
+      "description": "The agent acts only on stores in your own Shopify organization, using a Dev Dashboard app with the client credentials grant (Composio S2S_OAUTH2).",
+      "scopes": [
+        "write_products",
+        "write_inventory",
+        "read_orders",
+        "write_orders",
+        "read_customers",
+        "write_customers"
+      ],
+      "factorOverrides": {
+        "review_required": "no",
+        "user_cap_before_review": "no"
+      },
+      "timeToProduction": {
+        "label": "Same day",
+        "minHours": 1,
+        "maxHours": 8,
+        "basis": "Create the app in the Dev Dashboard, release a version and connect your own store; no review for your own organization."
+      },
+      "handsOnEffort": {
+        "label": "1–3 hours",
+        "minHours": 1,
+        "maxHours": 3,
+        "basis": "Register and release (about 45 minutes of steps), then the Composio auth config and a smoke test."
+      },
+      "note": "App Store review only applies to apps that other merchants install. Client-credentials tokens last 24 hours and are re-minted by code, but this grant can't reach stores outside your organization.",
+      "sourceIds": [
+        "S4",
+        "S11",
+        "S3"
+      ],
+      "confidence": "official"
+    },
+    {
+      "id": "shopify-custom-distribution",
+      "label": "Custom distribution (one merchant)",
+      "description": "One merchant store, or the stores of one Shopify Plus organization, installs the app from a link you send, with no App Store listing.",
+      "scopes": [
+        "write_products",
+        "write_inventory",
+        "read_orders",
+        "write_orders",
+        "read_customers",
+        "write_customers"
+      ],
+      "factorOverrides": {
+        "review_required": "no",
+        "user_cap_before_review": "no"
+      },
+      "timeToProduction": {
+        "label": "Same day",
+        "minHours": 1,
+        "maxHours": 8,
+        "basis": "Send the install link as soon as a version is released; no App Store review for custom distribution."
+      },
+      "handsOnEffort": {
+        "label": "1–3 hours",
+        "minHours": 1,
+        "maxHours": 3,
+        "basis": "Register and release, select Custom distribution, then connect the merchant store through Composio."
+      },
+      "note": "Custom distribution skips App Store review, but it can't be switched to public later. Creating a custom app per merchant to avoid review breaches the Partner Program Agreement.",
+      "sourceIds": [
+        "S4",
+        "S5",
+        "S16"
+      ],
+      "confidence": "official"
+    },
+    {
+      "id": "shopify-public-products-only",
+      "label": "Public app: products and inventory only",
+      "description": "A public app that only reads and updates products and inventory, with no customer names, emails, phones or addresses.",
+      "scopes": [
+        "write_products",
+        "write_inventory"
+      ],
+      "factorOverrides": {
+        "security_assessment": "no"
+      },
+      "note": "App Store review is still required, so the rating and timeline stay the same. You skip the protected customer data request and the data protection review it can trigger.",
+      "sourceIds": [
+        "S8",
+        "S4",
+        "S16"
+      ],
+      "confidence": "official"
+    },
+    {
+      "id": "shopify-public-full",
+      "label": "Public app, all scopes (default)",
+      "description": "The guide's default: a public-distribution app that reads and updates products, orders (including beyond 60 days) and customer data in many merchants' stores.",
+      "scopes": [
+        "write_products",
+        "read_orders",
+        "write_orders",
+        "read_all_orders",
+        "read_customers",
+        "write_customers",
+        "write_inventory"
+      ],
+      "factorOverrides": {},
+      "note": "This needs App Store review, an approved protected customer data request for names, emails, phones and addresses, and a read_all_orders approval for orders older than 60 days.",
+      "sourceIds": [
+        "S4",
+        "S8",
+        "S9"
+      ],
+      "confidence": "official"
+    }
+  ],
   "composioSetup": {
     "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
     "steps": [

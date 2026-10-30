@@ -828,6 +828,114 @@
       "confidence": "tested"
     }
   ],
+  "profiles": [
+    {
+      "id": "spotify-dev-mode-5-users",
+      "label": "Up to 5 users (Development Mode)",
+      "description": "A personal or beta agent for you and up to five named users, in a self-serve Development Mode app.",
+      "scopes": [
+        "user-read-recently-played",
+        "user-top-read",
+        "user-read-playback-state",
+        "user-read-currently-playing",
+        "user-modify-playback-state",
+        "playlist-read-private",
+        "playlist-read-collaborative",
+        "playlist-modify-private",
+        "playlist-modify-public",
+        "user-library-read"
+      ],
+      "factorOverrides": {
+        "review_required": "no",
+        "business_verification": "no",
+        "partner_or_sales_gate": "no"
+      },
+      "timeToProduction": {
+        "label": "Same day (5 users max)",
+        "minHours": 0.5,
+        "maxHours": 4,
+        "basis": "About an hour to register and connect your own account; each extra user is added by name and Spotify email in Users Management."
+      },
+      "handsOnEffort": {
+        "label": "About 1 hour",
+        "minHours": 0.5,
+        "maxHours": 2,
+        "basis": "Register the app, create the Composio auth config and add each tester (2 minutes per user)."
+      },
+      "note": "Development Mode needs no review or partner approval, but it is capped at 5 allowlisted users, the app owner needs Premium, and new apps get a reduced endpoint set since Feb 2026. Nobody else can connect.",
+      "sourceIds": [
+        "S5",
+        "S6",
+        "S9"
+      ],
+      "confidence": "official"
+    },
+    {
+      "id": "spotify-existing-extended-quota",
+      "label": "Existing extended-quota app",
+      "description": "You already own a Spotify app in extended quota mode and plug its Client ID and secret into Composio.",
+      "scopes": [
+        "user-read-recently-played",
+        "user-top-read",
+        "user-read-playback-state",
+        "user-read-currently-playing",
+        "user-modify-playback-state",
+        "playlist-read-private",
+        "playlist-read-collaborative",
+        "playlist-modify-private",
+        "playlist-modify-public",
+        "user-library-read"
+      ],
+      "factorOverrides": {
+        "review_required": "no",
+        "business_verification": "no",
+        "partner_or_sales_gate": "no",
+        "user_cap_before_review": "no"
+      },
+      "timeToProduction": {
+        "label": "Same day",
+        "minHours": 1,
+        "maxHours": 8,
+        "basis": "Paste the existing Client ID and secret into a Composio auth config; no new Spotify review."
+      },
+      "handsOnEffort": {
+        "label": "About 1 hour",
+        "minHours": 0.5,
+        "maxHours": 2,
+        "basis": "Create the Composio auth config, add the redirect URI and test a connection."
+      },
+      "note": "Extended-quota apps are unaffected by the February 2026 Development Mode restrictions and have no user allowlist, so there is no new review. It only helps if you already hold such an app; a new app can't get there without an approved Partner Application.",
+      "sourceIds": [
+        "S5",
+        "S6"
+      ],
+      "confidence": "official"
+    },
+    {
+      "id": "spotify-extended-quota-default",
+      "label": "Any user via extended quota (default)",
+      "description": "The guide's default: any Spotify user connects, which needs a legally registered organisation with 250k+ MAU and an approved Partner Application.",
+      "scopes": [
+        "user-read-recently-played",
+        "user-top-read",
+        "user-read-playback-state",
+        "user-read-currently-playing",
+        "user-modify-playback-state",
+        "playlist-read-private",
+        "playlist-read-collaborative",
+        "playlist-modify-private",
+        "playlist-modify-public",
+        "user-library-read"
+      ],
+      "factorOverrides": {},
+      "note": "This stays gated: a Partner Application must be approved first, then a quota-extension review of up to six weeks, and only organisations with 250k+ MAU are eligible.",
+      "sourceIds": [
+        "S5",
+        "S9"
+      ],
+      "confidence": "official"
+    }
+  ],
   "composioSetup": {
     "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
     "steps": [
