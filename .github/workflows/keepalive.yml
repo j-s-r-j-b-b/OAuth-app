@@ -1,0 +1,14 @@
+# Render's free tier sleeps after 15 minutes without traffic (about a minute to wake).
+# This pings the deployed app every 10 minutes so reviewers don't hit a cold start.
+# Set the repository variable APP_URL (Settings → Secrets and variables → Actions → Variables) to enable it.
+name: keep-alive
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    if: ${{ vars.APP_URL != '' }}
+    steps:
+      - run: curl -fsS --max-time 90 "${{ vars.APP_URL }}/api/health" || true

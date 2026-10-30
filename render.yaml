@@ -1,0 +1,20 @@
+# Render Blueprint: New → Blueprint → pick this repo. Render asks for the two secrets on first creation.
+services:
+  - type: web
+    name: oauth-runway
+    runtime: node
+    plan: free
+    # --include=dev: the build needs Vite/esbuild/Tailwind even if NODE_ENV=production is set.
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: LLM_MODEL
+        value: gemini-3.5-flash-lite
+      - key: LLM_API_KEY
+        sync: false
+      - key: COMPOSIO_API_KEY
+        sync: false

@@ -130,12 +130,18 @@ Library guides work with no keys at all; only live generation needs them.
 | `npm run catalog` | Refreshes the 382-toolkit catalog from Composio's docs |
 | `npm run build && npm start` | Production build (Vite app and bundled Express server) |
 
-## Deploy on Railway
+## Deploy
 
-1. Push this repo to GitHub, then in Railway choose **New Project → Deploy from GitHub repo**. Railway's builder runs `npm run build` and `npm start`. `railway.json` also sets a health check on `/api/health`.
-2. Variables: `LLM_API_KEY` and `COMPOSIO_API_KEY`. Optional: `LLM_MODEL`, `LLM_BASE_URL`, `GENERATE_LIMIT_PER_HOUR` (default 6 per IP).
-3. Attach a **Volume** to the service at any mount path, e.g. `/data`, so generated guides survive redeploys. The app picks up `RAILWAY_VOLUME_MOUNT_PATH` automatically; `DATA_DIR` overrides it.
-4. **Settings → Networking → Generate Domain.**
+**Render (free, what the demo uses).** In Render, choose **New → Blueprint** and pick this repo. [`render.yaml`](render.yaml) defines a free Node web service, and Render asks for `LLM_API_KEY` and `COMPOSIO_API_KEY`.
+- **Sleep:** free services sleep after 15 minutes idle, and waking takes about a minute. [`keepalive.yml`](.github/workflows/keepalive.yml) pings the app every 10 minutes once you set the repo variable `APP_URL`.
+- **Storage:** the free disk is wiped on every restart or redeploy, so guides generated on the deployed site are temporary there. The evaluated live guides in `docs/live-eval/` are loaded at startup, so the site always shows real live-agent output.
+
+**Railway (or any host with a persistent disk).** Deploy from GitHub; [`railway.json`](railway.json) sets the build, start and health check.
+- Set the same two variables.
+- Attach a Volume; the app picks up `RAILWAY_VOLUME_MOUNT_PATH` automatically, and `DATA_DIR` overrides it.
+- Then go to **Settings → Networking → Generate Domain**.
+
+Optional variables: `LLM_MODEL`, `LLM_BASE_URL` (any OpenAI-compatible endpoint), `GENERATE_LIMIT_PER_HOUR` (default 6 per IP).
 
 ## How it's built
 

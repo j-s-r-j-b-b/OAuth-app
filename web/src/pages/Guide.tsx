@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { guideToMarkdown } from '../../../shared/markdown.ts';
 import { DIFFICULTY_INFO, type Actor, type Guide, type Step } from '../../../shared/schema.ts';
-import { api, type Health, type Trace } from '../api.ts';
+import { api, type GuideSummary, type Health, type Trace } from '../api.ts';
 import { EventFeed, QualitySummary } from '../components/EventFeed.tsx';
 import { ActorChip, CONF, CopyButton, DIFF_BAR, DifficultyPill, Evidence, ManagedBadge, RunwayBar, Section } from '../components/ui.tsx';
 import { renderInline, renderMd } from '../lib/md.ts';
@@ -55,6 +55,7 @@ export default function GuidePage() {
   const [error, setError] = useState('');
   const [trace, setTrace] = useState<Trace | null>(null);
   const [health, setHealth] = useState<Health | null>(null);
+  const [allGuides, setAllGuides] = useState<GuideSummary[]>([]);
   const storageKey = `runway:${slug}:done`;
   const [done, setDone] = useState<Set<string>>(new Set());
 
@@ -64,6 +65,10 @@ export default function GuidePage() {
     api.guide(slug).then(setG).catch((e) => setError(e.message));
     api.trace(slug).then(setTrace).catch(() => setTrace(null));
     api.health().then(setHealth).catch(() => {});
+    api
+      .guides()
+      .then(setAllGuides)
+      .catch(() => {});
     try {
       setDone(new Set(JSON.parse(localStorage.getItem(storageKey) ?? '[]')));
     } catch {
@@ -144,6 +149,21 @@ export default function GuidePage() {
             <ManagedBadge m={g.composio.managedOAuth} />
             <Provenance g={g} />
           </div>
+          {(() => {
+            const twin =
+              g.meta.generator === 'live' && g.composio.toolkitSlug
+                ? allGuides.find((x) => x.generator === 'library' && x.toolkitSlug === g.composio.toolkitSlug)
+                : undefined;
+            return twin ? (
+              <div className="no-print mt-3 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-900 dark:border-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-200">
+                A <strong>verified library guide</strong> exists for this app.{' '}
+                <Link to={`/guides/${twin.slug}`} className="font-semibold underline">
+                  Open it
+                </Link>
+                . This page is the live agent's quick first draft and may miss nuances; comparing the two shows what deeper research adds.
+              </div>
+            ) : null;
+          })()}
         </div>
         <div className="no-print flex flex-wrap gap-2">
           <CopyButton text={url} label="Copy link" />

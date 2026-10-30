@@ -58,7 +58,33 @@ function readDir(dir: string): Guide[] {
 }
 
 let library = readDir(LIBRARY_DIR);
-let generated = readDir(GEN_DIR);
+
+/**
+ * Live-agent outputs from the evaluation (committed under docs/live-eval), so a fresh deployment on an
+ * ephemeral disk still shows real live guides. A seed whose slug belongs to a library guide becomes "<slug>-live".
+ */
+const SEED_DIR = 'docs/live-eval';
+function readSeeds(): { guides: Guide[]; traces: Map<string, Trace> } {
+  const guides: Guide[] = [];
+  const traces = new Map<string, Trace>();
+  if (!existsSync(SEED_DIR)) return { guides, traces };
+  const libSlugs = new Set(library.map((g) => g.slug));
+  for (const f of readdirSync(SEED_DIR).filter((f) => f.endsWith('.json') && !f.endsWith('.trace.json'))) {
+    try {
+      const g = Guide.parse(JSON.parse(readFileSync(join(SEED_DIR, f), 'utf8')));
+      if (libSlugs.has(g.slug)) g.slug = `${g.slug}-live`;
+      const tracePath = join(SEED_DIR, f.replace(/\.json$/, '.trace.json'));
+      if (existsSync(tracePath)) traces.set(g.slug, JSON.parse(readFileSync(tracePath, 'utf8')) as Trace);
+      guides.push(g);
+    } catch (e) {
+      console.warn(`[store] skipping invalid seed ${f}: ${(e as Error).message.slice(0, 200)}`);
+    }
+  }
+  return { guides, traces };
+}
+const seeds = readSeeds();
+const fromDisk = readDir(GEN_DIR);
+let generated = [...seeds.guides.filter((s) => !fromDisk.some((g) => g.slug === s.slug)), ...fromDisk];
 
 /** In dev, pick up library edits without a restart. */
 export function reloadLibrary() {
@@ -94,6 +120,6 @@ export const store = {
   },
   trace(slug: string): Trace | null {
     const p = join(TRACE_DIR, `${slug}.json`);
-    return existsSync(p) ? (JSON.parse(readFileSync(p, 'utf8')) as Trace) : null;
+    return existsSync(p) ? (JSON.parse(readFileSync(p, 'utf8')) as Trace) : (seeds.traces.get(slug) ?? null);
   },
 };
