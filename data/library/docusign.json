@@ -23,8 +23,9 @@
       }
     ],
     "notes": [
+      "Tested: a custom auth config created without `oauth_redirect_uri` sends `https://backend.composio.dev/api/v1/auth-apps/add`, not the v3 callback shown in Composio's API docs. Register exactly the URI your auth config sends, or set `oauth_redirect_uri` to `https://backend.composio.dev/api/v3/toolkits/auth/callback` and register that instead.",
       "Composio-managed OAuth is not available. You must bring your own DocuSign integration key (client ID) and secret key.",
-      "Composio's DocuSign guide shows the redirect URI https://backend.composio.dev/api/v1/auth-apps/add. The standard Composio callback is https://backend.composio.dev/api/v3/toolkits/auth/callback. Register whichever URI your auth config form shows; DocuSign accepts several redirect URIs per app.",
+      "DocuSign accepts several redirect URIs per app, so register both `https://backend.composio.dev/api/v1/auth-apps/add` (what Composio sends by default) and `https://backend.composio.dev/api/v3/toolkits/auth/callback` (sent only if the auth config sets `oauth_redirect_uri`).",
       "Tools accept accountId 'auto' and fill it from the connected account. DOCUSIGN_LIST_OAUTH_USERINFO returns the user's accounts with their base URIs.",
       "All 20 DocuSign triggers (for example DOCUSIGN_ENVELOPE_COMPLETED) are webhook-based. Use them to track status instead of polling, which DocuSign rate-limits."
     ]
@@ -243,13 +244,14 @@
           "actor": "you",
           "effort": "5 min",
           "wait": null,
-          "details": "Under **Additional Settings → Redirect URIs**, click **+ Add URI** and enter `https://backend.composio.dev/api/v3/toolkits/auth/callback`. Also add any different URI your Composio auth config form shows; Composio's DocuSign guide lists `https://backend.composio.dev/api/v1/auth-apps/add`. Optionally fill **Privacy Policy** and **Terms of Use** URLs. Leave CORS empty. Click **Save**; changes can take up to 5 min to propagate. The app should then show **Go Live Status: Ready to Submit**.",
+          "details": "Under **Additional Settings → Redirect URIs**, click **+ Add URI** and enter `https://backend.composio.dev/api/v1/auth-apps/add`, which Composio sends by default. Also add `https://backend.composio.dev/api/v3/toolkits/auth/callback`, which Composio sends only if the auth config sets `oauth_redirect_uri`. Optionally fill **Privacy Policy** and **Terms of Use** URLs. Leave CORS empty. Click **Save**; changes can take up to 5 min to propagate. The app should then show **Go Live Status: Ready to Submit**.",
           "agentAssist": "Can pre-fill the exact URIs and check that each matches the Composio form character for character.",
           "links": [],
           "sourceIds": [
             "S2",
             "S3",
-            "S9"
+            "S9",
+            "P7"
           ],
           "confidence": "official"
         }
@@ -559,9 +561,10 @@
       "scope": "extended",
       "purpose": "Each refresh issues a refresh token with a full lifetime (typically 30 days).",
       "tier": "basic",
-      "note": "Without it, the refresh token expires about 30 days after first login and users must reconnect. Unverified whether Composio requests it by default.",
+      "note": "Without it, the refresh token expires about 30 days after first login and users must reconnect. Composio does not request it by default (tested), so add it to the auth config scopes.",
       "sourceIds": [
-        "S10"
+        "S10",
+        "P7"
       ],
       "confidence": "official"
     },
@@ -569,10 +572,11 @@
       "scope": "impersonation",
       "purpose": "JWT Grant (service integrations acting as a user).",
       "tier": "sensitive",
-      "note": "Not used by Composio's OAuth2 (Authorization Code) scheme. Needed only if you build a JWT service flow, which requires user or admin consent and an RSA key pair.",
+      "note": "Not needed for the Authorization Code grant, but Composio requests it by default (tested). Needed only for a JWT service flow, which requires user or admin consent and an RSA key pair.",
       "sourceIds": [
         "S10",
-        "S9"
+        "S9",
+        "P7"
       ],
       "confidence": "official"
     },
@@ -759,18 +763,39 @@
         "S5"
       ],
       "confidence": "official"
+    },
+    {
+      "title": "Composio requests `signature impersonation` by default",
+      "detail": "Composio's default DocuSign scopes are `signature impersonation`, with no `extended`. `impersonation` is a JWT-grant scope you do not need here, and without `extended` refresh tokens die after about 30 days, so override the auth config scopes to `signature extended`.",
+      "sourceIds": [
+        "P7"
+      ],
+      "confidence": "tested"
     }
   ],
   "composioSetup": {
-    "redirectUri": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+    "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
     "steps": [
-      "In DocuSign Apps and Keys, register https://backend.composio.dev/api/v3/toolkits/auth/callback as a redirect URI, plus any different URI shown in your Composio auth config form (Composio's DocuSign guide lists https://backend.composio.dev/api/v1/auth-apps/add).",
+      "In DocuSign Apps and Keys, register https://backend.composio.dev/api/v1/auth-apps/add (what Composio sends by default) and, in case you set `oauth_redirect_uri` on the auth config, https://backend.composio.dev/api/v3/toolkits/auth/callback.",
       "Composio → Auth Configs → + Create Auth Config → DocuSign (OAUTH2).",
       "Client ID = Integration Key; Client Secret = Secret Key; Authorization URL = https://account-d.docusign.com (demo) or https://account.docusign.com (production). Request scopes `signature extended`.",
       "Save, then click Connect Account and click Allow Access on the DocuSign consent screen; confirm the connected account is ACTIVE.",
       "Run DOCUSIGN_LIST_OAUTH_USERINFO to confirm the account ID and base URI. Tools accept accountId 'auto'.",
       "After Go-Live, create a separate production auth config with the production secret and pass it in your sessions' authConfigs."
-    ]
+    ],
+    "tested": {
+      "probeId": "P7",
+      "testedAt": "2026-10-30",
+      "authorizeUrl": "https://account.docusign.com/oauth/auth",
+      "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
+      "defaultScopes": [
+        "signature",
+        "impersonation"
+      ],
+      "extraParams": {
+        "response_type": "code"
+      }
+    }
   },
   "evidence": {
     "sources": [
@@ -989,6 +1014,15 @@
         "summary": "All cited DocuSign doc pages exist (HTTP 200).",
         "detail": "Pages are client-rendered (Gatsby); content read from /page-data/<path>/page-data.json.",
         "at": "2026-10-28T07:30:00Z"
+      },
+      {
+        "kind": "composio-api",
+        "target": "Composio API: create custom OAuth2 auth config for `docusign` with a dummy client → start a connection → follow the redirect (then delete both)",
+        "result": "pass",
+        "summary": "Composio sends users to https://account.docusign.com/oauth/auth with redirect_uri=https://backend.composio.dev/api/v1/auth-apps/add; default scopes: signature impersonation; PKCE on.",
+        "detail": "{\"authorizeUrl\":\"https://account.docusign.com/oauth/auth\",\"redirectUri\":\"https://backend.composio.dev/api/v1/auth-apps/add\",\"scopes\":[\"signature\",\"impersonation\"],\"extraParams\":{\"response_type\":\"code\"},\"pkce\":true,\"note\":\"extra params: response_type=code\"}",
+        "id": "P7",
+        "at": "2026-10-30T09:33:41.042Z"
       }
     ],
     "openQuestions": [
@@ -1003,19 +1037,9 @@
         "howToResolve": "Ask the Docusign partner team in writing (partner support case or partners.docusign.com). The public requirements page could not be rendered for this guide."
       },
       {
-        "question": "Which scopes does Composio's DocuSign OAuth2 auth config request by default, and is `extended` included?",
-        "whyItMatters": "Without `extended`, connections need re-consent about 30 days after first login.",
-        "howToResolve": "Inspect the auth config's scopes in the Composio dashboard or toolkit API, or check the scope parameter on a test authorize URL."
-      },
-      {
         "question": "Which paid plans can hold a promoted key for a Private custom integration (Starter API plan? Business Pro?)",
         "whyItMatters": "It sets the minimum spend for the internal-only and Bring Your Own Key fallbacks; reports conflict.",
         "howToResolve": "Ask Docusign sales before purchase, or try Actions → Select Go-Live account against the candidate account."
-      },
-      {
-        "question": "Which redirect URI does the current Composio DocuSign auth config expect: v3 toolkits/auth/callback or v1 auth-apps/add?",
-        "whyItMatters": "A mismatch breaks consent with a redirect error.",
-        "howToResolve": "Read the redirect URI shown in the Composio auth config form, or ask Composio support; registering both is harmless."
       },
       {
         "question": "Do Composio's webhook triggers create a Connect configuration in each customer's account, and does that need Connect on the customer's plan?",
@@ -1031,55 +1055,92 @@
           "claim": "timeToProduction 2–8 weeks (partner program \"several weeks\" + app review + Go-Live ≤48 h)",
           "outcome": "unverifiable",
           "note": "Docusign's ISV Go-Live page says joining \"can take several weeks\" and the 48 h Go-Live figure is official. No source gives a Partner Application Review time. The basis now says \"Estimate\" and a new open question covers it.",
-          "sourceIds": ["S16", "S4", "S22"]
+          "sourceIds": [
+            "S16",
+            "S4",
+            "S22"
+          ]
         },
         {
           "claim": "A Public integration (one key, many customer accounts) requires Docusign Partner Program membership; no security assessment",
           "outcome": "confirmed",
           "note": "Both Go-Live pages say you must join the Partner Program to launch a public integration. A Docusign employee confirmed it in Aug 2026 for a multi-tenant SaaS. The app review lists four items, no security assessment.",
-          "sourceIds": ["S4", "S5", "S23", "S17"]
+          "sourceIds": [
+            "S4",
+            "S5",
+            "S23",
+            "S17"
+          ]
         },
         {
           "claim": "The old \"20 API calls\" Go-Live rule was removed in Oct 2025; Go-Live is an automated check",
           "outcome": "confirmed",
           "note": "A Docusign employee post (3 Oct 2025) announces no more 20 eSignature calls and instant approval in most cases. Neither Go-Live page mentions the rule. The 20-transaction test mode survives only for per-customer-key designs.",
-          "sourceIds": ["S22", "S4", "S5", "S19"]
+          "sourceIds": [
+            "S22",
+            "S4",
+            "S5",
+            "S19"
+          ]
         },
         {
           "claim": "Go-Live results: Pending approval, or Declined + Verification required; manual reviews take 24–48 h",
           "outcome": "corrected",
           "note": "The platform page puts \"manual reviews ... 24–48 hours\" and the Verification link under Declined; Pending approval has no stated time. Rewrote step s11 to match; the Oct 2025 post says reviews take 48 h or less.",
-          "sourceIds": ["S4", "S5", "S22"]
+          "sourceIds": [
+            "S4",
+            "S5",
+            "S22"
+          ]
         },
         {
           "claim": "Plan needs: paid production account; API plans $50/$300/$480 a month annual ($75/$450/$720 monthly); Business Pro case by case",
           "outcome": "confirmed",
           "note": "The pricing page shows the annual and monthly prices and Starter 40 and Intermediate 100 envelopes. Go-Live pages require a paid or partner production account. A support case in S25 says Business Pro is promoted case by case.",
-          "sourceIds": ["S21", "S5", "S25"]
+          "sourceIds": [
+            "S21",
+            "S5",
+            "S25"
+          ]
         },
         {
           "claim": "Partner eligibility reportedly needs at least 20 employees and 1 year in business",
           "outcome": "unverifiable",
           "note": "Only forum users state this (one quotes a requirements page; another was rejected for under 20 employees). No official page found. The partner ops/business review is official. Added S25; the existing open question stays.",
-          "sourceIds": ["S24", "S25", "S20"]
+          "sourceIds": [
+            "S24",
+            "S25",
+            "S20"
+          ]
         },
         {
           "claim": "Console path: Admin → Integrations → Apps and Keys → add app; User Application Yes; Add Secret Key; Add URI; Save",
           "outcome": "corrected",
           "note": "Docusign's configure-app page confirms the secret, User Application, redirect URI, Save, 5-minute propagation and no-delete steps. It labels the add-app dialog button \"ADD\", not \"Create App\"; step s2 now notes both.",
-          "sourceIds": ["S9", "S4"]
+          "sourceIds": [
+            "S9",
+            "S4"
+          ]
         },
         {
           "claim": "Polling: 1 GET status per envelope per 15 min; 3,000 calls/h; burst 200 demo/500 prod; ≤5 calls per envelope create/update",
           "outcome": "corrected",
           "note": "The limits page confirms the 15-minute rule (poll at 20), 3,000/h and the 200/500 burst. It has no \"5 calls per envelope\" rule, so I removed it from step s7 and the polling blocker; per-envelope GET and PUT limits remain.",
-          "sourceIds": ["S13"]
+          "sourceIds": [
+            "S13"
+          ]
         },
         {
           "claim": "Probes P1–P5 still match: demo and prod discovery, client_id_not_found on both authorize endpoints, portal login wall",
           "outcome": "confirmed",
           "note": "Re-run today: demo discovery 200 with 347 scopes and no registration_endpoint, prod 343 scopes; both authorize URLs return 200 with client_id_not_found; Apps and Keys shows isUserAuthed false, clientAppCreationAllowed true.",
-          "sourceIds": ["P1", "P2", "P3", "P4", "P5"]
+          "sourceIds": [
+            "P1",
+            "P2",
+            "P3",
+            "P4",
+            "P5"
+          ]
         }
       ]
     }

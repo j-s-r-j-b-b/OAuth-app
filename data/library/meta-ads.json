@@ -19,6 +19,7 @@
     "toolkitDocsUrl": "https://docs.composio.dev/toolkits/metaads",
     "requiredFields": [],
     "notes": [
+      "Tested: a custom auth config created without `oauth_redirect_uri` sends `https://backend.composio.dev/api/v1/auth-apps/add`, not the v3 callback shown in Composio's API docs. Register exactly the URI your auth config sends, or set `oauth_redirect_uri` to `https://backend.composio.dev/api/v3/toolkits/auth/callback` and register that instead.",
       "Composio has no managed OAuth app for `metaads` (78 tools, 0 triggers, toolkit version 20261026_00), so you must bring your own Meta app.",
       "The related `facebook` toolkit (Pages only) and `instagram` toolkit (Business/Creator accounts) do have Composio-managed OAuth. Use them if you only need Page or Instagram content, not ads.",
       "There is no Meta Ads-specific Composio auth guide (composio.dev/auth/meta and /auth/metaads return 404). Follow composio.dev/auth/facebook: it says the same steps apply to other Meta apps.",
@@ -51,6 +52,7 @@
     },
     "longestPole": "Business Verification of your business portfolio, followed by App Review for Advanced Access to ads_read, ads_management and business_management. Rejections over screen recordings are common.",
     "cost": "Free (no Meta fees found)",
+    "costDetail": "Meta's docs list no fee for the app, App Review or Marketing API access; the Limited tier is granted automatically. You need a registered legal business with matching documents and a website, plus a public privacy policy. Ad spend is billed to each advertiser's own ad account. The free rating is inferred, because no page states the pricing explicitly.",
     "easierPaths": [
       {
         "condition": "Only your own company's ad accounts, or a few pilot users you can add to App roles as Tester or Developer",
@@ -68,8 +70,7 @@
         "condition": "A single business that owns all the ad accounts",
         "effect": "Use a system-user token from that business with Composio's API_KEY scheme instead of an OAuth flow for many users."
       }
-    ],
-    "costDetail": "Meta's docs list no fee for the app, App Review or Marketing API access; the Limited tier is granted automatically. You need a registered legal business with matching documents and a website, plus a public privacy policy. Ad spend is billed to each advertiser's own ad account. The free rating is inferred, because no page states the pricing explicitly."
+    ]
   },
   "factors": [
     {
@@ -255,7 +256,7 @@
           "actor": "you",
           "effort": "5 min",
           "wait": null,
-          "details": "In **Facebook Login for Business → Settings → Client OAuth settings → Valid OAuth Redirect URIs**, add `https://backend.composio.dev/api/v3/toolkits/auth/callback`. It must match exactly; only `state` is ignored. Keep **Strict Mode** and **Enforce HTTPS** on. Meta's docs name this path only for classic Facebook Login (Products → Facebook Login → Settings); the Business-login path comes from a third-party guide, so search Settings if the field isn't there. Composio's guide says 'App Settings → Advanced', but Meta checks the Valid OAuth Redirect URIs list.",
+          "details": "In **Facebook Login for Business → Settings → Client OAuth settings → Valid OAuth Redirect URIs**, add both `https://backend.composio.dev/api/v1/auth-apps/add` (what Composio sends by default) and `https://backend.composio.dev/api/v3/toolkits/auth/callback` (used only if you set `oauth_redirect_uri`). It must match exactly; only `state` is ignored. Keep **Strict Mode** and **Enforce HTTPS** on. Meta's docs name this path only for classic Facebook Login (Products → Facebook Login → Settings); the Business-login path comes from a third-party guide, so search Settings if the field isn't there. Composio's guide says 'App Settings → Advanced', but Meta checks the Valid OAuth Redirect URIs list.",
           "agentAssist": "After setup, opens the authorize URL with your real App ID to confirm Facebook shows the consent screen and not a redirect error.",
           "links": [
             {
@@ -268,7 +269,8 @@
             "S21",
             "S22",
             "S3",
-            "S2"
+            "S2",
+            "P7"
           ],
           "confidence": "reported"
         },
@@ -301,7 +303,7 @@
           "effort": "10 min",
           "wait": null,
           "details": "In the Composio dashboard, go to **Auth Configs → Create Auth Config → Meta Ads (`metaads`) → OAuth2 → Use your own developer authentication**. Paste the App ID and App Secret. Scopes: `ads_read,ads_management,business_management,pages_show_list,pages_read_engagement`. Click **Create** and copy the `ac_…` ID.",
-          "agentAssist": "Can create it through Composio's API or SDK with your API key, then echo back the redirect URI the dashboard shows so you can compare it with the one in Meta.",
+          "agentAssist": "Can create it through Composio's API or SDK with your API key, then start a connection and read the `redirect_uri` in the authorize URL, so you can compare it with the ones in Meta.",
           "links": [
             {
               "label": "Managed vs custom auth",
@@ -738,16 +740,17 @@
       "title": "Redirect URI not allow-listed",
       "symptom": "Connect fails at Facebook with a redirect error instead of the consent screen.",
       "likelihood": "occasional",
-      "howToProceed": "Add `https://backend.composio.dev/api/v3/toolkits/auth/callback` exactly to Valid OAuth Redirect URIs in the Facebook Login for Business settings, not only App Domains. It must also match the callback the Composio dashboard shows.",
+      "howToProceed": "Add `https://backend.composio.dev/api/v1/auth-apps/add` (Composio's default) and `https://backend.composio.dev/api/v3/toolkits/auth/callback` (if you set `oauth_redirect_uri`) exactly to Valid OAuth Redirect URIs in the Facebook Login for Business settings, not only App Domains. Compare with the `redirect_uri` in the failing authorize URL.",
       "escalation": {
         "label": "Composio KB: Facebook",
         "url": "https://docs.composio.dev/kb/guide/toolkits-facebook"
       },
       "sourceIds": [
         "S3",
-        "S15"
+        "S15",
+        "P7"
       ],
-      "confidence": "official"
+      "confidence": "tested"
     },
     {
       "title": "Wrong client ID in the auth config",
@@ -837,19 +840,43 @@
         "S10"
       ],
       "confidence": "official"
+    },
+    {
+      "title": "Composio requests only three scopes by default",
+      "detail": "The default request is `ads_read`, `ads_management` and `business_management`, without the `pages_show_list` and `pages_read_engagement` dependencies listed for the last two. Override the auth config scopes to match what you submit for review, and drop `ads_management` if the agent only reads insights.",
+      "sourceIds": [
+        "P7"
+      ],
+      "confidence": "tested"
     }
   ],
   "composioSetup": {
-    "redirectUri": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+    "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
     "steps": [
       "In the Composio dashboard, go to Auth Configs → Create Auth Config → choose Meta Ads (`metaads`) → OAuth2 → 'Use your own developer authentication'.",
       "Paste the numeric App ID as the Client ID and the App Secret as the Client Secret.",
       "Set the scopes to ads_read, ads_management, business_management, pages_show_list and pages_read_engagement. Add pages_manage_ads or leads_retrieval only if you use them and they are approved.",
-      "Check that the callback the dashboard shows is https://backend.composio.dev/api/v3/toolkits/auth/callback and that it is listed under Valid OAuth Redirect URIs in Meta's Facebook Login for Business settings.",
+      "Check that Valid OAuth Redirect URIs in Meta's Facebook Login for Business settings lists https://backend.composio.dev/api/v1/auth-apps/add (what Composio sends by default) and, if you set `oauth_redirect_uri`, https://backend.composio.dev/api/v3/toolkits/auth/callback.",
       "Click Create, copy the auth config ID (ac_…), then use Connect Account to test as your Playground user, logged in as a Facebook user with a role on the app.",
       "In code, call composio.create(userId, { authConfigs: { metaads: 'ac_…' } }) and send users hosted connect links. Without this, the session won't use your config.",
       "After any scope change, users must reconnect for the new permissions to appear in their Meta grant."
-    ]
+    ],
+    "tested": {
+      "probeId": "P7",
+      "testedAt": "2026-10-30",
+      "authorizeUrl": "https://www.facebook.com/v26.0/dialog/oauth",
+      "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
+      "defaultScopes": [
+        "ads_read",
+        "ads_management",
+        "business_management"
+      ],
+      "extraParams": {
+        "response_type": "code",
+        "prompt": "consent",
+        "response_mode": "query"
+      }
+    }
   },
   "evidence": {
     "sources": [
@@ -1092,6 +1119,15 @@
         "summary": "All six cited pages returned HTTP 200. Meta serves text/markdown versions to non-browser clients. composio.dev/auth/meta and /auth/metaads returned 404.",
         "detail": "Sizes: 9.3 KB, 168 KB, 3.8 KB, 12 KB (Meta); 113 KB and 208 KB (Composio). The authorization page's own dialog example uses v26.0.",
         "at": "2026-10-28T07:20:28Z"
+      },
+      {
+        "kind": "composio-api",
+        "target": "Composio API: create custom OAuth2 auth config for `metaads` with a dummy client → start a connection → follow the redirect (then delete both)",
+        "result": "pass",
+        "summary": "Composio sends users to https://www.facebook.com/v26.0/dialog/oauth with redirect_uri=https://backend.composio.dev/api/v1/auth-apps/add; default scopes: ads_read ads_management business_management; PKCE on.",
+        "detail": "{\"authorizeUrl\":\"https://www.facebook.com/v26.0/dialog/oauth\",\"redirectUri\":\"https://backend.composio.dev/api/v1/auth-apps/add\",\"scopes\":[\"ads_read\",\"ads_management\",\"business_management\"],\"extraParams\":{\"response_type\":\"code\",\"prompt\":\"consent\",\"response_mode\":\"query\"},\"pkce\":true,\"note\":\"extra params: response_type=code, prompt=consent, response_mode=query\"}",
+        "id": "P7",
+        "at": "2026-10-30T09:33:49.536Z"
       }
     ],
     "openQuestions": [

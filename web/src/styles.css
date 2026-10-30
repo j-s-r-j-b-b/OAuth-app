@@ -80,3 +80,17 @@ body {
     break-inside: avoid;
   }
 }
+
+/* Long URLs, scope strings and code in guide text must wrap on phones. */
+.md,
+.md :where(code),
+.md :where(a) {
+  overflow-wrap: anywhere;
+}
+main :where(code) {
+  overflow-wrap: anywhere;
+}
+html,
+body {
+  overflow-x: clip;
+}

@@ -115,6 +115,22 @@ export default function SearchBox({ catalog, guides, liveEnabled }: { catalog: C
           {busy ? 'Starting…' : 'Get the guide'}
         </button>
       </form>
+      {liveEnabled && (
+        <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs">
+          <span className="text-slate-500 dark:text-slate-400">Try a live run:</span>
+          {['Klaviyo', 'Smartsheet', 'Zoom', 'QuickBooks', 'Typeform'].map((app) => (
+            <button
+              key={app}
+              type="button"
+              disabled={busy}
+              onClick={() => go(app, null)}
+              className="rounded-full border border-slate-300 bg-white px-2.5 py-1 font-medium text-slate-700 hover:border-sky-400 hover:text-sky-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:text-sky-300"
+            >
+              {app}
+            </button>
+          ))}
+        </div>
+      )}
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
         {liveEnabled
           ? 'Library apps open instantly. For anything else, a research agent investigates live (about 2–4 minutes) and publishes a shareable guide.'

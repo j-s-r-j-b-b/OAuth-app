@@ -18,7 +18,7 @@ State the **assumption** the ratings are based on. Pick a typical agent use case
 
 ## 2. Research order
 
-1. **Composio facts.** Read `https://docs.composio.dev/toolkits/<slug>.md` for auth schemes, managed-OAuth status and FAQ gotchas, and `https://composio.dev/auth/<app>` if a setup guide exists. The redirect URI to register is `https://backend.composio.dev/api/v3/toolkits/auth/callback`.
+1. **Composio facts.** Read `https://docs.composio.dev/toolkits/<slug>.md` for auth schemes, managed-OAuth status and FAQ gotchas, and `https://composio.dev/auth/<app>` if a setup guide exists. Redirect URI (tested 2026-10-30): a custom auth config created without `oauth_redirect_uri` sends `https://backend.composio.dev/api/v1/auth-apps/add`; one that sets `oauth_redirect_uri` to `https://backend.composio.dev/api/v3/toolkits/auth/callback` sends that. Tell developers to register exactly what their auth config sends (both, where the provider allows several). `npm run connect-probe` records what Composio actually sends per toolkit.
 2. **Provider's official docs.** Cover app registration, OAuth endpoints, scopes, distribution, publishing, review or verification, user and tenant caps before approval, rate limits, API pricing and access tiers, and developer terms. These are `official` sources.
 3. **Real-world reports.** Use forums, Reddit, Stack Overflow, provider community boards and GitHub issues for actual review times, rejection reasons and surprises. These are `community` sources and must be labelled that way.
 4. **Recency.** Today is late 2026. Prefer current pages and flag anything that recently changed or is announced to change. Never rely on memory for prices, quotas or timelines. Find a source or mark the claim `inferred` and add an open question.

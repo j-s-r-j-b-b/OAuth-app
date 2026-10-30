@@ -190,3 +190,122 @@ export async function getToolkitDocs(slug: string): Promise<{ url: string; authL
   const faq = faqStart >= 0 ? md.slice(faqStart, faqEnd > 0 ? faqEnd : faqStart + 6000).slice(0, 6000) : '';
   return { url: url.replace(/\.md$/, ''), authLine, managedLine, faq };
 }
+
+export type ConnectProbeResult = {
+  ok: boolean;
+  stage: 'auth-config' | 'connection' | 'redirect' | 'done';
+  error?: string;
+  authorizeUrl?: string;
+  redirectUri?: string | null;
+  scopes?: string[];
+  extraParams?: Record<string, string>;
+  pkce?: boolean;
+};
+
+/**
+ * A real setup attempt through Composio, using throwaway credentials:
+ * create a custom OAuth2 auth config with a dummy client → start a connection →
+ * follow Composio's redirect to the provider → record exactly what Composio sends
+ * (authorize URL, redirect_uri, scopes) → delete everything.
+ */
+export async function connectProbe(
+  toolkitSlug: string,
+  connectionData: Record<string, string> = {},
+  extraCredentials: Record<string, string> = {},
+): Promise<ConnectProbeResult> {
+  if (!composioEnabled()) return { ok: false, stage: 'auth-config', error: 'No Composio API key' };
+  let authConfigId: string | undefined;
+  let connectionId: string | undefined;
+  try {
+    const ac = await api<{ auth_config: { id: string } }>('/auth_configs', {
+      method: 'POST',
+      body: JSON.stringify({
+        toolkit: { slug: toolkitSlug },
+        auth_config: {
+          type: 'use_custom_auth',
+          authScheme: 'OAUTH2',
+          name: 'oauth-runway-probe (auto-deleted)',
+          credentials: { client_id: 'oauth-runway-probe', client_secret: 'oauth-runway-probe-secret', ...extraCredentials },
+        },
+      }),
+    }).catch((e: Error) => {
+      throw Object.assign(e, { stage: 'auth-config' });
+    });
+    authConfigId = ac.auth_config.id;
+    const conn = await api<{ id: string; redirect_url?: string; redirect_uri?: string }>('/connected_accounts', {
+      method: 'POST',
+      body: JSON.stringify({
+        auth_config: { id: authConfigId },
+        connection: { user_id: 'oauth-runway-probe', ...(Object.keys(connectionData).length ? { data: connectionData } : {}) },
+      }),
+    }).catch((e: Error) => {
+      throw Object.assign(e, { stage: 'connection' });
+    });
+    connectionId = conn.id;
+    const short = conn.redirect_url ?? conn.redirect_uri;
+    if (!short) return { ok: false, stage: 'redirect', error: 'Composio returned no redirect URL' };
+    // Composio's link is a short URL that 30x-redirects to the provider's authorize endpoint.
+    let url = short;
+    for (let i = 0; i < 4; i++) {
+      const res = await fetch(url, { redirect: 'manual', signal: AbortSignal.timeout(15000) });
+      const loc = res.headers.get('location');
+      if (!loc || res.status < 300 || res.status >= 400) break;
+      url = new URL(loc, url).toString();
+      if (!/composio\.dev/.test(new URL(url).hostname)) break;
+    }
+    const u = new URL(url);
+    if (/composio\.dev/.test(u.hostname)) return { ok: false, stage: 'redirect', error: `Redirect stayed on Composio (${u.hostname}${u.pathname})` };
+    const params = Object.fromEntries(u.searchParams);
+    const { client_id: _c, redirect_uri, scope, state: _s, code_challenge, code_challenge_method: _m, ...extra } = params;
+    return {
+      ok: true,
+      stage: 'done',
+      authorizeUrl: `${u.origin}${u.pathname}`,
+      redirectUri: redirect_uri ?? null,
+      scopes: scope ? scope.split(/[\s,+]+/).filter(Boolean) : [],
+      extraParams: extra,
+      pkce: Boolean(code_challenge),
+    };
+  } catch (e) {
+    return { ok: false, stage: ((e as { stage?: ConnectProbeResult['stage'] }).stage ?? 'auth-config'), error: (e as Error).message.slice(0, 300) };
+  } finally {
+    if (connectionId) await api(`/connected_accounts/${connectionId}`, { method: 'DELETE' }).catch(() => {});
+    if (authConfigId) await api(`/auth_configs/${authConfigId}`, { method: 'DELETE' }).catch(() => {});
+  }
+}
+
+/** Human summary + probe record for a connect-probe result. */
+export function describeConnectProbe(toolkitSlug: string, r: ConnectProbeResult) {
+  const target = `Composio API: create custom OAuth2 auth config for \`${toolkitSlug}\` with a dummy client → start a connection → follow the redirect (then delete both)`;
+  if (!r.ok) {
+    return {
+      kind: 'composio-api' as const,
+      target,
+      result: 'info' as const,
+      summary: `Composio connect test stopped at ${r.stage}: ${r.error}`,
+      detail: null,
+    };
+  }
+  const extra = Object.entries(r.extraParams ?? {}).map(([k, v]) => `${k}=${v}`).join(', ');
+  return {
+    kind: 'composio-api' as const,
+    target,
+    result: 'pass' as const,
+    summary: `Composio sends users to ${r.authorizeUrl} with redirect_uri=${r.redirectUri ?? '(none)'}; default scopes: ${r.scopes?.length ? r.scopes.join(' ') : '(none sent)'}${r.pkce ? '; PKCE on' : ''}.`,
+    detail: JSON.stringify({ authorizeUrl: r.authorizeUrl, redirectUri: r.redirectUri, scopes: r.scopes, extraParams: r.extraParams, pkce: r.pkce, note: extra ? `extra params: ${extra}` : undefined }).slice(0, 1500),
+  };
+}
+
+/** Connect probe that first looks up the toolkit's required fields and fills them with dummy values. */
+export async function connectProbeAuto(toolkitSlug: string): Promise<ConnectProbeResult> {
+  const auth = await getToolkitAuth(toolkitSlug).catch(() => null);
+  const oauth = auth?.details.find((d) => /OAUTH2/i.test(d.scheme));
+  if (!oauth) return { ok: false, stage: 'auth-config', error: 'Toolkit has no OAuth2 scheme in Composio' };
+  const dummy = (name: string, description: string) =>
+    /url|endpoint|full|host|domain/i.test(`${name} ${description}`) && !/subdomain/i.test(name) ? 'https://oauth-runway-probe.example.com' : 'oauth-runway-probe';
+  const extraCredentials = Object.fromEntries(
+    oauth.configFields.filter((f) => f.required && !['client_id', 'client_secret'].includes(f.name)).map((f) => [f.name, dummy(f.name, f.description)]),
+  );
+  const connectionData = Object.fromEntries(oauth.connectionFields.filter((f) => f.required).map((f) => [f.name, dummy(f.name, f.description)]));
+  return connectProbe(toolkitSlug, connectionData, extraCredentials);
+}

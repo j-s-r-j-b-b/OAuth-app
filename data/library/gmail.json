@@ -18,9 +18,10 @@
     "toolkitDocsUrl": "https://docs.composio.dev/toolkits/gmail",
     "requiredFields": [],
     "notes": [
+      "Tested: a custom auth config created without `oauth_redirect_uri` sends `https://backend.composio.dev/api/v1/auth-apps/add`, not the v3 callback shown in Composio's API docs. Register exactly the URI your auth config sends, or set `oauth_redirect_uri` to `https://backend.composio.dev/api/v3/toolkits/auth/callback` and register that instead.",
       "Composio-managed OAuth works out of the box. Bring your own client for your own consent-screen name and logo, your own Gmail API quota (the managed app's quota is shared), and scopes beyond the defaults, such as gmail.settings.basic.",
       "Sibling toolkits googlecalendar, googledrive, googlesheets and googledocs can reuse the same Google Cloud project, consent screen and OAuth client. Enable each API in the project. Every scope you add joins the same verification, and Drive's full-access scopes are restricted too, so adding them widens the restricted review and the CASA assessment.",
-      "Register the v3 callback, https://backend.composio.dev/api/v3/toolkits/auth/callback. Composio's older Google Apps guide still shows the legacy https://backend.composio.dev/api/v1/auth-apps/add. Whichever URL you use must be identical in Google and in the auth config.",
+      "Composio sends `https://backend.composio.dev/api/v1/auth-apps/add` by default, and the v3 callback `https://backend.composio.dev/api/v3/toolkits/auth/callback` only if the auth config sets `oauth_redirect_uri` to it. Whichever URL you use must be identical in Google and in the auth config. For verification, route it through your own domain (see the redirect-proxy step).",
       "Connected accounts stay bound to the auth config they were created with. Users who connected through the managed app keep using it until you delete their connection and they re-authenticate.",
       "The Gmail toolkit also includes contact tools built on the People API. Those tools need the People API enabled and contacts scopes, which you must also declare and justify."
     ]
@@ -296,7 +297,7 @@
           "actor": "you",
           "effort": "10 min",
           "wait": null,
-          "details": "Go to **Google Auth Platform → Clients → Create client**. Set **Application type: Web application** and **Name** `composio-gmail-prod`. Under **Authorized redirect URIs**, add `https://backend.composio.dev/api/v3/toolkits/auth/callback`, and later your own-domain proxy. Copy the client secret right away: Google hashes secrets and shows the full value only once, and a client can have at most two secrets. Decide on **Use this client for an AI-powered agent** now (see nuances).",
+          "details": "Go to **Google Auth Platform → Clients → Create client**. Set **Application type: Web application** and **Name** `composio-gmail-prod`. Under **Authorized redirect URIs**, add `https://backend.composio.dev/api/v1/auth-apps/add` (what Composio sends by default) and `https://backend.composio.dev/api/v3/toolkits/auth/callback` (used only if you set `oauth_redirect_uri`), and later your own-domain proxy. Copy the client secret right away: Google hashes secrets and shows the full value only once, and a client can have at most two secrets. Decide on **Use this client for an AI-powered agent** now (see nuances).",
           "agentAssist": "Store the client ID and secret straight into your secret manager. Have the agent check the redirect URI string character by character against the Composio auth config.",
           "links": [
             {
@@ -307,7 +308,8 @@
           "sourceIds": [
             "S13",
             "S4",
-            "S2"
+            "S2",
+            "P5"
           ],
           "confidence": "official"
         }
@@ -344,7 +346,7 @@
           "actor": "you",
           "effort": "15 min",
           "wait": null,
-          "details": "In the Composio dashboard, click **Create Auth Config** and choose **Gmail**. Under **Authentication management**, choose **Manage authentication with custom credentials**, select **OAuth2** and turn on **Use your own developer credentials**. Paste the Client ID and Secret, set **Redirect URI** to `https://backend.composio.dev/api/v3/toolkits/auth/callback`, set the scopes to your Data Access list and click **Create**. Copy the `ac_…` ID. Start a connection with it and sign in as a test user; click through the tester warning.",
+          "details": "In the Composio dashboard, click **Create Auth Config** and choose **Gmail**. Under **Authentication management**, choose **Manage authentication with custom credentials**, select **OAuth2** and turn on **Use your own developer credentials**. Paste the Client ID and Secret, leave **Redirect URI** unset (Composio then sends `https://backend.composio.dev/api/v1/auth-apps/add`) or set it to the v3 callback, either one registered in Google, set the scopes to your Data Access list and click **Create**. Copy the `ac_…` ID. Start a connection with it and sign in as a test user; click through the tester warning.",
           "agentAssist": "Write the `composio.connectedAccounts.initiate(userId, 'ac_…')` call and, after consent, compare the granted scopes with the declared list.",
           "links": [
             {
@@ -355,7 +357,8 @@
           "sourceIds": [
             "S2",
             "S3",
-            "S9"
+            "S9",
+            "P5"
           ],
           "confidence": "official"
         }
@@ -797,16 +800,17 @@
       "title": "Redirect URI mismatch",
       "symptom": "\"Error 400: redirect_uri_mismatch\" on Google's screen when a connection starts.",
       "likelihood": "common",
-      "howToProceed": "Use the identical URL in the Google client and the Composio auth config: the v3 callback or your own proxy, not the legacy v1 `api/v1/auth-apps/add` from the older guide.",
+      "howToProceed": "Register the URI Composio actually sends: `https://backend.composio.dev/api/v1/auth-apps/add` by default, the v3 callback only if the auth config sets `oauth_redirect_uri` to it, or your own proxy URL. Compare the `redirect_uri` in the failing authorize URL with the Google client character by character.",
       "escalation": {
         "label": "Composio custom auth configs",
         "url": "https://docs.composio.dev/docs/auth-configuration/custom-auth-configs"
       },
       "sourceIds": [
         "S3",
-        "S4"
+        "S4",
+        "P5"
       ],
-      "confidence": "official"
+      "confidence": "tested"
     },
     {
       "title": "Unapproved scope breaks a verified app",
@@ -918,18 +922,50 @@
         "S15"
       ],
       "confidence": "official"
+    },
+    {
+      "title": "Composio requests `https://mail.google.com/` by default",
+      "detail": "Without a scopes override, the auth config asks for the restricted `https://mail.google.com/` (full Gmail access, which triggers the CASA assessment) plus ten userinfo and People API scopes such as `contacts.readonly`, `user.addresses.read` and `user.birthday.read`, with `access_type=offline` and `prompt=consent`. Override the scopes with only the Gmail scopes you declared under Data Access.",
+      "sourceIds": [
+        "P5"
+      ],
+      "confidence": "tested"
     }
   ],
   "composioSetup": {
-    "redirectUri": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+    "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
     "steps": [
-      "In Google Auth Platform → Clients → your Web client, add the Authorized redirect URI https://backend.composio.dev/api/v3/toolkits/auth/callback, or for production your own-domain endpoint that 302s to it.",
+      "In Google Auth Platform → Clients → your Web client, add the Authorized redirect URIs https://backend.composio.dev/api/v1/auth-apps/add (what Composio sends by default) and https://backend.composio.dev/api/v3/toolkits/auth/callback (used only if you set `oauth_redirect_uri`), or for production your own-domain endpoint that 302s to the v3 callback.",
       "In the Composio dashboard, click Create Auth Config and choose Gmail. Under Authentication management, choose 'Manage authentication with custom credentials', select OAuth2 and turn on 'Use your own developer credentials'.",
-      "Paste the Client ID and Client Secret, and set Redirect URI to exactly the value registered in Google. Use the v3 URL, not the legacy v1 one.",
+      "Paste the Client ID and Client Secret. Leave Redirect URI unset to send the v1 URL, or set it to a value registered in Google (the v3 callback or your own-domain endpoint).",
       "Set the scopes to exactly the set declared under Data Access and later approved; extra scopes cause 'App is blocked'.",
       "Click Create, copy the ac_… auth config ID, and pass it when starting connections, e.g. composio.connectedAccounts.initiate(userId, 'ac_…').",
       "After verification, delete connections created under the managed or test config and have users re-authenticate. Existing connections stay on their original auth config."
-    ]
+    ],
+    "tested": {
+      "probeId": "P5",
+      "testedAt": "2026-10-30",
+      "authorizeUrl": "https://accounts.google.com/o/oauth2/v2/auth",
+      "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
+      "defaultScopes": [
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/contacts.readonly",
+        "https://www.googleapis.com/auth/contacts.other.readonly",
+        "https://www.googleapis.com/auth/profile.language.read",
+        "https://www.googleapis.com/auth/user.addresses.read",
+        "https://www.googleapis.com/auth/user.birthday.read",
+        "https://www.googleapis.com/auth/user.emails.read",
+        "https://www.googleapis.com/auth/user.phonenumbers.read",
+        "https://www.googleapis.com/auth/profile.emails.read",
+        "https://mail.google.com/"
+      ],
+      "extraParams": {
+        "response_type": "code",
+        "access_type": "offline",
+        "prompt": "consent"
+      }
+    }
   },
   "evidence": {
     "sources": [
@@ -1138,14 +1174,18 @@
         "summary": "All 7 returned HTTP 200.",
         "detail": "The Composio KB page (docs.composio.dev/kb/guide/platform-google-oauth) exists, but it only says to keep scopes verified, reconnect after scope changes and match the callback URI.",
         "at": "2026-10-28T07:23:55Z"
+      },
+      {
+        "kind": "composio-api",
+        "target": "Composio API: create custom OAuth2 auth config for `gmail` with a dummy client → start a connection → follow the redirect (then delete both)",
+        "result": "pass",
+        "summary": "Composio sends users to https://accounts.google.com/o/oauth2/v2/auth with redirect_uri=https://backend.composio.dev/api/v1/auth-apps/add; default scopes: https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/contacts.other.readonly https://www.googleapis.com/auth/profile.language.read https://www.googleapis.com/auth/user.addresses.read https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/user.emails.read https://www.googleapis.com/auth/user.phonenumbers.read https://www.googleapis.com/auth/profile.emails.read https://mail.google.com/; PKCE on.",
+        "detail": "{\"authorizeUrl\":\"https://accounts.google.com/o/oauth2/v2/auth\",\"redirectUri\":\"https://backend.composio.dev/api/v1/auth-apps/add\",\"scopes\":[\"https://www.googleapis.com/auth/userinfo.profile\",\"https://www.googleapis.com/auth/userinfo.email\",\"https://www.googleapis.com/auth/contacts.readonly\",\"https://www.googleapis.com/auth/contacts.other.readonly\",\"https://www.googleapis.com/auth/profile.language.read\",\"https://www.googleapis.com/auth/user.addresses.read\",\"https://www.googleapis.com/auth/user.birthday.read\",\"https://www.googleapis.com/auth/user.emails.read\",\"https://www.googleapis.com/auth/user.phonenumbers.read\",\"https://www.googleapis.com/auth/profile.emails.read\",\"https://mail.google.com/\"],\"extraParams\":{\"response_type\":\"code\",\"access_type\":\"offline\",\"prompt\":\"consent\"},\"pkce\":true,\"note\":\"extra params: response_type=code, access_type=offline, prompt=consent\"}",
+        "id": "P5",
+        "at": "2026-10-30T09:33:45.054Z"
       }
     ],
     "openQuestions": [
-      {
-        "question": "Which scopes does Composio's Gmail auth config request by default when 'Use your own developer credentials' is on?",
-        "whyItMatters": "Default scopes you haven't declared and verified trigger 'App is blocked'. A managed connection was reportedly granted https://mail.google.com/, which is hard to justify.",
-        "howToResolve": "Read the Scopes field in Composio's Create Auth Config screen, or fetch the Gmail toolkit's auth details with a Composio API key, then trim to your verified set."
-      },
       {
         "question": "Will Google's reviewers accept backend.composio.dev as the registered redirect host, or must the callback be on your own domain?",
         "whyItMatters": "Google requires redirect-URI domains to be authorized and verified, and you cannot verify composio.dev. Getting this wrong costs a review round.",

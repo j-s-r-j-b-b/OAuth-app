@@ -1,0 +1,1211 @@
+{
+  "schemaVersion": 1,
+  "slug": "webflow",
+  "app": {
+    "name": "Webflow",
+    "website": "https://webflow.com",
+    "category": "Website builder / CMS",
+    "description": "Visual website builder and CMS. Third-party access to sites, CMS collections and pages goes through a Webflow App with the Data Client capability, which authorizes via OAuth 2.0 against the Data API v2.",
+    "developerPortalUrl": "https://webflow.com/dashboard",
+    "docsUrl": "https://developers.webflow.com/data/docs/register-an-app"
+  },
+  "composio": {
+    "toolkitSlug": "webflow",
+    "managedOAuth": "not-available",
+    "authSchemes": [
+      "OAUTH2",
+      "API_KEY"
+    ],
+    "toolkitDocsUrl": "https://docs.composio.dev/toolkits/webflow",
+    "requiredFields": [
+      {
+        "name": "scopes",
+        "description": "Space-separated Webflow scopes (e.g. `sites:read cms:read cms:write pages:read pages:write`). They must be a subset of the scopes ticked in the Webflow App, or Webflow rejects the install URL."
+      },
+      {
+        "name": "oauth_redirect_uri (optional)",
+        "description": "Leave it unset and Composio sends `https://backend.composio.dev/api/v1/auth-apps/add` (tested). Set it to `https://backend.composio.dev/api/v3/toolkits/auth/callback` to send the v3 callback, or to your own-domain forwarder, which must 302 to Composio's callback with the query string untouched. Register exactly the URI the config sends in the Webflow App."
+      }
+    ],
+    "notes": [
+      "Tested (probe P6, 2026-10-30): a custom auth config created without `oauth_redirect_uri` sends `https://backend.composio.dev/api/v1/auth-apps/add`, not the v3 callback shown in Composio's API docs. Register exactly the URI your auth config sends, or set `oauth_redirect_uri` to `https://backend.composio.dev/api/v3/toolkits/auth/callback` and register that instead. Webflow's Marketplace guidelines require a single redirect URI at review, so pick one rather than registering both.",
+      "No Composio-managed Webflow app: you must bring your own Webflow App (Data Client) for OAuth. The API_KEY scheme takes a per-site Site Token instead and needs no app.",
+      "60 tools, 0 triggers. Field keys must be collection field slugs, not display names; bulk create/update caps at 100 items and hits only the primary locale unless `cmsLocaleIds` is set.",
+      "Publish Site is limited to one successful publish per minute. Update Webflow Site needs the customer on an Enterprise workspace; secondary-locale slug updates need Advanced or Enterprise localization.",
+      "Get Page DOM works only on static pages, not CMS template pages."
+    ]
+  },
+  "assumption": "A commercial agent product that reads and updates CMS items, pages and site settings on many different customers' Webflow sites, using your own Webflow App (Data Client, OAuth) wired into Composio.",
+  "verdict": {
+    "headline": "Building and testing is free and self-serve, but apart from your own Workspace and up to 5 testers Webflow Support adds, no one can install the app until Marketplace review approves it (Webflow aims for 10 business days).",
+    "summary": "Create a free Developer Workspace, register an App with the **Data Client** capability, add Composio's callback and tick scopes, and you can connect your own sites the same day. Before approval, though, only members of the app's Workspace can install it, plus up to 5 external testers that Webflow Support adds by email. To let any customer connect you submit to the Marketplace (public, listed or unlisted). That needs a published `.webflow.io` testing site, a 2–5 minute English demo video that shows OAuth being approved **and** denied, privacy/terms/support/docs URLs, working review credentials, and three written attestations about how tokens are stored. Webflow aims to decide within 10 business days. Scopes lock once the app is published, so get them right first.",
+    "difficulty": "formal-review",
+    "handsOnEffort": {
+      "label": "1 hour – 4 days",
+      "minHours": 1,
+      "maxHours": 32,
+      "basis": "About 1 hour to register and connect; 2–4 working days to build the testing site, demo video, policies, attestations and listing assets"
+    },
+    "timeToFirstConnection": {
+      "label": "Under 2 hours",
+      "minHours": 0.5,
+      "maxHours": 2,
+      "basis": "Developer Workspace is created instantly; app registration and the Composio auth config take minutes. Sites must be in the app's own Workspace."
+    },
+    "timeToProduction": {
+      "label": "1.5–6 weeks",
+      "minHours": 252,
+      "maxHours": 1008,
+      "basis": "Webflow aims to decide within 10 business days (about 2 calendar weeks) per submission; the low end assumes a faster first pass. An older Webflow page, now unreachable, said 3–4 weeks including changes. Add 2–5 days of prep and any resubmission rounds. No first-hand review times found."
+    },
+    "longestPole": "Marketplace review: preparing the submission (testing site, demo video with OAuth approve/deny, policies, token attestations), then a decision Webflow aims to send within 10 business days. Each change request is another full round.",
+    "cost": "Free (Developer Workspace)",
+    "costDetail": "The App Developer Workspace plan is free (one per person, up to 3 users, no production publishing); site plans bought inside it are billed at standard rates. Webflow's own register-an-app troubleshooting still says app development needs a Team or Enterprise plan, which conflicts. No Marketplace or API fee is stated anywhere we read. Customer-side: rate limits follow the customer's site plan (60/min Starter and Basic, 120/min CMS/eCommerce/Business), and Composio's Update Site tool needs an Enterprise workspace.",
+    "easierPaths": [
+      {
+        "condition": "The agent only works on sites in your own Workspace (internal tooling or an agency's own client sites hosted in its Workspace)",
+        "effect": "No review needed: a new app is installable by anyone in its own Workspace right away."
+      },
+      {
+        "condition": "A pilot with five or fewer external customers",
+        "effect": "Ask Webflow Support (support.webflow.com) to add up to 5 test users by their Webflow email, then share your install URL. No Marketplace review needed for the pilot."
+      },
+      {
+        "condition": "A single customer and site, with no custom-code features",
+        "effect": "Use Composio's API_KEY scheme with a Site Token the customer creates in their site settings. No app and no review, but one token per site, and Site Tokens cannot reach custom_code endpoints."
+      },
+      {
+        "condition": "A custom app for one organization",
+        "effect": "Submit with Marketplace Visibility set to Private. It still goes through the same review, so this saves no time; it only hides the listing."
+      }
+    ]
+  },
+  "factors": [
+    {
+      "key": "self_serve_registration",
+      "value": "yes",
+      "detail": "Any Webflow user who is an Admin of a Workspace, with a verified email and 2FA, can create an App under Settings → Apps & Integrations → App Development. A free Developer Workspace is created instantly. The dashboard is behind a login wall.",
+      "sourceIds": [
+        "S4",
+        "S9",
+        "P4"
+      ],
+      "confidence": "tested"
+    },
+    {
+      "key": "review_required",
+      "value": "yes",
+      "detail": "New apps are installable only by users in the app's own Workspace. External users cannot install until the app is approved and published through Marketplace review (public listed/unlisted, or private).",
+      "sourceIds": [
+        "S4",
+        "S10",
+        "S11"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "business_verification",
+      "value": "no",
+      "detail": "Submission asks for 2FA on a Workspace admin, a testing site, demo video, policy/support URLs and review access. No legal-entity verification step is listed.",
+      "sourceIds": [
+        "S11",
+        "S12"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "security_assessment",
+      "value": "no",
+      "detail": "No third-party assessment. Webflow's own review checks API use and credential handling, and Data Clients must attest that tokens are encrypted at rest, server-side only, and deleted on uninstall or revocation.",
+      "sourceIds": [
+        "S12",
+        "S14"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "paid_access",
+      "value": "depends",
+      "detail": "Depends on which Webflow page is right: the Developer Workspace is free and meant for app building, but register-an-app troubleshooting says app development needs Team or Enterprise. On the customer side, Update Site needs Enterprise and rate limits follow the site plan.",
+      "sourceIds": [
+        "S9",
+        "S4",
+        "S7",
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "partner_or_sales_gate",
+      "value": "no",
+      "detail": "Submission is a public form at developers.webflow.com/submit. No partner program or sales contact is needed.",
+      "sourceIds": [
+        "S11",
+        "S15",
+        "P4"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "user_cap_before_review",
+      "value": "yes",
+      "detail": "Before approval only members of the app's Workspace can install, plus up to 5 external test users that Webflow Support adds by email.",
+      "sourceIds": [
+        "S4",
+        "S10"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "per_customer_setup",
+      "value": "no",
+      "detail": "No per-customer config: on the consent screen each user picks the sites (or the whole Workspace) to grant, unless you enabled 'Restrict app installation to a specific site'.",
+      "sourceIds": [
+        "S5",
+        "S4"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "phases": [
+    {
+      "id": "register",
+      "title": "Register the Webflow App",
+      "outcome": "A Data Client app in a dedicated Developer Workspace, with the one redirect URI your auth config sends and minimal scopes.",
+      "steps": [
+        {
+          "id": "plan-scopes",
+          "title": "Map agent tools to the minimal scope set",
+          "actor": "agent",
+          "effort": "15 min",
+          "wait": null,
+          "details": "List the Composio Webflow tools the agent will call and map each to a scope. Typical set: `sites:read`, `cms:read`, `cms:write`, `pages:read`, `pages:write`, plus `sites:write` only if the agent publishes. Request `:write` only where you actually write, never workspace scopes when site scopes suffice, and `authorized_user:read` (not `sites:read`) for identity. Scopes **lock when the app is published**, so decide now.",
+          "agentAssist": "Produce the scope list with a one-line justification each; reuse it for the review notes.",
+          "links": [
+            {
+              "label": "Webflow scopes",
+              "url": "https://developers.webflow.com/data/reference/scopes"
+            }
+          ],
+          "sourceIds": [
+            "S6",
+            "S12",
+            "S1",
+            "S4"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "dev-workspace",
+          "title": "Prepare an admin account and a Developer Workspace",
+          "actor": "you",
+          "effort": "10 min",
+          "wait": null,
+          "details": "Sign in at **webflow.com/dashboard** (logged-out requests bounce to the login page). Verify your email and turn on **two-factor authentication**: both are needed to see App Development, and 2FA on an admin is a submission requirement. Then click **Create a developer workspace**, enter a name and a reason (20+ characters), confirm it is only for building apps, and click **Create developer workspace**. It is free and ready immediately; you can own only one.",
+          "agentAssist": "Draft the 20+ character reason text.",
+          "links": [
+            {
+              "label": "Developer Workspace",
+              "url": "https://developers.webflow.com/data/docs/developer-workspace"
+            }
+          ],
+          "sourceIds": [
+            "S9",
+            "S4",
+            "S11",
+            "P4"
+          ],
+          "confidence": "tested"
+        },
+        {
+          "id": "create-app",
+          "title": "Create the App with the Data Client capability",
+          "actor": "you",
+          "effort": "15 min",
+          "wait": null,
+          "details": "In the Workspace go to **Settings → Apps & Integrations → App Development → Create an App**. Enter **Name**, **Description** (140 chars max), **Icon** and an HTTPS **Homepage URL**. Leave **Restrict app installation to a specific site** off so users can grant several sites or the Workspace. Click **Continue**, tick **Data Client**, then **Add redirect URI**: register exactly the URI your Composio auth config sends. By default that is `https://backend.composio.dev/api/v1/auth-apps/add`; it is `https://backend.composio.dev/api/v3/toolkits/auth/callback` only if you set `oauth_redirect_uri` to it (exact match; a trailing slash counts as different). Marketplace review wants a single redirect URI, so register one, not both. Tick the scopes from the plan and click **Create app**.",
+          "agentAssist": "Pre-fill all field values and the redirect URI so you only paste.",
+          "links": [
+            {
+              "label": "Register an App",
+              "url": "https://developers.webflow.com/data/docs/register-an-app"
+            }
+          ],
+          "sourceIds": [
+            "S4",
+            "S12",
+            "P6"
+          ],
+          "confidence": "tested"
+        }
+      ]
+    },
+    {
+      "id": "configure",
+      "title": "Collect credentials and settle the redirect URI",
+      "outcome": "Client ID and secret stored safely, and a redirect URI you can keep through review.",
+      "steps": [
+        {
+          "id": "collect-creds",
+          "title": "Copy the Client ID and Client Secret",
+          "actor": "you",
+          "effort": "5 min",
+          "wait": null,
+          "details": "Open **Settings → Apps & Integrations → App Development**, select the app and copy **Client ID** and **Client Secret**. Only Workspace admins can view the secret. Store it in a secrets manager; rotate it if exposed (an exposed `client_secret` is a listed rejection reason).",
+          "agentAssist": "Write the values straight into your secret store; never echo them into chat or code.",
+          "links": [],
+          "sourceIds": [
+            "S4",
+            "S5",
+            "S12"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "redirect-forwarder",
+          "title": "Decide: Composio callback or your own-domain forwarder",
+          "actor": "you",
+          "effort": "0–2 h",
+          "wait": null,
+          "details": "Marketplace rules require 'a single, fully-qualified HTTPS URL on a production domain' (port 443, no localhost or tunnels). Composio's own callback meets the letter of that, whichever your auth config sends (`https://backend.composio.dev/api/v1/auth-apps/add` by default, `https://backend.composio.dev/api/v3/toolkits/auth/callback` if you set `oauth_redirect_uri`). Pick one. If you want the redirect on your own domain, deploy `https://your-app.com/oauth/webflow-callback` that returns `302` to Composio's callback with the original query string untouched, register that URL in the Webflow App, and set it as `oauth_redirect_uri` in the Composio auth config. Turn off query-string logging on that route.",
+          "agentAssist": "Generate the forwarder route (302, Cache-Control: no-store, Referrer-Policy: no-referrer) and its log-scrubbing config.",
+          "links": [
+            {
+              "label": "Composio white-labeling",
+              "url": "https://docs.composio.dev/docs/authentication/white-labeling-authentication"
+            }
+          ],
+          "sourceIds": [
+            "S12",
+            "S3",
+            "P6"
+          ],
+          "confidence": "tested"
+        }
+      ]
+    },
+    {
+      "id": "test",
+      "title": "Wire into Composio and test with your own sites",
+      "outcome": "A working Composio connection on a site in your Workspace, and up to 5 external pilot testers.",
+      "steps": [
+        {
+          "id": "auth-config",
+          "title": "Create the Composio auth config",
+          "actor": "agent",
+          "effort": "10 min",
+          "wait": null,
+          "details": "With your Composio API key, create an auth config for toolkit `webflow` (or in the dashboard: **Auth Configs → Create Auth Config → Webflow → OAuth2 → Use your own developer credentials**). Enter Client ID, Client Secret and the same scopes as the Webflow App (space-separated); do not leave scopes empty, because Composio then asks for all 13 default scopes. Leave `oauth_redirect_uri` unset to send the v1 URI, or set it to the v3 callback or your forwarder, and register that exact URI in the Webflow App. Copy the `ac_…` ID.",
+          "agentAssist": "Create it programmatically and diff its scopes against the App's ticked scopes.",
+          "links": [
+            {
+              "label": "Managed vs custom auth",
+              "url": "https://docs.composio.dev/docs/authentication/custom-app-vs-managed-app"
+            }
+          ],
+          "sourceIds": [
+            "S2",
+            "S1",
+            "S5",
+            "P6"
+          ],
+          "confidence": "tested"
+        },
+        {
+          "id": "first-connection",
+          "title": "Connect a site in your Workspace and smoke-test",
+          "actor": "you",
+          "effort": "15 min",
+          "wait": null,
+          "details": "Start a connection with the auth config. Webflow sends you to log in, then shows the consent screen: select the sites (or Workspace) and click **Authorize**. The code is single-use and valid 15 minutes, which Composio handles. Then list sites, read a collection, and update a draft CMS item. Use a site in the app's own Workspace; external accounts cannot install yet.",
+          "agentAssist": "Run List Sites → List Collections → Update Collection Item (V2) and confirm a missing-scope call fails as expected.",
+          "links": [],
+          "sourceIds": [
+            "S5",
+            "S4",
+            "S1",
+            "P1"
+          ],
+          "confidence": "tested"
+        },
+        {
+          "id": "invite-testers",
+          "title": "Add up to 5 external pilot testers",
+          "actor": "you",
+          "effort": "15 min",
+          "wait": "Support ticket turnaround (not stated)",
+          "details": "Open a ticket at **support.webflow.com** asking to add test users to your app, with each tester's Webflow account email (maximum 5). Once added, share your install URL (your Composio connect link) with them. This is separate from a Private app.",
+          "agentAssist": "Draft the support ticket with app name, Client ID and tester emails.",
+          "links": [
+            {
+              "label": "Marketplace overview (user testing)",
+              "url": "https://developers.webflow.com/apps/docs/marketplace/overview"
+            }
+          ],
+          "sourceIds": [
+            "S10",
+            "S13"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "prepare",
+      "title": "Prepare the Marketplace submission",
+      "outcome": "Testing site, demo video, policy links, review credentials and attestations ready.",
+      "steps": [
+        {
+          "id": "testing-site",
+          "title": "Publish a .webflow.io testing site with the app installed",
+          "actor": "you",
+          "effort": "1–3 h",
+          "wait": null,
+          "details": "Build a site with real-looking CMS collections and pages, publish it to its `.webflow.io` address, and authorize your app on it so every feature is reachable. Give reviewers a full-featured demo account on your product that doesn't expire and isn't behind a paywall, and keep your backend up through review.",
+          "agentAssist": "Seed the CMS with sample items through the API and write the reviewer test instructions.",
+          "links": [],
+          "sourceIds": [
+            "S11",
+            "S12"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "materials",
+          "title": "Record the demo video and write policies and attestations",
+          "actor": "you",
+          "effort": "1–3 days",
+          "wait": null,
+          "details": "You need:\n- A 2–5 minute demo video in English (or with English subtitles), from install through use, that shows the OAuth request being **approved and denied**. Host on Loom, unlisted YouTube or Google Drive.\n- Live URLs for website, documentation, privacy policy, terms and support.\n- The three Data Client attestations: tokens encrypted at rest, stored server-side only, deleted on uninstall or revocation.\n- English listing copy and screenshots, each with alt text.\n- Disclosed pricing, and a visible distinction for AI drafts so they never silently overwrite Webflow data.",
+          "agentAssist": "Draft the privacy-policy data section, attestations, demo script, listing copy and screenshot alt text.",
+          "links": [
+            {
+              "label": "Submitting your App",
+              "url": "https://developers.webflow.com/apps/docs/marketplace/submitting-your-app"
+            }
+          ],
+          "sourceIds": [
+            "S11",
+            "S12"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "preflight",
+          "title": "Run a preflight against the guidelines",
+          "actor": "agent",
+          "effort": "30 min",
+          "wait": null,
+          "details": "Check the common rejection reasons: requested scopes must equal or be a subset of the App's scopes and match the listing; the redirect URI must exactly match; every submitted URL must resolve over HTTPS; no staging/localhost URLs or placeholder content. Webflow published a `webflow-app-preflight` agent skill (Aug 2026) and says automated guideline checks at submission are coming.",
+          "agentAssist": "Run the preflight skill or an equivalent checklist and hand back a go/no-go list.",
+          "links": [
+            {
+              "label": "Aug 2026 review changelog",
+              "url": "https://developers.webflow.com/home/changelog/2026/8/19"
+            }
+          ],
+          "sourceIds": [
+            "S14",
+            "S12"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "review",
+      "title": "Submit and pass Marketplace review",
+      "outcome": "An approved app that any Webflow user can install.",
+      "steps": [
+        {
+          "id": "submit",
+          "title": "Submit at developers.webflow.com/submit",
+          "actor": "you",
+          "effort": "1 h",
+          "wait": null,
+          "details": "Fill in the **Submit a Webflow App** form: app type Data Client, Marketplace Visibility **Public**, the **Published testing site** URL, demo video, links, review credentials and attestations. A Designer Extension or Hybrid app would also need a review ZIP; a pure Data Client does not. Webflow emails a receipt to your account address.",
+          "agentAssist": "Pre-fill every form answer in a document you paste from.",
+          "links": [
+            {
+              "label": "Submit a Webflow App",
+              "url": "https://developers.webflow.com/submit"
+            }
+          ],
+          "sourceIds": [
+            "S11",
+            "S15",
+            "P4"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "review-wait",
+          "title": "Webflow app review",
+          "actor": "provider",
+          "effort": "—",
+          "wait": "Aim: within 10 business days per round",
+          "details": "Review covers Webflow API use and credential handling. The decision comes by email to your Webflow account address. 10 business days is Webflow's stated aim, not a guarantee.",
+          "agentAssist": "Watch the inbox and keep the backend and demo account healthy.",
+          "links": [],
+          "sourceIds": [
+            "S11",
+            "S12"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "resubmit",
+          "title": "Fix every item and resubmit if changes are requested",
+          "actor": "you",
+          "effort": "2 h – 2 days",
+          "wait": "Another review round",
+          "details": "Feedback lists what blocked approval in that round, not every defect. Fix all items, retest end to end, then resubmit. Repeated submissions that don't fix earlier feedback can pause new submissions for the app. Support tickets are the reliable path to the Marketplace team.",
+          "agentAssist": "Turn feedback into a checklist and re-run the preflight before resubmitting.",
+          "links": [],
+          "sourceIds": [
+            "S11",
+            "S12",
+            "S14"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "go-live",
+      "title": "Go live in Composio",
+      "outcome": "Production sessions use your approved Webflow App.",
+      "steps": [
+        {
+          "id": "publish",
+          "title": "Publish and treat scopes as frozen",
+          "actor": "you",
+          "effort": "15 min",
+          "wait": null,
+          "details": "Once approved the app is published. The scopes section is then locked: adding scopes needs another approval, and you should not change the OAuth URL scopes until the update is approved. Register a separate copy of the app to test future scope changes, and submit updates via the same form as **App Update**.",
+          "agentAssist": "Keep the staging copy's settings in sync and track scope changes as review items.",
+          "links": [],
+          "sourceIds": [
+            "S4",
+            "S10"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "switch-sessions",
+          "title": "Point sessions at your auth config and add backoff",
+          "actor": "agent",
+          "effort": "15 min",
+          "wait": null,
+          "details": "Pass `authConfigs: { webflow: \"ac_…\" }` when creating sessions. On HTTP 429 `too_many_requests`, honor `Retry-After` (typically 60 s). Limits follow the customer's site plan (60/min Starter and Basic, 120/min CMS/eCommerce/Business), and site publish is limited to one success per minute. On uninstall, delete the Composio connection and revoke the token.",
+          "agentAssist": "Update session code, add 429 backoff, and wire uninstall to connection deletion plus `POST https://webflow.com/oauth/revoke_authorization`.",
+          "links": [],
+          "sourceIds": [
+            "S2",
+            "S7",
+            "S5",
+            "S1"
+          ],
+          "confidence": "official"
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "item": "Webflow account with verified email and 2FA, as a Workspace Admin",
+      "neededFor": "registration",
+      "detail": "Only Workspace admins can create apps, view client secrets and change settings. 2FA on an admin is also a submission requirement.",
+      "sourceIds": [
+        "S4",
+        "S11",
+        "P4"
+      ],
+      "confidence": "tested"
+    },
+    {
+      "item": "A Workspace whose plan supports app development",
+      "neededFor": "registration",
+      "detail": "The free Developer Workspace is designed for this (one per person, 3 users, 120 requests/min). One Webflow page still says Team or Enterprise.",
+      "sourceIds": [
+        "S9",
+        "S4"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "HTTPS redirect URI on a production domain",
+      "neededFor": "review",
+      "detail": "Single, exact-match HTTPS URL on port 443. No wildcards, localhost, HTTP, IP addresses or tunnels. It must be the URI your Composio auth config sends: `https://backend.composio.dev/api/v1/auth-apps/add` by default, or `https://backend.composio.dev/api/v3/toolkits/auth/callback` only if `oauth_redirect_uri` is set to it.",
+      "sourceIds": [
+        "S12",
+        "S4",
+        "P6"
+      ],
+      "confidence": "tested"
+    },
+    {
+      "item": "Published .webflow.io testing site with the app installed",
+      "neededFor": "review",
+      "detail": "Entered in the 'Published testing site' field. Every feature must be reachable there.",
+      "sourceIds": [
+        "S11"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "2–5 minute English demo video",
+      "neededFor": "review",
+      "detail": "From install through use, including the OAuth approve and deny flows. Loom, unlisted YouTube or Google Drive.",
+      "sourceIds": [
+        "S11",
+        "S12"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "Website, docs, privacy policy, terms and support URLs",
+      "neededFor": "review",
+      "detail": "Each must resolve over HTTPS and point to its own content at review time.",
+      "sourceIds": [
+        "S11",
+        "S12"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "Reviewer access to your product",
+      "neededFor": "review",
+      "detail": "A full-featured demo account and test credentials that don't expire or sit behind a paywall, with the backend up throughout review.",
+      "sourceIds": [
+        "S11",
+        "S12"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "Token-handling attestations",
+      "neededFor": "review",
+      "detail": "Data Clients attest that tokens are encrypted at rest, stored server-side only, and deleted on uninstall or revocation.",
+      "sourceIds": [
+        "S12"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "scopes": [
+    {
+      "scope": "sites:read",
+      "purpose": "List the sites the user granted and read site details",
+      "tier": "basic",
+      "note": "Don't use it just to confirm identity; use authorized_user:read.",
+      "sourceIds": [
+        "S6",
+        "S12"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "sites:write",
+      "purpose": "Publish sites and update site settings",
+      "tier": "basic",
+      "note": "Only if the agent publishes. Publish is limited to 1 success/min; Composio's Update Site needs an Enterprise workspace.",
+      "sourceIds": [
+        "S6",
+        "S1",
+        "S7"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "cms:read",
+      "purpose": "Read CMS collections, fields and items",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "S6",
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "cms:write",
+      "purpose": "Create, update, publish and delete CMS items and fields",
+      "tier": "basic",
+      "note": "Guidelines: AI drafts must be visually distinct and never silently overwrite Webflow data.",
+      "sourceIds": [
+        "S6",
+        "S12"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "pages:read / pages:write",
+      "purpose": "List pages, read DOM and metadata, update page settings and SEO",
+      "tier": "basic",
+      "note": "Request write only if the agent edits pages.",
+      "sourceIds": [
+        "S6",
+        "S1",
+        "S12"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "site_config:read / site_config:write",
+      "purpose": "Site configuration such as URL redirects",
+      "tier": "basic",
+      "note": "Only if 'site settings' means redirects and similar config.",
+      "sourceIds": [
+        "S6"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "authorized_user:read",
+      "purpose": "Identify the user who authorized the app",
+      "tier": "basic",
+      "note": "The guideline-preferred scope for identity.",
+      "sourceIds": [
+        "S6",
+        "S12"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "custom_code:read / custom_code:write",
+      "purpose": "Register and apply custom scripts to sites or pages",
+      "tier": "restricted",
+      "note": "Webflow has no formal tiers, but guidelines call these elevated-risk and require a disclosed feature. Data Client apps only.",
+      "sourceIds": [
+        "S12",
+        "S6"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "blockers": [
+    {
+      "title": "No App Development section in Workspace settings",
+      "symptom": "Settings → Apps & Integrations shows no App Development section or Create an App button",
+      "likelihood": "common",
+      "howToProceed": "Check you are in Workspace (not Site) settings, are a Workspace Admin, have a verified email and 2FA on, and are in a Workspace whose plan supports app development. Create the free Developer Workspace if needed.",
+      "escalation": {
+        "label": "Webflow Support",
+        "url": "https://support.webflow.com"
+      },
+      "sourceIds": [
+        "S4",
+        "S9"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Customers outside your Workspace can't install",
+      "symptom": "Pilot customers can't authorize or install the app before it's published",
+      "likelihood": "common",
+      "howToProceed": "Expected before approval. Ask Webflow Support to add up to 5 test users by email for the pilot, and submit to the Marketplace for general availability. A Private app doesn't help: it's for one organization and gets the same review.",
+      "escalation": {
+        "label": "Marketplace overview",
+        "url": "https://developers.webflow.com/apps/docs/marketplace/overview"
+      },
+      "sourceIds": [
+        "S4",
+        "S10",
+        "S13"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Invalid Redirect URI",
+      "symptom": "'Invalid Redirect URI' error after login on the Webflow authorize page",
+      "likelihood": "common",
+      "howToProceed": "Register exactly the URL your auth config sends, with no trailing slash: `https://backend.composio.dev/api/v1/auth-apps/add` by default, or `https://backend.composio.dev/api/v3/toolkits/auth/callback` if you set `oauth_redirect_uri` (or your forwarder URL). Errors only appear after sign-in, so test while logged in.",
+      "escalation": {
+        "label": "Register an App: troubleshooting",
+        "url": "https://developers.webflow.com/data/docs/register-an-app"
+      },
+      "sourceIds": [
+        "S4",
+        "S5",
+        "P1",
+        "P6"
+      ],
+      "confidence": "tested"
+    },
+    {
+      "title": "Authorization succeeds but tool calls fail on scope",
+      "symptom": "Connection is active but some Composio tools return permission errors",
+      "likelihood": "occasional",
+      "howToProceed": "Webflow authorizes even when a needed scope was left out of the request, and only rejects scopes beyond the App's configured set. Align the Composio auth config scopes with the App and have users reconnect. After publishing, new scopes need re-approval.",
+      "escalation": {
+        "label": "Webflow OAuth reference",
+        "url": "https://developers.webflow.com/data/reference/oauth-app"
+      },
+      "sourceIds": [
+        "S5",
+        "S4"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Submission returned for changes",
+      "symptom": "Email requesting changes: scope mismatch, redirect mismatch, exposed secret, staging URLs, placeholder content or unreachable backend",
+      "likelihood": "occasional",
+      "howToProceed": "Fix every listed item, retest end to end and resubmit. Repeated resubmissions that ignore feedback can pause new submissions. Run a preflight first.",
+      "escalation": {
+        "label": "Webflow Support (reaches the Marketplace team)",
+        "url": "https://support.webflow.com"
+      },
+      "sourceIds": [
+        "S11",
+        "S12",
+        "S14"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Rate limited on smaller customer sites",
+      "symptom": "HTTP 429 `too_many_requests` with Retry-After ~60 s",
+      "likelihood": "occasional",
+      "howToProceed": "Back off per Retry-After, batch CMS writes (up to 100 items per bulk call), prefer webhooks over polling, and publish at most once a minute. Starter and Basic sites get 60 requests/min.",
+      "escalation": {
+        "label": "Webflow rate limits",
+        "url": "https://developers.webflow.com/data/reference/rate-limits"
+      },
+      "sourceIds": [
+        "S7",
+        "S1"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "nuances": [
+    {
+      "title": "Token lifetime is undocumented and there is no refresh token",
+      "detail": "The OAuth reference describes no expiry or refresh token, yet the auth guide says to refresh 'before they expire'. A community thread reports no refresh_token in the response. Treat a 401 as 'reconnect', not 'refresh'.",
+      "sourceIds": [
+        "S5",
+        "S8",
+        "S17"
+      ],
+      "confidence": "reported"
+    },
+    {
+      "title": "You attest to Composio's token storage",
+      "detail": "Webflow requires attestations that tokens are encrypted at rest, server-side only and deleted on revocation, and that you not share credentials with third parties. Composio holds the tokens, so confirm its storage terms and delete connections on uninstall.",
+      "sourceIds": [
+        "S12",
+        "S2"
+      ],
+      "confidence": "inferred"
+    },
+    {
+      "title": "Users grant sites, not just an account",
+      "detail": "On consent the user selects specific sites or the whole Workspace. Your app's site-restriction toggle limits it to one site. Guidelines discourage workspace-level scopes when site scopes suffice.",
+      "sourceIds": [
+        "S5",
+        "S4",
+        "S12"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Composio's default Webflow scopes are all 13, including custom_code",
+      "detail": "With no scopes set, a custom auth config asked Webflow for `assets:read/write`, `authorized_user:read`, `cms:read/write`, `custom_code:read/write`, `forms:read/write`, `pages:read/write` and `sites:read/write` (tested 2026-10-30). Webflow fails an authorize URL that asks for scopes the App doesn't have, and review expects scopes to match the App and the listing, with `custom_code` treated as elevated risk. Set your minimal scopes on the auth config and tick only those in the App.",
+      "sourceIds": [
+        "P6",
+        "S5",
+        "S12"
+      ],
+      "confidence": "tested"
+    },
+    {
+      "title": "Misconfigurations are invisible until login",
+      "detail": "The authorize endpoint 302s every request to the login page without validating client_id or redirect_uri. There is no OIDC/OAuth discovery document and no dynamic client registration.",
+      "sourceIds": [
+        "P1",
+        "P3"
+      ],
+      "confidence": "tested"
+    },
+    {
+      "title": "Developer Workspace can't publish to production",
+      "detail": "It allows up to 3 users and 1,000 visitors/month, with production publishing and code export disabled. That suits a .webflow.io testing site, not a customer's live site.",
+      "sourceIds": [
+        "S9"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "An older Webflow page said review takes 3–4 weeks",
+      "detail": "A legacy Webflow v1 page, now a 404, said review may take 3–4 weeks including feedback and changes. We saw only a search snippet of it, and found no first-hand report of Data Client review times. Treat the 10-business-day aim as per submission, and expect extra rounds if feedback is requested.",
+      "sourceIds": [
+        "S16"
+      ],
+      "confidence": "reported"
+    }
+  ],
+  "composioSetup": {
+    "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
+    "steps": [
+      "In the Webflow App (Settings → Apps & Integrations → App Development → your app), add as the redirect URI exactly what your auth config sends: `https://backend.composio.dev/api/v1/auth-apps/add` by default, or `https://backend.composio.dev/api/v3/toolkits/auth/callback` if you set `oauth_redirect_uri` to it (probe P6, tested). Marketplace review wants a single redirect URI, so register one. Your own-domain forwarder that 302s to Composio's callback also works.",
+      "Composio dashboard → Auth Configs → Create Auth Config → Webflow → OAuth2 → Use your own developer credentials. Enter Client ID, Client Secret and space-separated scopes that are a subset of the App's scopes. With scopes empty Composio asks for all 13 defaults, which Webflow rejects unless the App has them all. Set `oauth_redirect_uri` only if you want the v3 callback or a forwarder instead of the v1 default.",
+      "Pass `authConfigs: { webflow: \"ac_…\" }` when creating sessions; toolkits you omit fall back to managed auth, which Webflow doesn't have.",
+      "Connect a site in your own Workspace, select it on the consent screen, then run List Sites and a CMS read/write to confirm scopes.",
+      "On uninstall, delete the Composio connected account and revoke the token at `POST https://webflow.com/oauth/revoke_authorization`."
+    ],
+    "tested": {
+      "probeId": "P6",
+      "testedAt": "2026-10-30",
+      "authorizeUrl": "https://webflow.com/oauth/authorize",
+      "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
+      "defaultScopes": [
+        "assets:read",
+        "assets:write",
+        "authorized_user:read",
+        "cms:read",
+        "cms:write",
+        "custom_code:read",
+        "custom_code:write",
+        "forms:read",
+        "forms:write",
+        "pages:read",
+        "pages:write",
+        "sites:read",
+        "sites:write"
+      ],
+      "extraParams": {
+        "response_type": "code"
+      }
+    }
+  },
+  "evidence": {
+    "sources": [
+      {
+        "id": "S1",
+        "url": "https://docs.composio.dev/toolkits/webflow.md",
+        "title": "Composio — Webflow toolkit",
+        "kind": "composio",
+        "accessedAt": "2026-10-30",
+        "note": "Auth: OAUTH2, API_KEY; managed OAuth: No; 60 tools, 0 triggers; publish 1/min; Update Site needs Enterprise workspace.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S2",
+        "url": "https://docs.composio.dev/docs/authentication/custom-app-vs-managed-app.md",
+        "title": "Composio — Managed vs custom auth",
+        "kind": "composio",
+        "accessedAt": "2026-10-30",
+        "note": "Create Auth Config with your client ID/secret; pass the ac_ ID in authConfigs or managed auth is used.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S3",
+        "url": "https://docs.composio.dev/docs/authentication/white-labeling-authentication.md",
+        "title": "Composio — White-labeling authentication",
+        "kind": "composio",
+        "accessedAt": "2026-10-30",
+        "note": "Register your own HTTPS endpoint as redirect, set oauth_redirect_uri, 302 to Composio's callback preserving the query string.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S4",
+        "url": "https://developers.webflow.com/data/docs/register-an-app",
+        "title": "Webflow — Register an App",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Settings → Apps & Integrations → App Development → Create an App; admins only; new apps installable only within your workspace; scopes lock on publish.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S5",
+        "url": "https://developers.webflow.com/data/reference/oauth-app",
+        "title": "Webflow — OAuth app reference",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Authorize webflow.com/oauth/authorize; token api.webflow.com/oauth/access_token; code single-use, 15 min; users select workspace or sites.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S6",
+        "url": "https://developers.webflow.com/data/reference/scopes",
+        "title": "Webflow — Data API scopes",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Site-level scopes: sites, cms, pages, site_config, custom_code (Data Clients only), authorized_user:read; workspace scopes separate.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S7",
+        "url": "https://developers.webflow.com/data/reference/rate-limits",
+        "title": "Webflow — Rate limits",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Starter/Basic 60 rpm; CMS/eCommerce/Business 120 rpm; Enterprise custom; 429 with Retry-After ~60 s; one publish per minute.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S8",
+        "url": "https://developers.webflow.com/data/reference/authentication.md",
+        "title": "Webflow — Authentication",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Advises 'refresh tokens automatically before they expire' but states no OAuth token lifetime or refresh-token mechanism.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S9",
+        "url": "https://developers.webflow.com/data/docs/developer-workspace",
+        "title": "Webflow — Developer Workspace plan",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Free; one per person; 3 users; no production publishing or code export; 1,000 visitors/month; 120 requests/minute.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S10",
+        "url": "https://developers.webflow.com/apps/docs/marketplace/overview",
+        "title": "Webflow — Marketplace overview",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Up to 5 test users via support.webflow.com before launch; public apps listed or unlisted; updates use same review.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S11",
+        "url": "https://developers.webflow.com/apps/docs/marketplace/submitting-your-app",
+        "title": "Webflow — Submitting your App",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "2FA admin, .webflow.io testing site, 2–5 min English demo video; 'we aim to send a decision within 10 business days'.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S12",
+        "url": "https://developers.webflow.com/apps/docs/marketplace-guidelines",
+        "title": "Webflow — Marketplace guidelines",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Redirect: single HTTPS URL on a production domain; token attestations; scope minimization; custom_code elevated-risk; common rejection reasons.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S13",
+        "url": "https://developers.webflow.com/apps/docs/private-apps",
+        "title": "Webflow — Private apps",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Private apps 'undergo the same rigorous review process as public apps'; for one organization; not a substitute for testing.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S14",
+        "url": "https://developers.webflow.com/home/changelog/2026/8/19",
+        "title": "Webflow changelog — Marketplace app review: clearer scope and pre-submission checks (Aug 19, 2026)",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Review focuses on Designer code, API interactions, credential handling; webflow-app-preflight skill; automated guideline checks coming at submission.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S15",
+        "url": "https://developers.webflow.com/submit",
+        "title": "Webflow — Submit a Webflow App (form)",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Public page (HTTP 200) hosting the form 'used to submit your app to our Marketplace review team'.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S16",
+        "url": "https://developers.webflow.com/data/v1.0.0/docs/app-review-guidelines",
+        "title": "Webflow — Introducing Your App to the Marketplace (legacy v1 docs; now 404)",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Search snippet only: review process may take 3–4 weeks including feedback and changes. Page now returns 404.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S17",
+        "url": "https://discourse.webflow.com/t/how-to-get-the-refresh-token/276973",
+        "title": "Webflow forum — How to get the refresh token (thread now redirects after forum migration)",
+        "kind": "community",
+        "accessedAt": "2026-10-30",
+        "note": "Search snippet only: developer reports no refresh token in the token response; adding offline access didn't help; no official answer seen.",
+        "retrieval": "search-result"
+      }
+    ],
+    "probes": [
+      {
+        "id": "P1",
+        "kind": "authorize-endpoint",
+        "target": "GET https://webflow.com/oauth/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https://backend.composio.dev/api/v3/toolkits/auth/callback&scope=sites:read&state=probe",
+        "result": "info",
+        "summary": "302 to webflow.com/login?r=<authorize URL>. The bogus client_id and redirect are not checked before sign-in.",
+        "detail": "The m= parameter base64-decodes to 'You have been logged out. Please sign back in to continue.' Client and redirect errors can only surface after a real login.",
+        "at": "2026-10-30T09:33:03Z"
+      },
+      {
+        "id": "P2",
+        "kind": "token-endpoint",
+        "target": "GET and POST https://api.webflow.com/oauth/access_token (client_id=oauth-runway-probe, bogus secret and code)",
+        "result": "info",
+        "summary": "GET returns 404 RouteNotFoundError; POST with JSON returns 400 {\"error\":\"invalid_client\"}. The endpoint is POST-only and checks the client first.",
+        "detail": null,
+        "at": "2026-10-30T09:33:28Z"
+      },
+      {
+        "id": "P3",
+        "kind": "oauth-discovery",
+        "target": "GET https://webflow.com/.well-known/openid-configuration and /.well-known/oauth-authorization-server",
+        "result": "fail",
+        "summary": "Both return 404 'Invalid .well-known request'. No discovery document and no dynamic client registration; endpoints come from docs only.",
+        "detail": null,
+        "at": "2026-10-30T09:33:03Z"
+      },
+      {
+        "id": "P4",
+        "kind": "portal",
+        "target": "GET https://webflow.com/dashboard; GET https://developers.webflow.com/submit",
+        "result": "info",
+        "summary": "Dashboard 302s to webflow.com/login: a human must sign in to create the workspace and app. The submission page is public (200) and contains the submission form.",
+        "detail": null,
+        "at": "2026-10-30T09:33:03Z"
+      },
+      {
+        "id": "P5",
+        "kind": "url-check",
+        "target": "GET 11 key pages: register-an-app, oauth-app, scopes, rate-limits, submitting-your-app, marketplace-guidelines, marketplace overview, private-apps, developer-workspace, Aug 2026 changelog, Composio webflow.md",
+        "result": "pass",
+        "summary": "All 11 returned HTTP 200. Legacy v1 app-review-guidelines and old discourse.webflow.com threads no longer resolve (404 / redirect).",
+        "detail": null,
+        "at": "2026-10-30T09:33:28Z"
+      },
+      {
+        "kind": "composio-api",
+        "target": "Composio API: create custom OAuth2 auth config for `webflow` with a dummy client → start a connection → follow the redirect (then delete both)",
+        "result": "pass",
+        "summary": "Composio sends users to https://webflow.com/oauth/authorize with redirect_uri=https://backend.composio.dev/api/v1/auth-apps/add; default scopes: assets:read assets:write authorized_user:read cms:read cms:write custom_code:read custom_code:write forms:read forms:write pages:read pages:write sites:read sites:write; PKCE on.",
+        "detail": "{\"authorizeUrl\":\"https://webflow.com/oauth/authorize\",\"redirectUri\":\"https://backend.composio.dev/api/v1/auth-apps/add\",\"scopes\":[\"assets:read\",\"assets:write\",\"authorized_user:read\",\"cms:read\",\"cms:write\",\"custom_code:read\",\"custom_code:write\",\"forms:read\",\"forms:write\",\"pages:read\",\"pages:write\",\"sites:read\",\"sites:write\"],\"extraParams\":{\"response_type\":\"code\"},\"pkce\":true,\"note\":\"extra params: response_type=code\"}",
+        "id": "P6",
+        "at": "2026-10-30T09:40:00.640Z"
+      }
+    ],
+    "openQuestions": [
+      {
+        "question": "Is the free Developer Workspace enough to create a Data Client app and submit it, or is a Team or Enterprise plan required?",
+        "whyItMatters": "The Developer Workspace page says it is free and meant for app building; the register-an-app troubleshooting says app development is available on Team and Enterprise plans. This decides whether cost is zero.",
+        "howToResolve": "Create the Developer Workspace and check for Settings → Apps & Integrations → App Development, or ask developers@webflow.com / Webflow Support."
+      },
+      {
+        "question": "Do Webflow OAuth access tokens expire, and is a refresh token ever issued?",
+        "whyItMatters": "If tokens expire without a refresh token, every customer must reconnect periodically and Composio connections would silently go stale.",
+        "howToResolve": "Inspect a real token response (expires_in / refresh_token fields) after the first connection, or ask Webflow developer support."
+      },
+      {
+        "question": "Will Marketplace reviewers accept a redirect URI on backend.composio.dev and tokens held by Composio under the 'server-side, encrypted, deleted on revocation' attestations?",
+        "whyItMatters": "Guidelines require a production-domain redirect and say not to share credentials with third parties. A rejection here would force the own-domain forwarder or a different token store.",
+        "howToResolve": "Ask the Marketplace team via a support ticket before submitting, and describe Composio as your token store in the submission notes."
+      },
+      {
+        "question": "How long do Data Client reviews actually take in late 2026, and is unlisted public distribution available for Data Clients?",
+        "whyItMatters": "Webflow aims for 10 business days, a legacy page said 3–4 weeks, and we found no first-hand app review reports. The overview only offers unlisted distribution 'where Webflow supports' it.",
+        "howToResolve": "Ask in the Webflow community forum (community.webflow.com) or the Marketplace team via support.webflow.com."
+      }
+    ],
+    "verification": {
+      "reviewedAt": "2026-10-30",
+      "method": "An independent verifier re-fetched the cited Webflow and Composio pages with curl and WebFetch, checked each claim against the page text, and re-ran four read-only GET probes.",
+      "items": [
+        {
+          "claim": "Before approval only your Workspace plus up to 5 external test users (added via support.webflow.com) can install.",
+          "outcome": "corrected",
+          "note": "Marketplace overview: 'Request to add up to 5 test users at support.webflow.com with their Webflow emails'. The headline said no one outside your Workspace can install, which the 5 testers contradict. Headline fixed; 5-tester limit confirmed.",
+          "sourceIds": [
+            "S10",
+            "S4"
+          ]
+        },
+        {
+          "claim": "Webflow aims to send a decision within 10 business days of submission.",
+          "outcome": "confirmed",
+          "note": "Submitting-your-app page, Post submission: 'we aim to send a decision within 10 business days'; email goes to the Webflow account address; after requested changes you fix every item and resubmit. A stated aim, not a guarantee.",
+          "sourceIds": [
+            "S11"
+          ]
+        },
+        {
+          "claim": "timeToProduction 1.5–6 weeks, incl. a legacy page saying review takes 3–4 weeks with changes.",
+          "outcome": "unverifiable",
+          "note": "The legacy v1 page still 404s (a Wayback lookup did too); only a search snippet remains. No first-hand Data Client review times found. Moved the 3–4 week figure out of the official step into a reported nuance; basis reworded. Open question covers it.",
+          "sourceIds": [
+            "S16",
+            "S11"
+          ]
+        },
+        {
+          "claim": "Console path: Settings → Apps & Integrations → App Development → Create an App (Workspace Admin, 2FA).",
+          "outcome": "confirmed",
+          "note": "Register-an-app: 'From the Settings menu on the left sidebar, select the Apps & Integrations tab. Go to the App Development section and click Create an App'. Needs a verified email, 2FA and Admin. Description limit 140 characters confirmed.",
+          "sourceIds": [
+            "S4"
+          ]
+        },
+        {
+          "claim": "Cost is 'Free (Developer Workspace)', but register-an-app says app development needs Team or Enterprise.",
+          "outcome": "confirmed",
+          "note": "Developer Workspace page: free, one per person, 3 users, 120 requests/min, no production publishing. Register-an-app FAQ still says 'available on Team and Enterprise plans'. The conflict is real and stays an open question.",
+          "sourceIds": [
+            "S9",
+            "S4"
+          ]
+        },
+        {
+          "claim": "Rate limits are 60/min (Starter, Basic) and 120/min (CMS, eCommerce, Business); one publish a minute; Update Site needs Enterprise.",
+          "outcome": "confirmed",
+          "note": "Rate-limits page lists the 60/120 tiers, Enterprise custom, 429 with Retry-After, and 'one successful publish per minute'. Composio's Webflow docs: Update Site 'requires an Enterprise workspace'; Publish Site 1 per minute.",
+          "sourceIds": [
+            "S7",
+            "S1"
+          ]
+        },
+        {
+          "claim": "Review needs a published .webflow.io site, a 2–5 min English demo video showing OAuth approve and deny, and 2FA on an admin.",
+          "outcome": "confirmed",
+          "note": "Submitting page: demo video '(2-5 minutes)', English or subtitled, and for Data Clients must show 'users approving and denying the request'. Testing site must be a webflow.io URL. 2FA on a workspace admin is required.",
+          "sourceIds": [
+            "S11"
+          ]
+        },
+        {
+          "claim": "Scopes lock after publish; an authorize URL asking for scopes beyond the App's configured set fails.",
+          "outcome": "confirmed",
+          "note": "Register-an-app: scopes section 'is locked after the App is published'. OAuth reference: Webflow only checks the URL requests no scopes beyond the App's; omitted scopes still authorize. Guidelines: one HTTPS redirect URI, port 443.",
+          "sourceIds": [
+            "S4",
+            "S5",
+            "S12"
+          ]
+        },
+        {
+          "claim": "Probes re-run by GET: authorize 302 to login, token endpoint GET 404, discovery 404, dashboard 302 to login, submit page 200.",
+          "outcome": "confirmed",
+          "note": "Bogus client_id on /oauth/authorize got 302 to /login (P1). GET api.webflow.com/oauth/access_token 404 RouteNotFound (P2). Both .well-known paths 404 (P3). webflow.com/dashboard 302 to login; developers.webflow.com/submit 200 (P4).",
+          "sourceIds": [
+            "P1",
+            "P2",
+            "P3",
+            "P4"
+          ]
+        }
+      ]
+    }
+  },
+  "meta": {
+    "generatedAt": "2026-10-30T09:50:00Z",
+    "generator": "library",
+    "model": "claude-opus-5-5 (research agent)",
+    "durationSec": null
+  }
+}

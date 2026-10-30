@@ -86,6 +86,13 @@ export function guideToMarkdown(g: Guide, url?: string): string {
     }${g.composio.notes.length ? `\n\n${g.composio.notes.map((n) => `- ${n}`).join('\n')}` : ''}`,
   );
 
+  const t = g.composioSetup.tested;
+  if (t) {
+    out.push(
+      `**Tested setup attempt (${t.testedAt}, ${t.probeId}):** a throwaway Composio auth config with a dummy client sent users to \`${t.authorizeUrl}\` with \`redirect_uri=${t.redirectUri ?? '(none)'}\` and ${t.defaultScopes.length ? `these default scopes: ${t.defaultScopes.map((s) => `\`${s}\``).join(', ')}` : 'no scope parameter'}.${Object.keys(t.extraParams).filter((k) => k !== 'response_type').length ? ` Extra parameters: ${Object.keys(t.extraParams).filter((k) => k !== 'response_type').join(', ')}.` : ''}`,
+    );
+  }
+
   const ev = g.evidence;
   out.push(`## Evidence\n\n### Sources\n\n${ev.sources.map((s) => `- **${s.id}** [${s.title}](${s.url}) (${s.kind})${s.note ? `: ${s.note}` : ''}`).join('\n')}`);
   if (ev.probes.length) out.push(`### Setup attempts (probes)\n\n${ev.probes.map((p) => `- **${p.id}** \`${p.target.slice(0, 160)}\` → **${p.result}**: ${p.summary}`).join('\n')}`);

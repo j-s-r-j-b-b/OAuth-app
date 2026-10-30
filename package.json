@@ -18,7 +18,8 @@
     "replay": "tsx scripts/replay-probes.ts",
     "report": "tsx scripts/report.ts",
     "smoke": "tsx scripts/smoke-live.ts",
-    "live-eval": "tsx scripts/live-eval.ts"
+    "live-eval": "tsx scripts/live-eval.ts",
+    "connect-probe": "tsx scripts/composio-connect-probe.ts"
   },
   "dependencies": {
     "cheerio": "^1.2.0",

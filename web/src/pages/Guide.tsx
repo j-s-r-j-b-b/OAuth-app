@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { guideToAgentBrief } from '../../../shared/agentBrief.ts';
 import { guideToMarkdown } from '../../../shared/markdown.ts';
 import { DIFFICULTY_INFO, type Actor, type Guide, type Step } from '../../../shared/schema.ts';
 import { api, type GuideSummary, type Health, type Trace } from '../api.ts';
@@ -167,6 +168,7 @@ export default function GuidePage() {
         </div>
         <div className="no-print flex flex-wrap gap-2">
           <CopyButton text={url} label="Copy link" />
+          <CopyButton text={() => guideToAgentBrief(g, url)} label="🤖 Copy agent brief" className="btn border-violet-300 bg-violet-50 text-violet-900 hover:bg-violet-100 dark:border-violet-700 dark:bg-violet-500/10 dark:text-violet-200" />
           <CopyButton text={() => guideToMarkdown(g, url)} label="Copy Markdown" />
           <a className="btn" href={`/guides/${g.slug}.md`} target="_blank" rel="noreferrer">
             .md
@@ -259,6 +261,7 @@ export default function GuidePage() {
           {/* Roles */}
           <Section id="roles" title="Who does what" kicker="Where an agent helps and where you take over">
             <Roles steps={steps} />
+            <AgentBrief g={g} url={url} />
           </Section>
 
           {/* Requirements */}
@@ -590,7 +593,7 @@ function Roles({ steps }: { steps: Step[] }) {
                 {list.map((s) => (
                   <li key={s.id} className="flex justify-between gap-2">
                     <span>{s.title}</span>
-                    <span className="shrink-0 text-xs text-slate-500">{c.actor === 'provider' ? (s.wait ?? s.effort) : s.effort}</span>
+                    <span className="max-w-[45%] text-right text-xs text-slate-500">{c.actor === 'provider' ? (s.wait ?? s.effort) : s.effort}</span>
                   </li>
                 ))}
                 {list.length === 0 && <li className="text-slate-400">Nothing</li>}
@@ -605,6 +608,31 @@ function Roles({ steps }: { steps: Step[] }) {
           Look for the 🤖 notes in the plan.
         </p>
       )}
+    </div>
+  );
+}
+
+function AgentBrief({ g, url }: { g: Guide; url: string }) {
+  const [open, setOpen] = useState(false);
+  const brief = guideToAgentBrief(g, url);
+  return (
+    <div className="mt-4 rounded-xl border border-violet-300 bg-violet-50 p-4 dark:border-violet-800 dark:bg-violet-500/10">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <div className="font-semibold text-violet-950 dark:text-violet-100">🤖 Hand this to your coding agent</div>
+          <p className="text-sm text-violet-900/80 dark:text-violet-200/80">
+            A ready brief for Claude Code, Cursor or similar. It covers the agent's steps, drafts of the review materials and scope justifications, the
+            exact Composio wiring with the tested redirect URI, and what to hand back to you.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <button className="btn" onClick={() => setOpen(!open)}>
+            {open ? 'Hide' : 'Preview'}
+          </button>
+          <CopyButton text={brief} label="Copy brief" className="btn-primary" />
+        </div>
+      </div>
+      {open && <pre className="mt-3 max-h-96 overflow-auto rounded-lg bg-white p-3 text-xs whitespace-pre-wrap text-slate-800 dark:bg-slate-900 dark:text-slate-200">{brief}</pre>}
     </div>
   );
 }
@@ -626,7 +654,13 @@ const link = await session.authorize("${slug}"); // send link.redirectUrl to the
           <code className="rounded-lg bg-slate-100 px-3 py-2 font-mono text-sm break-all dark:bg-slate-800">{g.composioSetup.redirectUri}</code>
           <CopyButton text={g.composioSetup.redirectUri} label="Copy" />
         </div>
+        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+          This is what a Composio custom auth config sends by default. If you set <code>oauth_redirect_uri</code> to{' '}
+          <code>https://backend.composio.dev/api/v3/toolkits/auth/callback</code>, register that instead; where {g.app.name} allows several redirect URIs,
+          register both.
+        </p>
       </div>
+      {g.composioSetup.tested && <TestedSetup g={g} />}
       <ol className="card list-decimal space-y-2 p-4 pl-9 text-sm">
         {g.composioSetup.steps.map((s, i) => (
           <li key={i} className="md" dangerouslySetInnerHTML={{ __html: renderInline(s) }} />
@@ -657,6 +691,66 @@ const link = await session.authorize("${slug}"); // send link.redirectUrl to the
           <CopyButton text={ts} label="Copy" className="rounded-md bg-white/10 px-2 py-1 text-xs text-white hover:bg-white/20" />
         </div>
       </div>
+    </div>
+  );
+}
+
+function TestedSetup({ g }: { g: Guide }) {
+  const t = g.composioSetup.tested!;
+  const extra = Object.entries(t.extraParams).filter(([k]) => k !== 'response_type');
+  const [open, setOpen] = useState(false);
+  const scopes = t.defaultScopes;
+  return (
+    <div className="card border-emerald-300 p-4 dark:border-emerald-800">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className={`rounded px-1.5 py-px text-[10px] font-bold tracking-wide uppercase ${CONF.tested.cls}`}>Tested</span>
+        <span className="font-semibold text-slate-900 dark:text-white">Setup attempt through Composio · {t.testedAt}</span>
+        <button onClick={() => cite(t.probeId)} className="font-mono text-[11px] text-slate-500 hover:underline">
+          [{t.probeId}]
+        </button>
+      </div>
+      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        We created a throwaway custom auth config for <code>{g.composio.toolkitSlug}</code> with a dummy client, started a connection, and followed
+        Composio's redirect to {g.app.name}. Then we deleted both. This is exactly what your users' browsers will be sent:
+      </p>
+      <dl className="mt-3 grid gap-2 text-sm">
+        <div>
+          <dt className="eyebrow">Authorize endpoint</dt>
+          <dd className="font-mono text-xs break-all">{t.authorizeUrl}</dd>
+        </div>
+        <div>
+          <dt className="eyebrow">redirect_uri sent</dt>
+          <dd className="font-mono text-xs break-all">{t.redirectUri ?? '(none)'}</dd>
+        </div>
+        <div>
+          <dt className="eyebrow">Default scopes Composio requests ({scopes.length})</dt>
+          <dd className="mt-1 flex flex-wrap gap-1">
+            {scopes.length === 0 && <span className="text-xs text-slate-500">None in the scope parameter{extra.length ? ' (see extra parameters)' : ''}</span>}
+            {(open ? scopes : scopes.slice(0, 14)).map((s) => (
+              <code key={s} className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] dark:bg-slate-800">
+                {s.replace('https://www.googleapis.com/auth/', '')}
+              </code>
+            ))}
+            {scopes.length > 14 && (
+              <button onClick={() => setOpen(!open)} className="text-xs font-medium text-sky-700 dark:text-sky-300">
+                {open ? 'show fewer' : `+${scopes.length - 14} more`}
+              </button>
+            )}
+          </dd>
+        </div>
+        {extra.length > 0 && (
+          <div>
+            <dt className="eyebrow">Extra parameters</dt>
+            <dd className="font-mono text-[11px] break-all text-slate-600 dark:text-slate-400">
+              {extra.map(([k, v]) => `${k}=${v.length > 160 ? `${v.slice(0, 160)}… (${v.split(/[\s,]+/).length} values)` : v}`).join(' · ')}
+            </dd>
+          </div>
+        )}
+      </dl>
+      <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+        Your own OAuth app must allow these scopes, and the provider's review judges them. Override them with a <code>scopes</code> value on the auth
+        config to request only what your agent needs.
+      </p>
     </div>
   );
 }

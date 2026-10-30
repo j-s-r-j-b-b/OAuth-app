@@ -18,6 +18,7 @@
     "toolkitDocsUrl": "https://docs.composio.dev/toolkits/spotify",
     "requiredFields": [],
     "notes": [
+      "Tested: a custom auth config created without `oauth_redirect_uri` sends `https://backend.composio.dev/api/v1/auth-apps/add`, not the v3 callback shown in Composio's API docs. Register exactly the URI your auth config sends, or set `oauth_redirect_uri` to `https://backend.composio.dev/api/v3/toolkits/auth/callback` and register that instead.",
       "Composio provides no default Spotify OAuth app; you must create your own in the Spotify Developer Dashboard.",
       "Toolkit version 20260721_00: 88 tools, 3 triggers.",
       "Composio flags Recommendations (404 without Extended API access), Audio Features (403 for apps created after 27 Nov 2024) and category playlists as restricted; queue/pause/transfer tools need the end user to have Premium.",
@@ -183,7 +184,7 @@
           "actor": "you",
           "effort": "10 min",
           "wait": null,
-          "details": "Dashboard → **Create app**, then fill in:\n- **App name** and **App description**: both appear on the consent screen.\n- **Website**: your product URL.\n- **Redirect URIs**: paste `https://backend.composio.dev/api/v3/toolkits/auth/callback` and click **Add**.\n- **Which API/SDKs are you planning to use?**: tick **Web API**. Add **Web Playback SDK** only if you stream in the browser.\n- Tick *I understand and agree with Spotify's Developer Terms of Service and Design Guidelines*.\n\nClick **Save**. If you belong to a developer organisation, the **Organization** selector sets the owner.",
+          "details": "Dashboard → **Create app**, then fill in:\n- **App name** and **App description**: both appear on the consent screen.\n- **Website**: your product URL.\n- **Redirect URIs**: paste `https://backend.composio.dev/api/v1/auth-apps/add` (what Composio sends by default) and click **Add**. Add `https://backend.composio.dev/api/v3/toolkits/auth/callback` too, which Composio sends only if you set `oauth_redirect_uri`.\n- **Which API/SDKs are you planning to use?**: tick **Web API**. Add **Web Playback SDK** only if you stream in the browser.\n- Tick *I understand and agree with Spotify's Developer Terms of Service and Design Guidelines*.\n\nClick **Save**. If you belong to a developer organisation, the **Organization** selector sets the owner.",
           "agentAssist": "Pre-fill the form values and check that the redirect URI is the exact HTTPS string, with no trailing slash and no `localhost`.",
           "links": [
             {
@@ -194,7 +195,8 @@
           "sourceIds": [
             "P4",
             "S13",
-            "S12"
+            "S12",
+            "P7"
           ],
           "confidence": "tested"
         },
@@ -466,12 +468,13 @@
     {
       "item": "HTTPS redirect URI registered exactly",
       "neededFor": "registration",
-      "detail": "`https://backend.composio.dev/api/v3/toolkits/auth/callback`. HTTP is allowed only for loopback IP literals; `localhost` is rejected.",
+      "detail": "`https://backend.composio.dev/api/v1/auth-apps/add`, which Composio sends by default, plus `https://backend.composio.dev/api/v3/toolkits/auth/callback` if you set `oauth_redirect_uri`. HTTP is allowed only for loopback IP literals; `localhost` is rejected.",
       "sourceIds": [
         "S12",
-        "S3"
+        "S3",
+        "P7"
       ],
-      "confidence": "official"
+      "confidence": "tested"
     },
     {
       "item": "Name and Spotify email of each tester (max 5)",
@@ -672,7 +675,7 @@
       "title": "Redirect URI rejected",
       "symptom": "After login, Spotify shows `INVALID_CLIENT: Invalid redirect URI` or `INVALID_CLIENT: Insecure redirect URI`. The dashboard flags non-HTTPS entries with *This redirect URI is not secure*.",
       "likelihood": "common",
-      "howToProceed": "Register exactly `https://backend.composio.dev/api/v3/toolkits/auth/callback`, or your own HTTPS proxy URL if you white-label. `http://` is allowed only for loopback IP literals, and `localhost` is never accepted. Decode the `redirect_uri` in the failing URL and compare it character by character.",
+      "howToProceed": "Register exactly the URI Composio sends: `https://backend.composio.dev/api/v1/auth-apps/add` by default, `https://backend.composio.dev/api/v3/toolkits/auth/callback` only if the auth config sets `oauth_redirect_uri`, or your own HTTPS proxy URL if you white-label. `http://` is allowed only for loopback IP literals, and `localhost` is never accepted. Decode the `redirect_uri` in the failing URL and compare it character by character.",
       "escalation": {
         "label": "Spotify for Developers community",
         "url": "https://community.spotify.com/t5/Spotify-for-Developers/bd-p/Spotify_Developer"
@@ -682,7 +685,8 @@
         "S3",
         "S10",
         "P1",
-        "P4"
+        "P4",
+        "P7"
       ],
       "confidence": "tested"
     },
@@ -814,19 +818,45 @@
         "P1"
       ],
       "confidence": "tested"
+    },
+    {
+      "title": "Composio's default scopes miss the ones this guide uses",
+      "detail": "The default request is `user-read-private`, `user-read-email`, `app-remote-control`, `streaming`, `user-modify-playback-state`, `user-read-playback-state` and `user-read-currently-playing`. `streaming` and `app-remote-control` are for Spotify's playback SDKs, while `user-read-recently-played` and the `playlist-*` scopes are missing, so override the auth config scopes.",
+      "sourceIds": [
+        "P7"
+      ],
+      "confidence": "tested"
     }
   ],
   "composioSetup": {
-    "redirectUri": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+    "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
     "steps": [
-      "In the Spotify app's settings, add the redirect URI `https://backend.composio.dev/api/v3/toolkits/auth/callback` exactly (HTTPS, no trailing slash) and click Save.",
+      "In the Spotify app's settings, add the redirect URI `https://backend.composio.dev/api/v1/auth-apps/add` (what Composio sends by default) and `https://backend.composio.dev/api/v3/toolkits/auth/callback` (used only if you set `oauth_redirect_uri`), each exactly (HTTPS, no trailing slash), and click Save.",
       "In the Composio dashboard: Auth Configs → Create Auth Config → Spotify → OAuth2. Paste the Client ID and Client Secret.",
       "Set scopes, for example `user-read-recently-played user-top-read user-read-playback-state user-read-currently-playing user-modify-playback-state playlist-read-private playlist-modify-private playlist-modify-public`. Click Create and copy the `ac_…` ID.",
       "Pass the ID in every session: `authConfigs: { spotify: \"ac_…\" }` (Python: `auth_configs={\"spotify\": \"ac_…\"}`).",
       "While in Development Mode, add each user in Spotify → Settings → Users Management before sending them the Connect Link.",
       "For endpoints the tools no longer reach after Feb 2026, use `session.proxyExecute({ toolkit: \"spotify\", endpoint, method })`. The API key needs the Proxy execute permission.",
-      "Optional: to hide backend.composio.dev, register your own HTTPS redirect that 302s to the Composio callback, then set it in the auth config."
-    ]
+      "Optional: to hide backend.composio.dev, register your own HTTPS redirect that 302s to the Composio callback, then set it as `oauth_redirect_uri` in the auth config."
+    ],
+    "tested": {
+      "probeId": "P7",
+      "testedAt": "2026-10-30",
+      "authorizeUrl": "https://accounts.spotify.com/authorize",
+      "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
+      "defaultScopes": [
+        "user-read-private",
+        "user-read-email",
+        "app-remote-control",
+        "streaming",
+        "user-modify-playback-state",
+        "user-read-playback-state",
+        "user-read-currently-playing"
+      ],
+      "extraParams": {
+        "response_type": "code"
+      }
+    }
   },
   "evidence": {
     "sources": [
@@ -1045,6 +1075,15 @@
         "summary": "All 200 except changes/october-2026, which is 404. August and September 2026 changelog pages were also 404, so July 2026 is the latest Web API changelog.",
         "detail": null,
         "at": "2026-10-29T06:27:07Z"
+      },
+      {
+        "kind": "composio-api",
+        "target": "Composio API: create custom OAuth2 auth config for `spotify` with a dummy client → start a connection → follow the redirect (then delete both)",
+        "result": "pass",
+        "summary": "Composio sends users to https://accounts.spotify.com/authorize with redirect_uri=https://backend.composio.dev/api/v1/auth-apps/add; default scopes: user-read-private user-read-email app-remote-control streaming user-modify-playback-state user-read-playback-state user-read-currently-playing; PKCE on.",
+        "detail": "{\"authorizeUrl\":\"https://accounts.spotify.com/authorize\",\"redirectUri\":\"https://backend.composio.dev/api/v1/auth-apps/add\",\"scopes\":[\"user-read-private\",\"user-read-email\",\"app-remote-control\",\"streaming\",\"user-modify-playback-state\",\"user-read-playback-state\",\"user-read-currently-playing\"],\"extraParams\":{\"response_type\":\"code\"},\"pkce\":true,\"note\":\"extra params: response_type=code\"}",
+        "id": "P7",
+        "at": "2026-10-30T09:34:05.240Z"
       }
     ],
     "openQuestions": [
@@ -1067,11 +1106,6 @@
         "question": "When will the postponed endpoint removals apply to Development Mode apps created before 11 Feb 2026?",
         "whyItMatters": "Teams relying on an old app could lose save, follow and batch endpoints with little notice.",
         "howToResolve": "Watch the Web API changelog and the 6 Feb 2026 blog post, where Spotify promised revised timelines."
-      },
-      {
-        "question": "What default scopes does Composio's Spotify OAuth2 auth config request?",
-        "whyItMatters": "Missing playback or playlist-modify scopes cause 403s that look like policy blocks.",
-        "howToResolve": "Inspect the scope field when creating the auth config, or GET the toolkit via the Composio API with an API key."
       }
     ],
     "verification": {

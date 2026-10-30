@@ -5,7 +5,7 @@
     "name": "Xero",
     "website": "https://www.xero.com",
     "category": "Accounting",
-    "description": "Cloud-based accounting software for small businesses and their advisors.",
+    "description": "Cloud-based accounting software platform for small and medium-sized businesses.",
     "developerPortalUrl": "https://developer.xero.com/",
     "docsUrl": "https://developer.xero.com/documentation/"
   },
@@ -18,41 +18,42 @@
     "toolkitDocsUrl": "https://docs.composio.dev/toolkits/xero",
     "requiredFields": [],
     "notes": [
-      "Composio manages token refreshing automatically once valid custom OAuth credentials are provided.",
-      "Ensure all default scopes (`openid`, `profile`, `email`, `offline_access`, and required accounting scopes) are included in your custom configuration.",
-      "No extra connection fields are required beyond standard OAuth parameters for the Xero toolkit."
+      "Tested: a custom auth config created without `oauth_redirect_uri` sends `https://backend.composio.dev/api/v1/auth-apps/add`. Register exactly the URI your auth config sends, or set `oauth_redirect_uri` to `https://backend.composio.dev/api/v3/toolkits/auth/callback` and register that instead.",
+      "Composio defaults to sending redirect URI `https://backend.composio.dev/api/v1/auth-apps/add` unless overridden.",
+      "Custom OAuth credentials allow you to bypass shared rate limits and brand the consent screen with your own app name.",
+      "Composio automatically manages token refreshes for the 60-day refresh token window as long as active usage is maintained."
     ]
   },
-  "assumption": "An AI agent that reads and manages accounting records, invoices, and contacts across multiple customer Xero accounts.",
+  "assumption": "An AI agent that reads and writes accounting, banking, and contact data across any user's Xero organization.",
   "verdict": {
-    "headline": "Xero provides a self-serve developer portal with tiered subscription pricing and mandatory certification for broader publishing.",
-    "summary": "Developers can immediately register an app and test connections via the Xero Developer Centre. Moving beyond starter tiers or publishing to the Xero App Store requires paid pricing tiers, onboarding at least 10 beta customers, implementing full OAuth flows, and completing annual security assessments.",
+    "headline": "Xero requires self-serve app registration for development, but full certification and high-volume limits depend on active connections and tiered paid plans.",
+    "summary": "You can register a custom OAuth app instantly in the Xero Developer Portal. Testing requires no initial fees or review under the free Starter plan (up to 5 connections). Going to production with unlimited users requires moving to paid developer tiers, and Xero App Store listing requires a security assessment and 10 active beta connections.",
     "difficulty": "formal-review",
     "handsOnEffort": {
-      "label": "2–4 days",
-      "minHours": 48,
-      "maxHours": 96,
-      "basis": "App creation and PKCE flow integration take a few hours, while gathering 10 beta customers and completing security reviews takes days."
+      "label": "2–4 hours",
+      "minHours": 2,
+      "maxHours": 4,
+      "basis": "Developer portal app creation, redirect URI configuration, and OAuth flow wiring."
     },
     "timeToFirstConnection": {
-      "label": "30–60 min",
-      "minHours": 0.5,
+      "label": "< 1 hour",
+      "minHours": 0,
       "maxHours": 1,
-      "basis": "Account creation at the Xero Developer Centre allows instant credential generation and testing."
+      "basis": "Instant self-serve developer account creation and app provisioning."
     },
     "timeToProduction": {
       "label": "2–4 weeks",
       "minHours": 336,
       "maxHours": 672,
-      "basis": "Onboarding 10 active beta customers and undergoing certification reviews dictates the production timeline."
+      "basis": "Accumulating 10 active beta connections and completing Xero App Store certification requirements."
     },
-    "longestPole": "Onboarding the required 10 active beta customers and completing initial security assessments for app certification.",
-    "cost": "Free to Starter ($35–$1,445 AUD/mo for…",
-    "costDetail": "Starter tier is 5 connections and free. Core tier is 50 connections at $35 AUD/month, Plus is $245 AUD/month, Advanced is $1,445 AUD/month, and Enterprise has custom pricing.",
+    "longestPole": "Accumulating 10 active customer connections and completing the security review required for App Store certification.",
+    "cost": "Free to $X/mo tiered developer pricing",
+    "costDetail": "Free Starter plan up to 5 connections; Core, Plus, and Advanced tiers scale based on connection limits and data egress.",
     "easierPaths": [
       {
-        "condition": "Internal custom integrations or personal usage",
-        "effect": "Avoids App Store certification requirements and higher tiered fees."
+        "condition": "Internal-only use (Custom Integration)",
+        "effect": "Bypasses App Store certification requirements while remaining within private connection limits."
       }
     ]
   },
@@ -60,36 +61,28 @@
     {
       "key": "self_serve_registration",
       "value": "yes",
-      "detail": "Developers can sign up at xero.com and create an app instantly in the Xero Developer Centre.",
+      "detail": "Apps are created instantly via the Xero Developer Portal without manual review.",
       "sourceIds": [
-        "P2",
-        "S1"
+        "S10",
+        "P5"
       ],
-      "confidence": "official"
+      "confidence": "tested"
     },
     {
       "key": "review_required",
       "value": "yes",
-      "detail": "Publishing to the Xero App Store and moving past Starter/Core tiers requires app certification and security assessments.",
+      "detail": "App Store listing and certification require security assessments and operational checks.",
       "sourceIds": [
-        "S3",
-        "S7"
+        "S5",
+        "S8",
+        "S9"
       ],
       "confidence": "official"
     },
     {
       "key": "business_verification",
       "value": "yes",
-      "detail": "Developer partner registration requires organizational details and business verification for certification.",
-      "sourceIds": [
-        "S10"
-      ],
-      "confidence": "official"
-    },
-    {
-      "key": "security_assessment",
-      "value": "yes",
-      "detail": "Certified app partners must complete initial and annual security assessments.",
+      "detail": "Developer account verification and security assessments require business entity validation.",
       "sourceIds": [
         "S5",
         "S6"
@@ -97,38 +90,51 @@
       "confidence": "official"
     },
     {
+      "key": "security_assessment",
+      "value": "yes",
+      "detail": "App Store certification requires passing security assessments.",
+      "sourceIds": [
+        "S5",
+        "S8"
+      ],
+      "confidence": "official"
+    },
+    {
       "key": "paid_access",
       "value": "yes",
-      "detail": "Core tier costs $35 AUD/month, Plus costs $245 AUD/month, and Advanced costs $1,445 AUD/month.",
+      "detail": "Scaling beyond the free Starter plan (5 connections) requires moving to paid developer tiers.",
       "sourceIds": [
-        "S7"
+        "S4",
+        "S12"
       ],
       "confidence": "official"
     },
     {
       "key": "partner_or_sales_gate",
       "value": "no",
-      "detail": "Apps can be registered and developed via self-service without sales intervention.",
+      "detail": "Developer account registration is self-service; no sales call is strictly needed to start.",
       "sourceIds": [
-        "P2",
-        "S1"
+        "S1",
+        "S10"
       ],
       "confidence": "official"
     },
     {
       "key": "user_cap_before_review",
       "value": "yes",
-      "detail": "Starter tier is strictly capped at 5 connections until payment details and higher plans are adopted.",
+      "detail": "Free tier is capped at 5 active connections; higher tiers require paid plans and certification prerequisites.",
       "sourceIds": [
-        "S7"
+        "S4",
+        "S5"
       ],
       "confidence": "official"
     },
     {
       "key": "per_customer_setup",
       "value": "no",
-      "detail": "Standard OAuth 2.0 authorization code grant handles user connection flows dynamically.",
+      "detail": "Standard OAuth 2.0 flow allows end-users to authorize access to their Xero organization directly.",
       "sourceIds": [
+        "S2",
         "P3"
       ],
       "confidence": "tested"
@@ -137,157 +143,161 @@
   "phases": [
     {
       "id": "p1",
-      "title": "Register Developer Account and App",
-      "outcome": "A registered application with a Client ID and Client Secret in the Xero Developer Centre.",
+      "title": "Register your Xero developer app",
+      "outcome": "You have a client ID, client secret, and a registered app in the Xero Developer Portal.",
       "steps": [
         {
           "id": "s1",
-          "title": "Create a Xero Developer Account",
+          "title": "Create a Xero developer account",
           "actor": "you",
           "effort": "5 min",
           "wait": null,
-          "details": "Go to **developer.xero.com** and sign up or log in with your Xero account credentials.",
+          "details": "Log in to the **Xero Developer Portal** (developer.xero.com) using your Xero user credentials. If you do not have an account, sign up for a free account.",
           "agentAssist": null,
           "links": [
             {
-              "label": "Xero Developer Centre",
-              "url": "https://developer.xero.com/app/manage"
+              "label": "Xero Developer Portal",
+              "url": "https://developer.xero.com"
             }
           ],
           "sourceIds": [
-            "P2",
-            "S1"
+            "S10",
+            "P5"
           ],
           "confidence": "official"
         },
         {
           "id": "s2",
-          "title": "Create a New App",
+          "title": "Provision a new OAuth application",
           "actor": "you",
           "effort": "5 min",
           "wait": null,
-          "details": "In the **Xero Developer Centre**, click **New app**. Enter your app name, select **Web app** as the integration type, and provide the absolute redirect URI: `https://backend.composio.dev/api/v3/toolkits/auth/callback`.",
-          "agentAssist": "Draft the app name and configuration parameters.",
+          "details": "Navigate to **My Apps** in the developer portal and click **New App**. Enter your application name, company URL, and privacy policy URL.",
+          "agentAssist": "Draft the app name, privacy policy URL, and company URL to paste into the form.",
           "links": [
             {
-              "label": "Xero App Manager",
+              "label": "Xero My Apps",
               "url": "https://developer.xero.com/app/manage"
             }
           ],
           "sourceIds": [
-            "S1",
-            "S9"
+            "S10",
+            "P5"
           ],
           "confidence": "official"
         },
         {
           "id": "s3",
-          "title": "Generate Client Secrets",
+          "title": "Configure redirect URIs and scopes",
           "actor": "you",
-          "effort": "2 min",
+          "effort": "5 min",
           "wait": null,
-          "details": "Navigate to **Configuration** for your newly created app, click **Generate a secret**, and securely copy both your **Client ID** and **Client Secret**.",
-          "agentAssist": null,
+          "details": "Add your absolute redirect URI (e.g., `https://backend.composio.dev/api/v1/auth-apps/add` or your custom callback URL). Note that wildcards are not permitted and absolute URIs are strictly enforced.",
+          "agentAssist": "Generate the required list of absolute redirect URIs and granular scopes based on Composio defaults.",
           "links": [
             {
-              "label": "Xero App Configuration",
-              "url": "https://developer.xero.com/app/manage"
+              "label": "Xero OAuth 2.0 FAQs",
+              "url": "https://developer.xero.com/faq/oauth2"
             }
           ],
           "sourceIds": [
-            "S1"
+            "S2",
+            "S10",
+            "P2"
           ],
-          "confidence": "official"
+          "confidence": "tested"
         }
       ]
     },
     {
       "id": "p2",
-      "title": "Configure Scopes and Security",
-      "outcome": "App configured with PKCE support and necessary granular scopes.",
+      "title": "Test authentication with your own account",
+      "outcome": "You have generated a valid authorization code, exchanged it for an access token, and verified token lifecycle properties.",
       "steps": [
         {
           "id": "s4",
-          "title": "Configure Granular Scopes",
-          "actor": "you",
-          "effort": "5 min",
+          "title": "Initiate the OAuth flow with PKCE",
+          "actor": "agent",
+          "effort": "10 min",
           "wait": null,
-          "details": "Select the required scopes for your integration. Ensure you include `openid`, `profile`, `email`, `offline_access`, and granular accounting scopes like `accounting.invoices` and `accounting.contacts`.",
-          "agentAssist": "Generate the full scope string required for your specific workflow.",
+          "details": "Trigger the authorization request against `https://login.xero.com/identity/connect/authorize` using `response_type=code`, your `client_id`, your redirect URI, PKCE (`code_challenge` with `S256`), and the required granular scopes.",
+          "agentAssist": "Construct the complete authorization URL with appropriate scopes and PKCE parameters.",
           "links": [
             {
-              "label": "Granular Scopes FAQs",
-              "url": "https://developer.xero.com/faq/granular-scopes"
+              "label": "OpenID Configuration",
+              "url": "https://identity.xero.com/.well-known/openid-configuration"
             }
           ],
           "sourceIds": [
-            "S12",
-            "S13"
+            "P2",
+            "P3"
           ],
-          "confidence": "official"
+          "confidence": "tested"
         },
         {
           "id": "s5",
-          "title": "Verify PKCE Requirement",
+          "title": "Exchange the code for access and refresh tokens",
           "actor": "agent",
-          "effort": "2 min",
+          "effort": "5 min",
           "wait": null,
-          "details": "Ensure your auth implementation utilizes PKCE with `code_challenge_method=S256` as required by Xero's OAuth 2.0 implementation.",
-          "agentAssist": "Validate the authorization code request structure for `S256` compliance.",
+          "details": "Send a POST request to `https://identity.xero.com/identity/connect/token` (or `https://identity.xero.com/connect/token`) with `grant_type=authorization_code`, the authorization code, `client_id`, `client_secret`, and `redirect_uri` to retrieve your 30-minute access token and 60-day refresh token.",
+          "agentAssist": "Write a script or API request structure to test the token exchange automatically.",
           "links": [
             {
-              "label": "OAuth 2.0 FAQs",
+              "label": "Xero OAuth 2.0 FAQs",
               "url": "https://developer.xero.com/faq/oauth2"
             }
           ],
           "sourceIds": [
+            "S2",
             "P3"
           ],
-          "confidence": "tested"
+          "confidence": "official"
         }
       ]
     },
     {
       "id": "p3",
-      "title": "Test with Own Account",
-      "outcome": "Successful OAuth token exchange and API verification using a test Xero organization.",
+      "title": "Prepare for review and production",
+      "outcome": "You have onboarded 10 active beta connections and selected a paid developer tier if scaling beyond the free Starter limit.",
       "steps": [
         {
           "id": "s6",
-          "title": "Initiate Authorization Flow",
+          "title": "Gather active beta connections",
           "actor": "you",
-          "effort": "10 min",
+          "effort": "1–2 weeks",
           "wait": null,
-          "details": "Direct your browser to the Xero authorization endpoint with your Client ID and redirect URI to authorize access to your test tenant: `https://login.xero.com/identity/connect/authorize`.",
-          "agentAssist": "Construct the authorization URL with all required parameters and scopes.",
+          "details": "Acquire at least 10 active customer connections (using your integration within the last 30 days) to meet Xero App Store certification prerequisites.",
+          "agentAssist": "Draft an onboarding tracking checklist and outreach messages for beta testers.",
           "links": [
             {
-              "label": "Authorize Endpoint",
-              "url": "https://login.xero.com/identity/connect/authorize"
+              "label": "Grow with the Xero App Store",
+              "url": "https://developer.xero.com/static/otherfiles/Grow-with-the-Xero-App-Store.pdf"
             }
           ],
           "sourceIds": [
-            "P3"
+            "S7",
+            "S8"
           ],
-          "confidence": "tested"
+          "confidence": "official"
         },
         {
           "id": "s7",
-          "title": "Exchange Code for Tokens",
-          "actor": "agent",
-          "effort": "5 min",
+          "title": "Select a developer pricing tier",
+          "actor": "you",
+          "effort": "10 min",
           "wait": null,
-          "details": "Exchange the returned authorization code via POST request at `https://identity.xero.com/connect/token` to obtain your 30-minute access token and 60-day refresh token.",
-          "agentAssist": "Write a script to test token exchange and validation against Xero APIs.",
+          "details": "If your application requires exceeding the free Starter tier limit of 5 connections, upgrade to a paid developer plan (Core, Plus, Advanced, or Enterprise) as introduced in March 2026.",
+          "agentAssist": "Compare connection volumes and data egress requirements against Xero's tiered pricing plans.",
           "links": [
             {
-              "label": "Token Endpoint",
-              "url": "https://identity.xero.com/connect/token"
+              "label": "Xero Developer Pricing",
+              "url": "https://developer.xero.com/pricing"
             }
           ],
           "sourceIds": [
-            "P3",
-            "S9"
+            "S4",
+            "S12"
           ],
           "confidence": "official"
         }
@@ -295,112 +305,46 @@
     },
     {
       "id": "p4",
-      "title": "Prepare for Review and Certification",
-      "outcome": "Beta testing complete and security requirements satisfied for production app store listing.",
+      "title": "Go live in Composio",
+      "outcome": "Your custom Xero credentials are active inside Composio and ready to manage accounting workflows.",
       "steps": [
         {
           "id": "s8",
-          "title": "Onboard Beta Customers",
-          "actor": "you",
-          "effort": "1–2 weeks",
+          "title": "Create custom auth config in Composio",
+          "actor": "agent",
+          "effort": "5 min",
           "wait": null,
-          "details": "Onboard at least 10 active beta customers using non-demo companies to meet Xero App Store certification prerequisites.",
-          "agentAssist": "Draft customer onboarding scripts and instructions.",
+          "details": "Configure Composio to use your Xero Client ID and Client Secret by creating a custom auth configuration for the `xero` toolkit via the Composio API or dashboard.",
+          "agentAssist": "Format the API payload with your `client_id`, `client_secret`, and custom redirect URI.",
           "links": [
             {
-              "label": "Grow with Xero App Store",
-              "url": "https://developer.xero.com/static/otherfiles/Grow-with-the-Xero-App-Store.pdf"
+              "label": "Composio Xero Docs",
+              "url": "https://docs.composio.dev/toolkits/xero"
             }
           ],
           "sourceIds": [
-            "S3",
-            "S4"
+            "P1",
+            "P2"
           ],
-          "confidence": "official"
+          "confidence": "inferred"
         },
         {
           "id": "s9",
-          "title": "Complete Security Assessment",
-          "actor": "you",
-          "effort": "3–5 days",
-          "wait": "5–10 business days",
-          "details": "Complete the initial security assessment questionnaire and submit necessary documentation via the Xero developer portal.",
-          "agentAssist": "Compile security architecture notes and data handling policies.",
+          "title": "Initiate connection in Composio",
+          "actor": "agent",
+          "effort": "5 min",
+          "wait": null,
+          "details": "Run the Composio connection flow using the custom auth config ID to verify that users are successfully redirected through `https://login.xero.com/identity/connect/authorize` back to Composio.",
+          "agentAssist": "Test starting a connection link via Composio to ensure the auth flow executes without error.",
           "links": [
             {
-              "label": "Security Requirements",
-              "url": "https://developer.xero.com/partner/security-requirements-for-developer-partners"
+              "label": "Composio Xero Auth Guide",
+              "url": "https://composio.dev/auth/xero"
             }
           ],
           "sourceIds": [
-            "S5",
+            "P2",
             "S11"
-          ],
-          "confidence": "official"
-        }
-      ]
-    },
-    {
-      "id": "p5",
-      "title": "Go live in Composio",
-      "outcome": "Xero fully integrated into Composio for execution by AI agents.",
-      "steps": [
-        {
-          "id": "s10",
-          "title": "Create Custom Auth Config in Composio",
-          "actor": "agent",
-          "effort": "5 min",
-          "wait": null,
-          "details": "In your Composio dashboard, navigate to **Custom Auth** or **Toolkits → Xero**, and create a new custom auth configuration.",
-          "agentAssist": "Prepare the payload with your Client ID and Client Secret.",
-          "links": [
-            {
-              "label": "Composio Xero Toolkit",
-              "url": "https://docs.composio.dev/toolkits/xero"
-            }
-          ],
-          "sourceIds": [
-            "S2"
-          ],
-          "confidence": "official"
-        },
-        {
-          "id": "s11",
-          "title": "Input Credentials and Scopes",
-          "actor": "you",
-          "effort": "5 min",
-          "wait": null,
-          "details": "Paste your **Client ID**, **Client Secret**, and ensure the redirect URI `https://backend.composio.dev/api/v3/toolkits/auth/callback` along with your required scopes are added.",
-          "agentAssist": "Verify scope string compatibility with Composio default requirements.",
-          "links": [
-            {
-              "label": "Composio Docs",
-              "url": "https://docs.composio.dev/toolkits/xero"
-            }
-          ],
-          "sourceIds": [
-            "P1",
-            "S2"
-          ],
-          "confidence": "official"
-        },
-        {
-          "id": "s12",
-          "title": "Initiate Connection in Composio",
-          "actor": "agent",
-          "effort": "2 min",
-          "wait": null,
-          "details": "Pass the custom auth config ID to your Composio session to trigger user connection flows and start managing accounting data.",
-          "agentAssist": "Execute API call to initiate connection link generation for end-users.",
-          "links": [
-            {
-              "label": "Composio API",
-              "url": "https://backend.composio.dev/api/v3/toolkits/xero"
-            }
-          ],
-          "sourceIds": [
-            "P1",
-            "S2"
           ],
           "confidence": "official"
         }
@@ -411,171 +355,235 @@
     {
       "item": "Xero Developer Account",
       "neededFor": "registration",
-      "detail": "Sign up at developer.xero.com to manage applications and obtain Client ID and Client Secret.",
+      "detail": "Required to access the Xero Developer Portal and create OAuth credentials.",
       "sourceIds": [
-        "P2",
-        "S1"
+        "S10",
+        "P5"
       ],
       "confidence": "official"
     },
     {
       "item": "Absolute Redirect URI",
-      "neededFor": "testing",
-      "detail": "Register an absolute redirect URI (e.g., https://backend.composio.dev/api/v3/toolkits/auth/callback) without wildcards.",
+      "neededFor": "registration",
+      "detail": "Must register absolute URIs (HTTPS for production, http://localhost permitted for local dev).",
       "sourceIds": [
-        "S9"
+        "S10",
+        "S2"
       ],
       "confidence": "official"
     },
     {
-      "item": "PKCE Implementation",
-      "neededFor": "testing",
-      "detail": "Implement PKCE with S256 code challenge method during authorization code exchanges.",
+      "item": "10 Active Beta Connections",
+      "neededFor": "review",
+      "detail": "Required for Xero App Store certification and listing.",
       "sourceIds": [
-        "P3"
+        "S7",
+        "S8"
       ],
-      "confidence": "tested"
+      "confidence": "official"
     },
     {
-      "item": "10 Beta Customers",
-      "neededFor": "review",
-      "detail": "Onboard at least 10 active beta customers using non-demo companies to qualify for app store certification.",
+      "item": "Paid Developer Tier",
+      "neededFor": "production",
+      "detail": "Required when scaling beyond the free Starter tier limit of 5 connections.",
       "sourceIds": [
-        "S3",
-        "S4"
+        "S4",
+        "S12"
       ],
       "confidence": "official"
     }
   ],
   "scopes": [
     {
-      "scope": "openid profile email",
-      "purpose": "Retrieves user identity and profile information for authentication.",
-      "tier": "basic",
-      "note": "Required for establishing basic user context.",
-      "sourceIds": [
-        "S12"
-      ],
-      "confidence": "reported"
-    },
-    {
       "scope": "offline_access",
-      "purpose": "Grants refresh tokens for maintaining long-term offline access.",
-      "tier": "sensitive",
-      "note": "Required for 60-day rolling refresh tokens.",
+      "purpose": "Enables refresh tokens to maintain API access beyond the 30-minute access token lifespan.",
+      "tier": "basic",
+      "note": null,
       "sourceIds": [
-        "S12"
+        "S2",
+        "P2"
       ],
-      "confidence": "reported"
+      "confidence": "official"
     },
     {
       "scope": "accounting.invoices",
-      "purpose": "Grants read and write access to customer invoices.",
+      "purpose": "Grants read and write access to invoices under the granular scope system.",
       "tier": "sensitive",
-      "note": "Part of the granular accounting scopes introduced to replace broad scopes.",
+      "note": "Transitioned from broad scopes in March 2026.",
       "sourceIds": [
-        "S13"
+        "S13",
+        "P2"
       ],
       "confidence": "official"
     },
     {
       "scope": "accounting.contacts",
-      "purpose": "Grants read and write access to customer contact records.",
+      "purpose": "Grants read and write access to customer and supplier contacts.",
       "tier": "sensitive",
-      "note": "Granular scope for managing contacts.",
+      "note": null,
       "sourceIds": [
-        "S13"
+        "S13",
+        "P2"
       ],
       "confidence": "official"
+    },
+    {
+      "scope": "accounting.banktransactions",
+      "purpose": "Grants access to bank transaction data.",
+      "tier": "sensitive",
+      "note": null,
+      "sourceIds": [
+        "S13",
+        "P2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "openid profile email",
+      "purpose": "Provides standard OpenID Connect user identity claims.",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "P2",
+        "P3"
+      ],
+      "confidence": "tested"
     }
   ],
   "blockers": [
     {
-      "title": "Redirect URI Mismatch",
-      "symptom": "Authorization request fails with a redirect URI error or blank page.",
+      "title": "Redirect URI mismatch error",
+      "symptom": "Authentication fails with an invalid redirect_uri error from Xero.",
       "likelihood": "common",
-      "howToProceed": "Ensure the redirect URI in your Xero App settings exactly matches `https://backend.composio.dev/api/v3/toolkits/auth/callback` without wildcards or trailing slashes.",
+      "howToProceed": "Ensure the redirect URI configured in your Xero Developer Portal app settings precisely matches the redirect URI sent by your application or Composio (e.g. `https://backend.composio.dev/api/v1/auth-apps/add`). Wildcards are not allowed.",
       "escalation": {
-        "label": "Xero OAuth FAQs",
+        "label": "Xero OAuth FAQ",
         "url": "https://developer.xero.com/faq/oauth2"
       },
       "sourceIds": [
-        "S9"
+        "S2",
+        "S10",
+        "P2"
       ],
-      "confidence": "official"
+      "confidence": "tested"
     },
     {
-      "title": "Connection Cap Reached on Starter Tier",
-      "symptom": "API requests fail when connecting more than 5 distinct organizations.",
-      "likelihood": "common",
-      "howToProceed": "Upgrade your developer plan to Core ($35 AUD/mo) or Plus to increase connection limits beyond the Starter tier cap of 5.",
+      "title": "Inactive refresh token expiration",
+      "symptom": "API calls fail with unauthorized errors after periods of inactivity.",
+      "likelihood": "occasional",
+      "howToProceed": "Xero refresh tokens expire after 60 days of inactivity. Ensure your integration implements a robust token refresh loop and prompts users to re-authenticate if the refresh token becomes invalid.",
       "escalation": {
-        "label": "Xero Developer Pricing",
-        "url": "https://developer.xero.com/pricing"
+        "label": "Xero OAuth FAQ",
+        "url": "https://developer.xero.com/faq/oauth2"
       },
       "sourceIds": [
-        "S7"
+        "S2"
       ],
       "confidence": "official"
     },
     {
-      "title": "Invalid Granular Scopes Error",
-      "symptom": "Authorization request rejects certain legacy scopes like `accounting.transactions`.",
+      "title": "Granular scope mismatch",
+      "symptom": "API requests are denied due to insufficient permissions or missing granular scopes.",
       "likelihood": "occasional",
-      "howToProceed": "Replace broad scopes with individual granular scopes (e.g., `accounting.invoices`, `accounting.contacts`) as required by Xero's migration timeline.",
+      "howToProceed": "Xero transitioned to granular scopes (e.g. `accounting.invoices`, `accounting.contacts`). Make sure your authorization request explicitly requests the precise granular scopes required for your API operations rather than legacy broad scopes.",
       "escalation": {
-        "label": "Granular Scopes FAQs",
+        "label": "Xero Granular Scopes FAQs",
         "url": "https://developer.xero.com/faq/granular-scopes"
       },
       "sourceIds": [
-        "S13"
+        "S13",
+        "P2"
       ],
       "confidence": "official"
     }
   ],
   "nuances": [
     {
-      "title": "Token Lifetimes",
-      "detail": "Xero access tokens expire in 30 minutes (1800 seconds). Refresh tokens expire after 60 days of inactivity, and each successful refresh rolls the 60-day window forward.",
+      "title": "Token Lifespans",
+      "detail": "Xero access tokens expire quickly after 30 minutes. Refresh tokens remain valid for 60 days of inactivity.",
       "sourceIds": [
-        "S9"
+        "S2"
       ],
       "confidence": "official"
     },
     {
-      "title": "AI/ML Data Training Prohibition",
-      "detail": "Xero developer terms explicitly forbid using data retrieved via the Xero API to train artificial intelligence or machine learning models.",
+      "title": "PKCE Requirement",
+      "detail": "Xero supports and encourages PKCE (S256) for secure OAuth 2.0 authorization code exchanges.",
       "sourceIds": [
-        "S7"
+        "P2",
+        "P3"
+      ],
+      "confidence": "tested"
+    },
+    {
+      "title": "AI Data Training Ban",
+      "detail": "Data obtained from Xero's APIs is strictly prohibited from being used to train AI or machine learning models.",
+      "sourceIds": [
+        "S4"
       ],
       "confidence": "official"
     },
     {
-      "title": "Rate Limits",
-      "detail": "Per connection limits are 5 concurrent calls, 60 calls per minute, and 5,000 calls per day (Starter tier is capped at 1,000 calls per day). App-wide limits are 10,000 calls per minute.",
+      "title": "Tiered Pricing Limits",
+      "detail": "Xero enforces a tiered developer pricing model effective March 2026, restricting connection limits based on your plan (Starter free tier is capped at 5 connections).",
       "sourceIds": [
-        "S8"
-      ],
-      "confidence": "official"
-    },
-    {
-      "title": "Redirect URI Restrictions",
-      "detail": "Redirect URIs must be absolute URIs without wildcards. You can register up to 50 unique redirect URIs per application.",
-      "sourceIds": [
-        "S9"
+        "S4",
+        "S12"
       ],
       "confidence": "official"
     }
   ],
   "composioSetup": {
-    "redirectUri": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+    "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
     "steps": [
-      "Navigate to the Composio dashboard and open the Xero toolkit settings.",
-      "Select the option to create a custom OAuth configuration.",
-      "Input your Xero Client ID and Client Secret.",
-      "Verify that the default redirect URI (`https://backend.composio.dev/api/v3/toolkits/auth/callback`) and scopes are correctly mapped.",
-      "Save the configuration and pass the custom auth ID to your agent connection session."
-    ]
+      "Navigate to your Composio developer dashboard and locate the Xero toolkit settings.",
+      "Create a custom OAuth configuration for Xero using your Xero Developer Portal Client ID and Client Secret.",
+      "Set the redirect URI in your Xero app settings to match Composio's expected callback URL (`https://backend.composio.dev/api/v1/auth-apps/add` or your custom callback).",
+      "Select or verify the default scopes required for your integration (including `offline_access`, `openid`, `profile`, `email`, and granular accounting scopes).",
+      "Trigger a connection test via Composio to execute the authorization flow and store user credentials securely."
+    ],
+    "tested": {
+      "probeId": "P2",
+      "testedAt": "2026-10-30",
+      "authorizeUrl": "https://login.xero.com/identity/connect/authorize",
+      "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
+      "defaultScopes": [
+        "offline_access",
+        "email",
+        "profile",
+        "openid",
+        "files",
+        "files.read",
+        "projects",
+        "projects.read",
+        "accounting.manualjournals.read",
+        "accounting.manualjournals",
+        "accounting.banktransactions.read",
+        "accounting.banktransactions",
+        "accounting.payments.read",
+        "accounting.payments",
+        "accounting.invoices.read",
+        "accounting.invoices",
+        "accounting.reports.tenninetynine.read",
+        "accounting.budgets.read",
+        "accounting.attachments.read",
+        "accounting.attachments",
+        "accounting.contacts.read",
+        "accounting.contacts",
+        "accounting.settings.read",
+        "accounting.settings",
+        "accounting.reports.taxreports.read",
+        "accounting.reports.trialbalance.read",
+        "accounting.reports.profitandloss.read",
+        "accounting.reports.executivesummary.read",
+        "accounting.reports.budgetsummary.read",
+        "accounting.reports.banksummary.read",
+        "accounting.reports.aged.read"
+      ],
+      "extraParams": {
+        "response_type": "code"
+      }
+    }
   },
   "evidence": {
     "sources": [
@@ -584,107 +592,107 @@
         "url": "https://developer.xero.com/faq/getting-started",
         "title": "Getting started FAQs — Xero Developer",
         "kind": "official",
-        "accessedAt": "2026-10-29",
-        "note": "Getting started FAQs provide details on application creation and management in the Xero Developer Centre.",
+        "accessedAt": "2026-10-30",
+        "note": "Official getting started FAQs for Xero developers.",
         "retrieval": "fetched"
       },
       {
         "id": "S2",
-        "url": "https://docs.composio.dev/toolkits/xero",
-        "title": "Composio docs: Xero toolkit",
-        "kind": "composio",
-        "accessedAt": "2026-10-29",
-        "note": null,
+        "url": "https://developer.xero.com/faq/oauth2",
+        "title": "OAuth 2.0 FAQs — Xero Developer",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Official Xero OAuth 2.0 FAQs covering token lifespans and redirect URIs.",
         "retrieval": "fetched"
       },
       {
         "id": "S3",
-        "url": "https://developer.xero.com/xero-developer-platform-commercial-terms",
-        "title": "Xero Developer Platform Commercial Terms — Xero Developer",
-        "kind": "official",
-        "accessedAt": "2026-10-29",
-        "note": "Developer Platform Commercial Terms outline partner obligations and beta customer requirements.",
-        "retrieval": "search-result"
+        "url": "https://docs.composio.dev/toolkits/xero",
+        "title": "Composio docs: Xero toolkit",
+        "kind": "composio",
+        "accessedAt": "2026-10-30",
+        "note": "Composio documentation for the Xero toolkit.",
+        "retrieval": "fetched"
       },
       {
         "id": "S4",
-        "url": "https://devblog.xero.com/update-app-certification-now-requiring-10-beta-customers-f07cff4bd103",
-        "title": "Medium",
+        "url": "https://developer.xero.com/pricing",
+        "title": "Pricing — Xero Developer",
         "kind": "official",
-        "accessedAt": "2026-10-29",
-        "note": "Devblog update outlines the mandatory requirement for 10 beta customers for app certification.",
-        "retrieval": "search-result"
+        "accessedAt": "2026-10-30",
+        "note": "Official Xero Developer Pricing page and tier rules.",
+        "retrieval": "fetched"
       },
       {
         "id": "S5",
-        "url": "https://developer.xero.com/faq/xero-ecosystem-security-requirements-update",
-        "title": "Xero Ecosystem Security Requirements Update FAQs — Xero Developer",
+        "url": "https://developer.xero.com/xero-developer-platform-commercial-terms",
+        "title": "Xero Developer Platform Commercial Terms — Xero Developer",
         "kind": "official",
-        "accessedAt": "2026-10-29",
-        "note": "Ecosystem security requirements explain initial and annual security assessment mandates.",
+        "accessedAt": "2026-10-30",
+        "note": "Xero Developer Platform commercial terms.",
         "retrieval": "search-result"
       },
       {
         "id": "S6",
-        "url": "https://devblog.xero.com/announcing-the-2026-annual-recertification-a-smoother-faster-process-5ca3aa3abb0e",
-        "title": "Medium",
+        "url": "https://developer.xero.com/faq/xero-ecosystem-security-requirements-update",
+        "title": "Xero Ecosystem Security Requirements Update FAQs — Xero Developer",
         "kind": "official",
-        "accessedAt": "2026-10-29",
-        "note": "Annual recertification processes ensure ongoing platform compliance.",
+        "accessedAt": "2026-10-30",
+        "note": "Xero ecosystem security requirements update FAQs.",
         "retrieval": "search-result"
       },
       {
         "id": "S7",
-        "url": "https://developer.xero.com/pricing",
-        "title": "Pricing — Xero Developer",
+        "url": "https://devblog.xero.com/update-app-certification-now-requiring-10-beta-customers-f07cff4bd103",
+        "title": "Medium",
         "kind": "official",
-        "accessedAt": "2026-10-29",
-        "note": "Pricing page details tiered developer plans, pricing, and AI/ML model training restrictions.",
-        "retrieval": "fetched"
+        "accessedAt": "2026-10-30",
+        "note": "Dev blog post announcing the 10-beta-customer requirement for app certification.",
+        "retrieval": "search-result"
       },
       {
         "id": "S8",
-        "url": "https://developer.xero.com/faq/limits",
-        "title": "Limits FAQs — Xero Developer",
+        "url": "https://developer.xero.com/static/otherfiles/Grow-with-the-Xero-App-Store.pdf",
+        "title": "Grow with the Xero App Store",
         "kind": "official",
-        "accessedAt": "2026-10-29",
-        "note": "Limits FAQs document per-connection and app-wide API rate limits.",
-        "retrieval": "fetched"
+        "accessedAt": "2026-10-30",
+        "note": "Official PDF guide for growing with the Xero App Store.",
+        "retrieval": "search-result"
       },
       {
         "id": "S9",
-        "url": "https://developer.xero.com/faq/oauth2",
-        "title": "OAuth 2.0 FAQs — Xero Developer",
+        "url": "https://devblog.xero.com/announcing-the-2026-annual-recertification-a-smoother-faster-process-5ca3aa3abb0e",
+        "title": "Medium",
         "kind": "official",
-        "accessedAt": "2026-10-29",
-        "note": "OAuth 2.0 FAQs detail token lifetimes, redirect URI formatting rules, and PKCE support.",
-        "retrieval": "fetched"
+        "accessedAt": "2026-10-30",
+        "note": "Dev blog on annual recertification processes.",
+        "retrieval": "search-result"
       },
       {
         "id": "S10",
-        "url": "https://developer.xero.com/partner/xero-developer-partner-terms-of-agreement",
-        "title": "Xero Developer Partner – terms of agreement — Xero Developer",
-        "kind": "official",
-        "accessedAt": "2026-10-29",
-        "note": "Xero Developer Partner terms of agreement.",
+        "url": "https://cknotes.com/xero-redirect-uri-for-oauth2-and-desktop-apps/",
+        "title": "Xero Redirect URI for OAuth2 and Desktop Apps – Chilkat Tech Notes",
+        "kind": "community",
+        "accessedAt": "2026-10-30",
+        "note": "Chilkat tech notes on Xero redirect URI for OAuth2 and desktop apps.",
         "retrieval": "search-result"
       },
       {
         "id": "S11",
-        "url": "https://developer.xero.com/partner/security-requirements-for-developer-partners",
-        "title": "Security – requirements for developer partners — Xero Developer",
-        "kind": "official",
-        "accessedAt": "2026-10-29",
-        "note": "Security requirements document mandatory partner standards.",
+        "url": "https://composio.dev/auth/xero",
+        "title": "How to create OAuth2 credentials for Xero | Composio",
+        "kind": "composio",
+        "accessedAt": "2026-10-30",
+        "note": "Composio guide on creating OAuth2 credentials for Xero.",
         "retrieval": "search-result"
       },
       {
         "id": "S12",
-        "url": "https://docs.stackone.com/connectors/xero/guides/connector-profile/oauth-2-0",
-        "title": "Xero OAuth 2.0 connector profile – StackOne setup guide - Stackone",
-        "kind": "community",
-        "accessedAt": "2026-10-29",
-        "note": "Connector profiles specify openid, profile, email, and offline_access scope requirements.",
+        "url": "https://developer.xero.com/xero-developer-platform-terms-conditions",
+        "title": "Developer Platform Terms and Conditions — Xero Developer",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Official Xero Developer Platform terms and conditions.",
         "retrieval": "search-result"
       },
       {
@@ -692,8 +700,8 @@
         "url": "https://developer.xero.com/faq/granular-scopes",
         "title": "Granular Scopes FAQs — Xero Developer",
         "kind": "official",
-        "accessedAt": "2026-10-29",
-        "note": "Granular scopes FAQs detail migration away from broad legacy scopes.",
+        "accessedAt": "2026-10-30",
+        "note": "Official Xero Granular Scopes FAQs.",
         "retrieval": "fetched"
       }
     ],
@@ -705,16 +713,16 @@
         "result": "pass",
         "summary": "Auth schemes: OAUTH2. Connection fields: none. Default scopes: offline_access email profile openid files files.read projects projects.read accounting.manualjournals.read accounting.manualjournals accounting.banktransactions.read accounting.banktransactions.",
         "detail": "[{\"scheme\":\"OAUTH2\",\"managed\":false,\"configFields\":[{\"name\":\"client_id\",\"displayName\":\"Client id\",\"required\":true,\"description\":\"Client id of the app\"},{\"name\":\"client_secret\",\"displayName\":\"Client secret\",\"required\":true,\"description\":\"Client secret of the app\"},{\"name\":\"oauth_redirect_uri\",\"displayName\":\"Redirect URI\",\"required\":false,\"description\":\"Add this Redirect URL to your app's OAuth allow list.\"},{\"name\":\"scopes\",\"displayName\":\"Scopes\",\"required\":false,\"description\":\"Scopes to request from the user, comma separated\"}],\"connectionFields\":[],\"defaultScopes\":[\"offline_access\",\"email\",\"profile\",\"openid\",\"files\",\"files.read\",\"projects\",\"projects.read\",\"accounting.manualjournals.read\",\"accounting.manualjournals\",\"accounting.banktransactions.read\",\"accounting.banktransactions\",\"accounting.payments.read\",\"accounting.payments\",\"accounting.invoices.read\",\"accounting.invoices\",\"accounting.reports.tenninetynine.read\",\"accounting.budgets.read\",\"accounting.attachments.read\",\"accounting.attachments\",\"accounting.contacts.read\",\"accounting.contacts\",\"accounting.settings.read\",\"accounting.settings\",\"accounting.reports.taxreports.read\",\"accounting.reports.trialbalance.read\",\"accounting.reports.profitandloss.read\",\"accounting.reports.executivesummary.read\",\"accounting.reports.budgetsummary.read\",\"accounting.reports.banksummary.read\",\"accounting.reports.aged.read\"]}]",
-        "at": "2026-10-29T13:00:26.669Z"
+        "at": "2026-10-30T09:46:29.291Z"
       },
       {
         "id": "P2",
-        "kind": "portal",
-        "target": "GET https://developer.xero.com/app/manage",
+        "kind": "composio-api",
+        "target": "Composio API: create custom OAuth2 auth config for `xero` with a dummy client → start a connection → follow the redirect (then delete both)",
         "result": "pass",
-        "summary": "Portal reachable (200, \"Xero\"); no sign-in redirect seen on the landing page.",
-        "detail": "Chain: 200 developer.xero.com/app/manage",
-        "at": "2026-10-29T13:00:39.793Z"
+        "summary": "Composio sends users to https://login.xero.com/identity/connect/authorize with redirect_uri=https://backend.composio.dev/api/v1/auth-apps/add; default scopes: offline_access email profile openid files files.read projects projects.read accounting.manualjournals.read accounting.manualjournals accounting.banktransactions.read accounting.banktransactions accounting.payments.read accounting.payments accounting.invoices.read accounting.invoices accounting.reports.tenninetynine.read accounting.budgets.read accounting.attachments.read accounting.attachments accounting.contacts.read accounting.contacts accounting.settings.read accounting.settings accounting.reports.taxreports.read accounting.reports.trialbalance.read accounting.reports.profitandloss.read accounting.reports.executivesummary.read accounting.reports.budgetsummary.read accounting.reports.banksummary.read accounting.reports.aged.read; PKCE on.",
+        "detail": "{\"authorizeUrl\":\"https://login.xero.com/identity/connect/authorize\",\"redirectUri\":\"https://backend.composio.dev/api/v1/auth-apps/add\",\"scopes\":[\"offline_access\",\"email\",\"profile\",\"openid\",\"files\",\"files.read\",\"projects\",\"projects.read\",\"accounting.manualjournals.read\",\"accounting.manualjournals\",\"accounting.banktransactions.read\",\"accounting.banktransactions\",\"accounting.payments.read\",\"accounting.payments\",\"accounting.invoices.read\",\"accounting.invoices\",\"accounting.reports.tenninetynine.read\",\"accounting.budgets.read\",\"accounting.attachments.read\",\"accounting.attachments\",\"accounting.contacts.read\",\"accounting.contacts\",\"accounting.settings.read\",\"accounting.settings\",\"accounting.reports.taxreports.read\",\"accounting.reports.trialbalance.read\",\"accounting.reports.profitandloss.read\",\"accounting.reports.executivesummary.read\",\"accounting.reports.budgetsummary.read\",\"accounting.reports.banksummary.read\",\"accounting.reports.aged.read\"],\"extraParams\":{\"response_type\":\"code\"},\"pkce\":true,\"note\":\"extra params: response_type=code\"}",
+        "at": "2026-10-30T09:46:32.403Z"
       },
       {
         "id": "P3",
@@ -723,31 +731,45 @@
         "result": "pass",
         "summary": "Discovery document found. Authorize: https://login.xero.com/identity/connect/authorize; token: https://identity.xero.com/connect/token. PKCE: S256.",
         "detail": "{\"issuer\":\"https://identity.xero.com\",\"authorization_endpoint\":\"https://login.xero.com/identity/connect/authorize\",\"token_endpoint\":\"https://identity.xero.com/connect/token\",\"registration_endpoint\":null,\"code_challenge_methods_supported\":[\"S256\"],\"grant_types_supported\":[\"authorization_code\",\"client_credentials\",\"refresh_token\"],\"scopes_supported\":null}",
-        "at": "2026-10-29T13:00:40.319Z"
+        "at": "2026-10-30T09:46:38.110Z"
       },
       {
         "id": "P4",
         "kind": "authorize-endpoint",
-        "target": "GET https://login.xero.com/identity/connect/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=openid+profile+email+accounting.transactions+accounting.settings",
+        "target": "GET https://login.xero.com/identity/connect/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=openid+profile+email+accounting.transactions",
         "result": "pass",
         "summary": "Endpoint is live and rejects an unregistered client (200). Shows what a misconfigured app sees.",
-        "detail": "Chain: 302 login.xero.com/identity/connect/authorize → 200 login.xero.com/identity/error\nFinal: https://login.xero.com/identity/error?errorId=CfDJ8MOMn5AHNxVIkNNdLD-L7IGBE_hMFjz-jc0tpZHuZiH4SdsiX15mzdfXMs4rM5g34d3ybrxCtbd60N2lmhAHnOMXEkQ9qJ1JHnYA9ykt1HIGSnE4SF4UtPvu-AyXIiu_Wp3zBpl9KOLGT5nNdd0012H2bAcPUWOMJHgkxklxfOr2xAzsZcIGOBTNZJIlhYO23qgDBxj-kbrYmk5EgPSQc-ySdC_GB3JKo7T8xhS9MJ72Y6WpagsszxuRwy\nExcerpt: title=\"Xero | Error 500\" | Error: unauthorized\\_client | Error code: 500 | error tokens in page: unauthorized_client | errorId=CfDJ8MOMn5AHNxVIkNNdLD-L7IGBE_hMFjz-jc0tpZHuZiH4SdsiX15mzdfXMs4rM5g34d3ybrxCtbd60N2lmhAHnOMXEkQ9qJ1JHnYA9ykt1HIGSnE4SF4U | errorId=CfDJ8MOMn5AHNxVIkNNdLD-L7IGBE_hMFjz-jc0tpZHuZiH4SdsiX15mzdfXMs4rM5g34d3ybrxCtbd60N2lmhAHnOMXEkQ9qJ1JHnYA9ykt1HIGSnE4SF4U",
-        "at": "2026-10-29T13:00:41.114Z"
+        "detail": "Chain: 302 login.xero.com/identity/connect/authorize → 200 login.xero.com/identity/error\nFinal: https://login.xero.com/identity/error?errorId=CfDJ8MOMn5AHNxVIkNNdLD-L7IFP6gFmDsG8o0FqJJKZdxXX5LyJpLWohekXJsRjwa_h47PoNTIhSR7khbtrfQnuZU1WwAKo7wI_KProPyeJxpjx2aatG-ie6lgf5Z624EGE1gbT5eKhy_OWYKT8YX4vGhTC6SvVmuXKGrNgsUyTd8QMQHjOmMsvV4PA9Aqo_1P-F2xkdWq2zWZAa4kUqEqjcZ3-vZFjHwvsOusNSxnaAZZdntlcEE32VgONef\nExcerpt: title=\"Xero | Error 500\" | Error: unauthorized\\_client | Error code: 500 | error tokens in page: unauthorized_client | errorId=CfDJ8MOMn5AHNxVIkNNdLD-L7IFP6gFmDsG8o0FqJJKZdxXX5LyJpLWohekXJsRjwa_h47PoNTIhSR7khbtrfQnuZU1WwAKo7wI_KProPyeJxpjx2aatG-ie | errorId=CfDJ8MOMn5AHNxVIkNNdLD-L7IFP6gFmDsG8o0FqJJKZdxXX5LyJpLWohekXJsRjwa_h47PoNTIhSR7khbtrfQnuZU1WwAKo7wI_KProPyeJxpjx2aatG-ie",
+        "at": "2026-10-30T09:46:38.695Z"
+      },
+      {
+        "id": "P5",
+        "kind": "portal",
+        "target": "GET https://developer.xero.com/app/manage",
+        "result": "pass",
+        "summary": "Portal reachable (200, \"Xero\"); no sign-in redirect seen on the landing page.",
+        "detail": "Chain: 200 developer.xero.com/app/manage",
+        "at": "2026-10-30T09:46:41.570Z"
       }
     ],
     "openQuestions": [
       {
-        "question": "What is the exact review turnaround time for initial security assessments?",
-        "whyItMatters": "Affects go-live timelines when publishing public apps.",
-        "howToResolve": "Submit the security assessment questionnaire early and monitor developer portal notifications."
+        "question": "What are the exact pricing dollar figures for the Core, Plus, and Advanced developer tiers introduced in March 2026?",
+        "whyItMatters": "Helps developers forecast operational expenses when scaling past the free Starter 5-connection limit.",
+        "howToResolve": "Check the official Xero Developer Pricing page for current tier fee schedules."
+      },
+      {
+        "question": "What specific automated security tools or manual checks are mandated during the Xero App Store security assessment?",
+        "whyItMatters": "Failure to prepare for security audits can delay App Store listing by several weeks.",
+        "howToResolve": "Review the Xero App Store certification checklist and developer terms documentation."
       }
     ],
     "verification": null
   },
   "meta": {
-    "generatedAt": "2026-10-29T13:02:02.216Z",
+    "generatedAt": "2026-10-30T09:47:14.261Z",
     "generator": "live",
-    "model": "gemini-3.5-flash-lite",
-    "durationSec": 108
+    "model": "gemini-3.5-flash-lite (research) + gemini-3.6-flash (writing)",
+    "durationSec": 50
   }
 }

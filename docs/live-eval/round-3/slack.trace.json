@@ -1,0 +1,360 @@
+{
+  "query": "Slack",
+  "events": [
+    {
+      "type": "stage",
+      "stage": "resolve",
+      "message": "Identifying “Slack”",
+      "t": 2
+    },
+    {
+      "type": "search",
+      "query": "Slack API OAuth app developer documentation",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 2487
+    },
+    {
+      "type": "info",
+      "message": "Identified Slack — A channel-based messaging platform for team collaboration and developer integration.",
+      "t": 3858
+    },
+    {
+      "type": "stage",
+      "stage": "composio",
+      "message": "Checking Composio’s toolkit catalog",
+      "t": 3858
+    },
+    {
+      "type": "info",
+      "message": "Setup attempt: creating a throwaway Composio auth config to see exactly what Composio sends to the provider",
+      "t": 5308
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "composio-api",
+        "target": "Composio API: create custom OAuth2 auth config for `slack` with a dummy client → start a connection → follow the redirect (then delete both)",
+        "result": "pass",
+        "summary": "Composio sends users to https://slack.com/oauth/v2/authorize with redirect_uri=https://backend.composio.dev/api/v1/auth-apps/add; default scopes: (none sent).",
+        "detail": "{\"authorizeUrl\":\"https://slack.com/oauth/v2/authorize\",\"redirectUri\":\"https://backend.composio.dev/api/v1/auth-apps/add\",\"scopes\":[],\"extraParams\":{\"response_type\":\"code\",\"user_scope\":\"calls:read calls:write channels:history channels:read channels:write chat:write dnd:read dnd:write emoji:read files:read files:write groups:history groups:read groups:write im:history im:read im:write links:read links:write lists:read lists:write mpim:history mpim:read mpim:write pins:read pins:write reactions:read reactions:write reminders:read reminders:write remote_files:read remote_files:share search:read search:read.files search:read.im search:read.mpim search:read.private search:read.public search:read.users team:read usergroups:read usergroups:write users.profile:read users.profile:write users:read users:read.email users:write\",\"user_scopes\":\"admin\"},\"pkce\":false,\"note\":\"extra params: response_type=code, user_scope=calls:read calls:write channels:history channels:read channels:write chat:write dnd:read dnd:write emoji:read files:read files:write groups:history groups:read groups:write im:history im:read im:write links:read links:write lists:read lists:write mpim:history mpim:read mpim:write pins:read pins:write reactions:read reactions:write reminders:read reminders:write remote_files:read remote_files:share search:read search:read.files search:read.im search:read.mpim search:read.private search:read.public search:read.users team:read usergroups:read usergroups:write users.profile:read u",
+        "id": "P2",
+        "at": "2026-10-30T09:39:13.762Z"
+      },
+      "t": 8664
+    },
+    {
+      "type": "info",
+      "message": "Composio toolkit `slack` has a managed OAuth app: you can prototype today and need your own app for production branding, scopes or quota.",
+      "t": 8665
+    },
+    {
+      "type": "stage",
+      "stage": "research",
+      "message": "Researching docs, policies and real-world reports",
+      "t": 8665
+    },
+    {
+      "type": "search",
+      "query": "Slack OAuth app review approval verification publish requirements",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 10594
+    },
+    {
+      "type": "search",
+      "query": "Slack API pricing plans tiers limits for developers connections",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 11147
+    },
+    {
+      "type": "search",
+      "query": "Slack OAuth app approval how long experience reddit OR forum",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 11830
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "authorize-endpoint",
+        "target": "GET https://slack.com/oauth/v2/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=channels%3Aread+chat%3Awrite",
+        "result": "info",
+        "summary": "Endpoint responded 200 with a client-rendered page; client validation happens in the browser, so this probe is inconclusive.",
+        "detail": "Chain: 200 slack.com/oauth/v2/authorize\nFinal: https://slack.com/oauth/v2/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=channels%3Aread+chat%3Awrite\nExcerpt: ",
+        "id": "P3",
+        "at": "2026-10-30T09:39:18.962Z"
+      },
+      "t": 13864
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "portal",
+        "target": "GET https://api.slack.com/apps",
+        "result": "pass",
+        "summary": "Portal reachable (200, \"Slack API: Applications | Slack\"); no sign-in redirect seen on the landing page.",
+        "detail": "Chain: 200 api.slack.com/apps",
+        "id": "P4",
+        "at": "2026-10-30T09:39:19.146Z"
+      },
+      "t": 14048
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "oauth-discovery",
+        "target": "GET https://slack.com/.well-known/openid-configuration",
+        "result": "pass",
+        "summary": "Discovery document found. Authorize: https://slack.com/openid/connect/authorize; token: https://slack.com/api/openid.connect.token.",
+        "detail": "{\"issuer\":\"https://slack.com\",\"authorization_endpoint\":\"https://slack.com/openid/connect/authorize\",\"token_endpoint\":\"https://slack.com/api/openid.connect.token\",\"registration_endpoint\":null,\"code_challenge_methods_supported\":null,\"grant_types_supported\":[\"authorization_code\"],\"scopes_supported\":[\"openid\",\"profile\",\"email\"]}",
+        "id": "P5",
+        "at": "2026-10-30T09:39:19.190Z"
+      },
+      "t": 14092
+    },
+    {
+      "type": "read",
+      "url": "https://docs.slack.dev/authentication/installing-with-oauth/",
+      "title": "Installing via OAuth authorization code flow | Slack Developer Docs",
+      "ok": true,
+      "chars": 14000,
+      "via": "direct",
+      "sourceId": "S1",
+      "t": 14901
+    },
+    {
+      "type": "read",
+      "url": "https://docs.slack.dev/app-management/distribution/",
+      "title": "App lifecycle & distribution | Slack Developer Docs",
+      "ok": true,
+      "chars": 14000,
+      "via": "direct",
+      "sourceId": "S13",
+      "t": 14980
+    },
+    {
+      "type": "read",
+      "url": "https://docs.slack.dev/slack-marketplace/slack-marketplace-review-guide/",
+      "title": "Slack Marketplace review process | Slack Developer Docs",
+      "ok": true,
+      "chars": 14000,
+      "via": "direct",
+      "sourceId": "S10",
+      "t": 15025
+    },
+    {
+      "type": "finding",
+      "fact": "Slack OAuth apps are registered via the Slack API developer portal at https://api.slack.com/apps.",
+      "sourceIds": [
+        "P4",
+        "S13"
+      ],
+      "t": 18546
+    },
+    {
+      "type": "finding",
+      "fact": "Slack apps use a v2 OAuth 2.0 flow with redirect endpoint https://slack.com/oauth/v2/authorize and token endpoint https://slack.com/api/oauth.v2.access.",
+      "sourceIds": [
+        "S1",
+        "S7"
+      ],
+      "t": 18546
+    },
+    {
+      "type": "finding",
+      "fact": "Any developer can build, distribute, and install an app via unlisted public distribution (Activating Public Distribution in app settings) without Slack review.",
+      "sourceIds": [
+        "S13",
+        "S25"
+      ],
+      "t": 18546
+    },
+    {
+      "type": "finding",
+      "fact": "Slack-side review and approval are only required if you choose to list your app in the official Slack Marketplace for commercial distribution.",
+      "sourceIds": [
+        "S10",
+        "S13"
+      ],
+      "t": 18546
+    },
+    {
+      "type": "finding",
+      "fact": "Prerequisites for submitting to the Slack Marketplace include: app must be fully tested, publicly available, and installed on 10 or more active workspaces (used in the past 28 days).",
+      "sourceIds": [
+        "S10"
+      ],
+      "t": 18546
+    },
+    {
+      "type": "finding",
+      "fact": "Marketplace review timelines are up to 10 business days for preliminary review and up to 10 weeks for functional review of new submissions.",
+      "sourceIds": [
+        "S10"
+      ],
+      "t": 18546
+    },
+    {
+      "type": "finding",
+      "fact": "Slack apps not listed in the Marketplace may trigger warning screens or be blocked if the workspace has 'Require apps from Slack Marketplace' or 'Require approved apps' enabled in App Management Settings, which admins can disable or bypass by configuring custom OAuth credentials.",
+      "sourceIds": [
+        "S9",
+        "S13"
+      ],
+      "t": 18546
+    },
+    {
+      "type": "finding",
+      "fact": "Slack rate limits are applied per API method per workspace per app and are categorized into tiers ranging from Tier 1 (1+ request/min) to Tier 4 (100+ requests/min), with custom tiers for posting messages.",
+      "sourceIds": [
+        "S21"
+      ],
+      "t": 21057
+    },
+    {
+      "type": "finding",
+      "fact": "Slack scopes are divided into bot scopes (prefixed with bot token) and user scopes (user_scope), covering chat, channels, files, search, and admin functions. Sensitive or restricted scopes require justification during Marketplace review.",
+      "sourceIds": [
+        "S1"
+      ],
+      "t": 21057
+    },
+    {
+      "type": "read",
+      "url": "https://docs.slack.dev/apis/web-api/rate-limits/",
+      "title": "Rate limits | Slack Developer Docs",
+      "ok": true,
+      "chars": 11047,
+      "via": "direct",
+      "sourceId": "S21",
+      "t": 22368
+    },
+    {
+      "type": "read",
+      "url": "https://docs.slack.dev/reference/scopes",
+      "title": "Scopes",
+      "ok": true,
+      "chars": 9754,
+      "via": "composio",
+      "sourceId": "S31",
+      "t": 22618
+    },
+    {
+      "type": "info",
+      "message": "Research done: 9 findings, 6 pages read, 5 probes.",
+      "t": 24207
+    },
+    {
+      "type": "stage",
+      "stage": "write",
+      "message": "Writing the guide",
+      "t": 24207
+    },
+    {
+      "type": "info",
+      "message": "Verdict drafted: Slack OAuth apps can be created and distributed publicly without official Slack Marketplace review using unlisted distribution.",
+      "t": 45467
+    },
+    {
+      "type": "warn",
+      "message": "gemini-3.6-flash unavailable (503); falling back to gemini-3.5-flash-lite",
+      "t": 48736
+    },
+    {
+      "type": "stage",
+      "stage": "check",
+      "message": "Checking citations, confidence labels and ratings",
+      "t": 55389
+    },
+    {
+      "type": "quality",
+      "report": {
+        "claims": {
+          "tested": 2,
+          "official": 26,
+          "reported": 1,
+          "inferred": 0
+        },
+        "sources": {
+          "total": 12,
+          "fetched": 6,
+          "snippetOnly": 6,
+          "official": 9,
+          "community": 2,
+          "composio": 1
+        },
+        "probes": {
+          "total": 5,
+          "pass": 4,
+          "info": 1,
+          "fail": 0
+        },
+        "fixes": [
+          "step Create a new Slack app: \"tested\" on a claim no probe can confirm → official",
+          "step Add required User and Bot scopes: \"tested\" on a claim no probe can confirm → official",
+          "step \"Create custom OAuth config in Composio\": Composio auth-config creation is agent-doable via API → agent",
+          "step Create custom OAuth config in Composio: \"tested\" on a claim no probe can confirm → official",
+          "step Initiate connection in Composio: \"tested\" on a claim no probe can confirm → official",
+          "requirement 2: \"tested\" on a claim no probe can confirm → official",
+          "scope channels:read: \"tested\" on a claim no probe can confirm → official",
+          "scope channels:history: \"tested\" on a claim no probe can confirm → official",
+          "scope chat:write: \"tested\" on a claim no probe can confirm → official",
+          "scope files:read: \"tested\" on a claim no probe can confirm → official",
+          "scope users:read: \"tested\" on a claim no probe can confirm → official",
+          "scope search:read: \"tested\" on a claim no probe can confirm → official"
+        ],
+        "llm": {
+          "calls": 8,
+          "inputTokens": 53892,
+          "outputTokens": 5439,
+          "model": "gemini-3.5-flash-lite"
+        }
+      },
+      "t": 55395
+    }
+  ],
+  "quality": {
+    "claims": {
+      "tested": 2,
+      "official": 26,
+      "reported": 1,
+      "inferred": 0
+    },
+    "sources": {
+      "total": 12,
+      "fetched": 6,
+      "snippetOnly": 6,
+      "official": 9,
+      "community": 2,
+      "composio": 1
+    },
+    "probes": {
+      "total": 5,
+      "pass": 4,
+      "info": 1,
+      "fail": 0
+    },
+    "fixes": [
+      "step Create a new Slack app: \"tested\" on a claim no probe can confirm → official",
+      "step Add required User and Bot scopes: \"tested\" on a claim no probe can confirm → official",
+      "step \"Create custom OAuth config in Composio\": Composio auth-config creation is agent-doable via API → agent",
+      "step Create custom OAuth config in Composio: \"tested\" on a claim no probe can confirm → official",
+      "step Initiate connection in Composio: \"tested\" on a claim no probe can confirm → official",
+      "requirement 2: \"tested\" on a claim no probe can confirm → official",
+      "scope channels:read: \"tested\" on a claim no probe can confirm → official",
+      "scope channels:history: \"tested\" on a claim no probe can confirm → official",
+      "scope chat:write: \"tested\" on a claim no probe can confirm → official",
+      "scope files:read: \"tested\" on a claim no probe can confirm → official",
+      "scope users:read: \"tested\" on a claim no probe can confirm → official",
+      "scope search:read: \"tested\" on a claim no probe can confirm → official"
+    ],
+    "llm": {
+      "calls": 8,
+      "inputTokens": 53892,
+      "outputTokens": 5439,
+      "model": "gemini-3.5-flash-lite"
+    }
+  }
+}

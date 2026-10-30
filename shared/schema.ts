@@ -12,7 +12,13 @@
  */
 import { z } from 'zod';
 
+/** The callback in Composio's API docs; sent only when an auth config sets `oauth_redirect_uri` to it. */
 export const COMPOSIO_REDIRECT_URI = 'https://backend.composio.dev/api/v3/toolkits/auth/callback';
+/**
+ * What Composio actually sends for a custom OAuth auth config created without `oauth_redirect_uri`
+ * (tested 2026-10-30 by creating auth configs with dummy clients and following the connect redirect).
+ */
+export const COMPOSIO_DEFAULT_REDIRECT_URI = 'https://backend.composio.dev/api/v1/auth-apps/add';
 
 export const Confidence = z.enum(['tested', 'official', 'reported', 'inferred']);
 export type Confidence = z.infer<typeof Confidence>;
@@ -215,6 +221,17 @@ export const Guide = z.object({
   composioSetup: z.object({
     redirectUri: z.string(),
     steps: z.array(z.string()).min(1),
+    /** A real setup attempt through Composio (dummy client): what Composio actually sends to the provider. */
+    tested: z
+      .object({
+        probeId: z.string(),
+        testedAt: z.string(),
+        authorizeUrl: z.string(),
+        redirectUri: z.string().nullable(),
+        defaultScopes: z.array(z.string()),
+        extraParams: z.record(z.string(), z.string()).default({}),
+      })
+      .optional(),
   }),
   evidence: z.object({
     sources: z.array(Source),

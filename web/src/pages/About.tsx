@@ -94,6 +94,12 @@ export default function About() {
             Composio's redirect URI (does the endpoint exist, how does it reject a bad client?), and the developer portal's sign-in wall. They never create
             accounts, log in, or submit forms. That boundary is also where a human takes over.
           </p>
+          <p className="mt-3 text-sm">
+            <strong>Setup attempts through Composio</strong> go one step further. We create a throwaway custom auth config with a dummy client, start a
+            connection, follow Composio's redirect to the provider, and delete both. That shows exactly which redirect URI and default scopes reach the
+            provider. It found that Composio sends <code>/api/v1/auth-apps/add</code> by default, not the v3 callback in its docs, and that its
+            default Gmail scopes include full mailbox access.
+          </p>
         </section>
 
         <section>

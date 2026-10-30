@@ -35,9 +35,10 @@
       }
     ],
     "notes": [
+      "Tested: a custom auth config created without `oauth_redirect_uri` sends `https://backend.composio.dev/api/v1/auth-apps/add`, not the v3 callback shown in Composio's API docs. Register exactly the URI your auth config sends, or set `oauth_redirect_uri` to `https://backend.composio.dev/api/v3/toolkits/auth/callback` and register that instead.",
       "Composio-managed OAuth is not available for Workday; you must create a custom auth config with a client registered in the customer's tenant.",
       "The toolkit has 588 tools and 13 triggers; many tool descriptions name the Workday scope (functional area) and security domains they need.",
-      "Composio's Workday setup guide shows the legacy redirect URI https://backend.composio.dev/api/v1/auth-apps/add; current custom configs use the v3 callback. Register whatever your auth config displays.",
+      "Composio's Workday setup guide shows `https://backend.composio.dev/api/v1/auth-apps/add`, which is what a custom auth config sends by default. The v3 callback is sent only if the auth config sets `oauth_redirect_uri`. Register whichever your config sends.",
       "Composio recommends creating auth configs in code 'a config per customer', which fits Workday's per-tenant clients."
     ]
   },
@@ -273,7 +274,7 @@
           "actor": "you",
           "effort": "20–30 min (with customer admin)",
           "wait": null,
-          "details": "Search the task **Register API Client**. Use the plain task, not *Register API Client for Integrations* and not *Register External OAuth Client*. Set these fields:\n- **Client Name**: e.g. `Acme Agent`\n- **Client Grant Type**: `Authorization Code Grant`\n- **Access Token Type**: `Bearer`\n- **Redirection URI**: exactly what your Composio auth config shows (`https://backend.composio.dev/api/v3/toolkits/auth/callback` by default)\n- **Support PKCE**: leave off\n- **Non-Expiring Refresh Tokens**: checked\n- **Scope (Functional Areas)**: Staffing, Time Off and Leave, Organizations and Roles, Personal Data, Contact Information (add System only for WQL)\n- **Include Workday Owned Scope**: checked\n- **Enforce 60 Minute Access Token Expiry**: leave cleared\n\nThen click **OK**.",
+          "details": "Search the task **Register API Client**. Use the plain task, not *Register API Client for Integrations* and not *Register External OAuth Client*. Set these fields:\n- **Client Name**: e.g. `Acme Agent`\n- **Client Grant Type**: `Authorization Code Grant`\n- **Access Token Type**: `Bearer`\n- **Redirection URI**: exactly what your Composio auth config sends (`https://backend.composio.dev/api/v1/auth-apps/add` by default, or `https://backend.composio.dev/api/v3/toolkits/auth/callback` if you set `oauth_redirect_uri`)\n- **Support PKCE**: leave off\n- **Non-Expiring Refresh Tokens**: checked\n- **Scope (Functional Areas)**: Staffing, Time Off and Leave, Organizations and Roles, Personal Data, Contact Information (add System only for WQL)\n- **Include Workday Owned Scope**: checked\n- **Enforce 60 Minute Access Token Expiry**: leave cleared\n\nThen click **OK**.",
           "agentAssist": "Pre-fill the value sheet. Check the summary screen against it: Authorization Code Grant, PKCE No, Bearer, the redirect URI, and Non-Expiring Refresh Tokens Yes.",
           "links": [
             {
@@ -286,7 +287,8 @@
             "S5",
             "S16",
             "S3",
-            "S7"
+            "S7",
+            "P7"
           ],
           "confidence": "official"
         },
@@ -656,16 +658,17 @@
       "title": "Redirect URI mismatch",
       "symptom": "The connection fails with `redirect_uri_mismatch` after Workday sign-in.",
       "likelihood": "common",
-      "howToProceed": "Copy the redirect URI shown in your Composio auth config: the v3 callback by default, though the older Composio guide shows the legacy `https://backend.composio.dev/api/v1/auth-apps/add`. Edit the API client's Redirection URI to match it character for character.",
+      "howToProceed": "Edit the API client's Redirection URI to match what Composio sends, character for character: `https://backend.composio.dev/api/v1/auth-apps/add` by default, or `https://backend.composio.dev/api/v3/toolkits/auth/callback` if the auth config sets `oauth_redirect_uri`. Compare with the `redirect_uri` in the failing authorize URL.",
       "escalation": {
         "label": "Composio programmatic auth configs",
         "url": "https://docs.composio.dev/docs/authentication/programmatic-auth-configs"
       },
       "sourceIds": [
         "S2",
-        "S3"
+        "S3",
+        "P7"
       ],
-      "confidence": "official"
+      "confidence": "tested"
     },
     {
       "title": "Wrong authorize host or tenant name",
@@ -820,17 +823,37 @@
         "S9"
       ],
       "confidence": "official"
+    },
+    {
+      "title": "Composio requests the admin-tier `System` scope by default",
+      "detail": "The default scope is `System` alone, the functional area this guide treats as admin-tier and WQL-only, rather than Staffing, Time Off and Leave or the other areas your API client grants. Override the auth config scopes to the functional areas you registered.",
+      "sourceIds": [
+        "P7"
+      ],
+      "confidence": "tested"
     }
   ],
   "composioSetup": {
-    "redirectUri": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+    "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
     "steps": [
       "For each customer tenant, create a custom auth config: Auth Configs → + Create Auth Config → Workday (OAUTH2). Paste that tenant's Client ID and Client Secret, or call auth_configs.create({type: 'use_custom_auth', auth_scheme: 'OAUTH2', credentials: {client_id, client_secret, oauth_redirect_uri}}).",
-      "Check that the redirect URI in the auth config exactly matches the API client's Redirection URI in Workday. The v3 callback is the default; some older configs and guides show the legacy https://backend.composio.dev/api/v1/auth-apps/add.",
+      "Check that the redirect URI Composio sends exactly matches the API client's Redirection URI in Workday: https://backend.composio.dev/api/v1/auth-apps/add by default, or https://backend.composio.dev/api/v3/toolkits/auth/callback if you set `oauth_redirect_uri`.",
       "Store a customer → auth config ID (ac_…) mapping and pass the right ID for the WORKDAY toolkit when you create sessions or initiate connections.",
       "Initiate a connection with a stable external user ID. On the connect screen, supply the tenant's Token URL, Authorization URL and REST API Endpoint, taken from View API Clients.",
       "Verify the connected account shows ACTIVE with toolkit WORKDAY, then run a read tool (workers, organizations or time off) to confirm scopes and security domains."
-    ]
+    ],
+    "tested": {
+      "probeId": "P7",
+      "testedAt": "2026-10-30",
+      "authorizeUrl": "https://impl.workday.com/oauthrunwayprobe/authorize",
+      "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
+      "defaultScopes": [
+        "System"
+      ],
+      "extraParams": {
+        "response_type": "code"
+      }
+    }
   },
   "evidence": {
     "sources": [
@@ -1073,6 +1096,15 @@
         "summary": "The REST call returns 401 {\"error\": \"Unauthorized\"} even for a fake tenant. The REST and WWS directories, the OpenAPI files and the cited doc.workday.com admin-guide pages return 200 without login.",
         "detail": "The OpenAPI files carry '<b>Scope:</b>' (functional area) and 'Secured By Domain' for every operation.",
         "at": "2026-10-28T07:23:00Z"
+      },
+      {
+        "kind": "composio-api",
+        "target": "Composio API: create custom OAuth2 auth config for `workday` with a dummy client → start a connection → follow the redirect (then delete both)",
+        "result": "pass",
+        "summary": "Composio sends users to https://impl.workday.com/oauthrunwayprobe/authorize with redirect_uri=https://backend.composio.dev/api/v1/auth-apps/add; default scopes: System.",
+        "detail": "{\"authorizeUrl\":\"https://impl.workday.com/oauthrunwayprobe/authorize\",\"redirectUri\":\"https://backend.composio.dev/api/v1/auth-apps/add\",\"scopes\":[\"System\"],\"extraParams\":{\"response_type\":\"code\"},\"pkce\":false,\"note\":\"extra params: response_type=code\"}",
+        "id": "P7",
+        "at": "2026-10-30T09:34:51.377Z"
       }
     ],
     "openQuestions": [

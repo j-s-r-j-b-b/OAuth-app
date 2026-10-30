@@ -31,6 +31,7 @@
       }
     ],
     "notes": [
+      "Tested: a custom auth config created without `oauth_redirect_uri` sends `https://backend.composio.dev/api/v1/auth-apps/add`, not the v3 callback shown in Composio's API docs. Register exactly the URI your auth config sends, or set `oauth_redirect_uri` to `https://backend.composio.dev/api/v3/toolkits/auth/callback` and register that instead.",
       "There are two toolkits. `slack` acts as the installing user (user token). `slackbot` acts as the bot (bot token). For mixed needs, create separate auth configs; don't combine user and bot scopes in one connection.",
       "Composio's managed Slack app is not yet approved for the Slack Marketplace, so users can see a 'not approved by Slack' warning. Composio recommends bringing your own app.",
       "If you bring your own app, triggers need a per-OAuth-app Composio webhook endpoint pasted into Slack's Event Subscriptions → Request URL. One OAuth app can serve only one Composio project.",
@@ -201,15 +202,16 @@
           "actor": "you",
           "effort": "2 min",
           "wait": null,
-          "details": "Go to **OAuth & Permissions → Redirect URLs → Add New Redirect URL** and enter `https://backend.composio.dev/api/v3/toolkits/auth/callback`, then **Save URLs**. It must be HTTPS and must match (or be a parent path of) the `redirect_uri` sent. With multiple URLs, a mismatch gives `bad_redirect_uri`. Composio's short `/api/v3/s/...` connect link is *not* the redirect URI.",
-          "agentAssist": "Read the exact callback from the Composio auth config and diff it against the Slack app settings.",
+          "details": "Go to **OAuth & Permissions → Redirect URLs → Add New Redirect URL** and enter `https://backend.composio.dev/api/v1/auth-apps/add`, which Composio sends by default. Add `https://backend.composio.dev/api/v3/toolkits/auth/callback` too (used only if you set `oauth_redirect_uri`), then **Save URLs**. It must be HTTPS and must match (or be a parent path of) the `redirect_uri` sent. With multiple URLs, a mismatch gives `bad_redirect_uri`. Composio's short `/api/v3/s/...` connect link is *not* the redirect URI.",
+          "agentAssist": "Start a connection and diff the `redirect_uri` in the authorize URL against the Slack app settings.",
           "links": [],
           "sourceIds": [
             "S13",
             "S3",
-            "S1"
+            "S1",
+            "P6"
           ],
-          "confidence": "official"
+          "confidence": "tested"
         },
         {
           "id": "scopes",
@@ -545,10 +547,11 @@
       "scope": "groups:history",
       "purpose": "Read private channels the bot was invited to",
       "tier": "sensitive",
-      "note": "Not in Composio defaults; add it explicitly.",
+      "note": "Not in Composio's Slackbot defaults; add it explicitly for bot tokens. The `slack` toolkit's default `user_scope` does include it (tested).",
       "sourceIds": [
         "S10",
-        "S4"
+        "S4",
+        "P6"
       ],
       "confidence": "official"
     },
@@ -556,10 +559,11 @@
       "scope": "im:history / mpim:history",
       "purpose": "Read DMs and group DMs with the bot",
       "tier": "sensitive",
-      "note": "Not in Composio defaults; add it explicitly.",
+      "note": "Not in Composio's Slackbot defaults; add them explicitly for bot tokens. The `slack` toolkit's default `user_scope` does include them (tested).",
       "sourceIds": [
         "S10",
-        "S4"
+        "S4",
+        "P6"
       ],
       "confidence": "official"
     },
@@ -637,7 +641,7 @@
       "title": "Redirect URI mismatch",
       "symptom": "`bad_redirect_uri` or a redirect mismatch error after approving",
       "likelihood": "common",
-      "howToProceed": "Add the exact callback from the Composio auth config under **OAuth & Permissions → Redirect URLs**. Don't register the short connect link.",
+      "howToProceed": "Add the URI Composio sends under **OAuth & Permissions → Redirect URLs**: `https://backend.composio.dev/api/v1/auth-apps/add` by default, or the v3 callback if the auth config sets `oauth_redirect_uri`. Don't register the short connect link.",
       "escalation": {
         "label": "Composio Slack KB",
         "url": "https://docs.composio.dev/kb/guide/toolkits-slack"
@@ -645,9 +649,10 @@
       "sourceIds": [
         "S13",
         "S1",
-        "S3"
+        "S3",
+        "P6"
       ],
-      "confidence": "official"
+      "confidence": "tested"
     },
     {
       "title": "History reads crawl on new installs",
@@ -790,17 +795,37 @@
         "S3"
       ],
       "confidence": "official"
+    },
+    {
+      "title": "Composio sends 47 user scopes and no bot scopes by default",
+      "detail": "A custom `slack` auth config sends no bot `scopes` but a `user_scope` list of 47, including `channels:history`, `groups:history`, `im:history`, `mpim:history`, `files:write`, `users:read.email` and `search:read.private`. Override `scopes` and `user_scopes` on the auth config to match your Slack app, since the `*:history` scopes draw enhanced Marketplace review.",
+      "sourceIds": [
+        "P6"
+      ],
+      "confidence": "tested"
     }
   ],
   "composioSetup": {
-    "redirectUri": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+    "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
     "steps": [
-      "In the Slack app, add `https://backend.composio.dev/api/v3/toolkits/auth/callback` under OAuth & Permissions → Redirect URLs.",
+      "In the Slack app, add https://backend.composio.dev/api/v1/auth-apps/add (what Composio sends by default) and https://backend.composio.dev/api/v3/toolkits/auth/callback (used only if you set `oauth_redirect_uri`) under OAuth & Permissions → Redirect URLs.",
       "Composio dashboard → Auth Configs → Create Auth Config → Slack (user token) or Slackbot (bot token) → OAuth2 with your own credentials. Enter the Client ID and Client Secret, `scopes` (bot) and `user_scopes` (user) matching the Slack app, plus the verification token for Slackbot triggers.",
       "For triggers: `composio.webhooks.endpoints.create(toolkit_slug=\"slack\", client_id=…)`, then update the endpoint with `webhook_signing_secret` and `app_token` (xapp-, authorizations:read), then paste `webhook_url` into Slack → Event Subscriptions → Request URL.",
       "Pass `authConfigs: { slack: \"ac_…\" }` (and/or `slackbot`) when creating sessions; unlisted toolkits fall back to Composio-managed auth.",
       "Connect a test workspace, then verify scopes with SLACK_TEST_AUTH and that trigger events arrive."
-    ]
+    ],
+    "tested": {
+      "probeId": "P6",
+      "testedAt": "2026-10-30",
+      "authorizeUrl": "https://slack.com/oauth/v2/authorize",
+      "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
+      "defaultScopes": [],
+      "extraParams": {
+        "response_type": "code",
+        "user_scope": "calls:read calls:write channels:history channels:read channels:write chat:write dnd:read dnd:write emoji:read files:read files:write groups:history groups:read groups:write im:history im:read im:write links:read links:write lists:read lists:write mpim:history mpim:read mpim:write pins:read pins:write reactions:read reactions:write reminders:read reminders:write remote_files:read remote_files:share search:read search:read.files search:read.im search:read.mpim search:read.private search:read.public search:read.users team:read usergroups:read usergroups:write users.profile:read users.profile:write users:read users:read.email users:write",
+        "user_scopes": "admin"
+      }
+    }
   },
   "evidence": {
     "sources": [
@@ -1018,6 +1043,15 @@
         "summary": "All returned HTTP 200 (Slack pages via trailing-slash redirect).",
         "detail": null,
         "at": "2026-10-28T07:24:15Z"
+      },
+      {
+        "kind": "composio-api",
+        "target": "Composio API: create custom OAuth2 auth config for `slack` with a dummy client → start a connection → follow the redirect (then delete both)",
+        "result": "pass",
+        "summary": "Composio sends users to https://slack.com/oauth/v2/authorize with redirect_uri=https://backend.composio.dev/api/v1/auth-apps/add; default scopes: (none sent).",
+        "detail": "{\"authorizeUrl\":\"https://slack.com/oauth/v2/authorize\",\"redirectUri\":\"https://backend.composio.dev/api/v1/auth-apps/add\",\"scopes\":[],\"extraParams\":{\"response_type\":\"code\",\"user_scope\":\"calls:read calls:write channels:history channels:read channels:write chat:write dnd:read dnd:write emoji:read files:read files:write groups:history groups:read groups:write im:history im:read im:write links:read links:write lists:read lists:write mpim:history mpim:read mpim:write pins:read pins:write reactions:read reactions:write reminders:read reminders:write remote_files:read remote_files:share search:read search:read.files search:read.im search:read.mpim search:read.private search:read.public search:read.users team:read usergroups:read usergroups:write users.profile:read users.profile:write users:read users:read.email users:write\",\"user_scopes\":\"admin\"},\"pkce\":false,\"note\":\"extra params: response_type=code, user_scope=calls:read calls:write channels:history channels:read channels:write chat:write dnd:read dnd:write emoji:read files:read files:write groups:history groups:read groups:write im:history im:read im:write links:read links:write lists:read lists:write mpim:history mpim:read mpim:write pins:read pins:write reactions:read reactions:write reminders:read reminders:write remote_files:read remote_files:share search:read search:read.files search:read.im search:read.mpim search:read.private search:read.public search:read.users team:read usergroups:read usergroups:write users.profile:read u",
+        "id": "P6",
+        "at": "2026-10-30T09:34:01.335Z"
       }
     ],
     "openQuestions": [

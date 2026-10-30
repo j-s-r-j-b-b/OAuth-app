@@ -66,5 +66,36 @@ if (compared) {
     out.push(`- **${g.app.name}.** Live: ${g.verdict.longestPole}\n  Library: ${lib.verdict.longestPole}`);
   }
 }
+// Round history: each archived round under docs/live-eval/round-N, plus the current outputs.
+const ROUNDS: [string, string][] = [
+  ['round-1', 'Baseline'],
+  ['round-2', 'Pricing search, ≥4 page reads before finishing, question about unlisted-app limits'],
+  ['round-3', '+ gotcha checklist from the library, stronger writing model, Composio setup attempt'],
+  ['.', '+ explicit factor definitions (thresholds count as a gate; review = any approval needed for full access)'],
+];
+out.push('\n## Rounds\n');
+out.push('| Round | Changes | Rating matched | Production ranges overlap | Factors agree |');
+out.push('|---|---|---|---|---|');
+ROUNDS.forEach(([dir, label], i) => {
+  const d = join(DIR, dir);
+  if (!existsSync(d)) return;
+  const gs = readdirSync(d)
+    .filter((f) => f.endsWith('.json') && !f.endsWith('.trace.json') && !f.includes('.round'))
+    .map((f) => load(join(d, f)));
+  let n = 0;
+  let r = 0;
+  let o = 0;
+  let fa = 0;
+  for (const g of gs) {
+    const lib = library.find((l) => l.composio.toolkitSlug && l.composio.toolkitSlug === g.composio.toolkitSlug);
+    if (!lib) continue;
+    n++;
+    if (g.verdict.difficulty === lib.verdict.difficulty) r++;
+    if (overlap(g.verdict.timeToProduction, lib.verdict.timeToProduction)) o++;
+    fa += lib.factors.filter((lf) => g.factors.find((x) => x.key === lf.key)?.value === lf.value).length;
+  }
+  if (n) out.push(`| ${dir === '.' ? `${i + 1} (latest)` : i + 1} | ${label} | ${r}/${n} | ${o}/${n} | ${fa}/${n * 8} |`);
+});
+
 writeFileSync('docs/LIVE_EVAL.md', out.join('\n') + '\n');
 console.log(out.join('\n'));

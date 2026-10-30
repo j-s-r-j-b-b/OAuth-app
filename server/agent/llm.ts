@@ -38,6 +38,12 @@ export async function chat(
       return res;
     } catch (e) {
       const err = e as { status?: number; message?: string; headers?: Record<string, string> };
+      // A stronger optional model (LLM_COMPOSE_MODEL) may be overloaded or out of free quota: fall back at once.
+      if ((err.status === 429 || err.status === 503 || err.status === 404) && params.model !== env.llm.model) {
+        onWait?.(`${params.model} unavailable (${err.status}); falling back to ${env.llm.model}`);
+        params = { ...params, model: env.llm.model };
+        continue;
+      }
       const retryable = err.status === 429 || (err.status !== undefined && err.status >= 500) || err.status === undefined;
       if (!retryable || attempt >= 4) throw e;
       const retryAfter = Number(err.headers?.['retry-after']);

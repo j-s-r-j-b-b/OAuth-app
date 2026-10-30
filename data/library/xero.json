@@ -18,6 +18,7 @@
     "toolkitDocsUrl": "https://docs.composio.dev/toolkits/xero",
     "requiredFields": [],
     "notes": [
+      "Tested: a custom auth config created without `oauth_redirect_uri` sends `https://backend.composio.dev/api/v1/auth-apps/add`, not the v3 callback shown in Composio's API docs. Register exactly the URI your auth config sends, or set `oauth_redirect_uri` to `https://backend.composio.dev/api/v3/toolkits/auth/callback` and register that instead.",
       "No Composio-managed Xero app. Create your own Xero app and paste its Client ID and Client Secret into an OAuth2 auth config.",
       "Toolkit version 20261015_00 has 68 tools and 0 triggers. Most tools take an optional `tenant_id`. If you omit it, the tool uses the first connected tenant.",
       "Composio's tool docs warn: \"never assume the first connection is correct\". Resolve the org with XERO_GET_CONNECTIONS and pass `tenant_id` explicitly.",
@@ -187,7 +188,7 @@
           "actor": "you",
           "effort": "10 min",
           "wait": null,
-          "details": "At **developer.xero.com → My Apps → New app**, fill in the following:\n- **App name**: your product's go-to-market name. It must not contain \"Xero\", which certification checkpoint 2 forbids, so don't use Composio's example `Composio-Xero`.\n- **Integration type**: **Web app** (auth code flow).\n- **Will you use Xero data to train an AI model?**: **No**.\n- **Do you agree to meet Xero's minimum security requirements?**: **Yes**.\n- **Company or application URL**: `https://…`.\n- **OAuth 2.0 redirect URI**: `https://backend.composio.dev/api/v3/toolkits/auth/callback`, exact, with no trailing slash.\n\nTick **I have read and agree to the Xero Developer Platform Terms & Conditions** and click **Create app**.",
+          "details": "At **developer.xero.com → My Apps → New app**, fill in the following:\n- **App name**: your product's go-to-market name. It must not contain \"Xero\", which certification checkpoint 2 forbids, so don't use Composio's example `Composio-Xero`.\n- **Integration type**: **Web app** (auth code flow).\n- **Will you use Xero data to train an AI model?**: **No**.\n- **Do you agree to meet Xero's minimum security requirements?**: **Yes**.\n- **Company or application URL**: `https://…`.\n- **OAuth 2.0 redirect URI**: `https://backend.composio.dev/api/v1/auth-apps/add` (what Composio sends by default), exact, with no trailing slash. If you set `oauth_redirect_uri`, also add `https://backend.composio.dev/api/v3/toolkits/auth/callback` under **Configuration → Redirect URIs**.\n\nTick **I have read and agree to the Xero Developer Platform Terms & Conditions** and click **Create app**.",
           "agentAssist": "Pre-fill every field value and check the name against checkpoint 2.",
           "links": [
             {
@@ -201,7 +202,8 @@
             "S18",
             "S12",
             "S22",
-            "P3"
+            "P3",
+            "P5"
           ],
           "confidence": "reported"
         },
@@ -629,7 +631,7 @@
       "title": "Unknown client or redirect mismatch",
       "symptom": "Xero error page: \"Error: unauthorized_client — Unknown client or client not enabled\" (Error code: 500).",
       "likelihood": "common",
-      "howToProceed": "Check that the Client ID in Composio matches **Configuration** exactly. Also check that `https://backend.composio.dev/api/v3/toolkits/auth/callback` is listed under **Redirect URIs** with no trailing slash, and that you clicked **Save**.",
+      "howToProceed": "Check that the Client ID in Composio matches **Configuration** exactly. Also check that the URI Composio sends is listed under **Redirect URIs** with no trailing slash (`https://backend.composio.dev/api/v1/auth-apps/add` by default, `https://backend.composio.dev/api/v3/toolkits/auth/callback` only if the auth config sets `oauth_redirect_uri`), and that you clicked **Save**.",
       "escalation": {
         "label": "Xero developer support",
         "url": "https://developer.xero.com/contact-xero-developer-platform-support"
@@ -637,7 +639,8 @@
       "sourceIds": [
         "P2",
         "S2",
-        "S21"
+        "S21",
+        "P5"
       ],
       "confidence": "tested"
     },
@@ -780,18 +783,68 @@
         "S11"
       ],
       "confidence": "official"
+    },
+    {
+      "title": "Composio requests 31 granular scopes by default",
+      "detail": "The default request has no deprecated broad scopes, but it includes `accounting.reports.profitandloss.read` and other report scopes that integrators say fail for new uncertified apps, plus `accounting.manualjournals`, `files` and `projects`. Override the auth config scopes with the short list in the setup steps to avoid an `invalid_scope` error and a wider consent screen.",
+      "sourceIds": [
+        "P5"
+      ],
+      "confidence": "tested"
     }
   ],
   "composioSetup": {
-    "redirectUri": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+    "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
     "steps": [
-      "In Xero **My Apps → your app → Configuration**, make sure `https://backend.composio.dev/api/v3/toolkits/auth/callback` is under **Redirect URIs** (exact, https, no trailing slash), then click **Save**.",
+      "In Xero **My Apps → your app → Configuration**, make sure `https://backend.composio.dev/api/v1/auth-apps/add` (what Composio sends by default) is under **Redirect URIs** (exact, https, no trailing slash), plus `https://backend.composio.dev/api/v3/toolkits/auth/callback` if you set `oauth_redirect_uri`. Then click **Save**.",
       "In **platform.composio.dev → Create Auth Config**, pick **Xero**, choose **OAuth2**, and toggle **Use your own developer credentials**. Paste the Client ID and Client Secret.",
       "Set scopes to `openid profile email offline_access accounting.invoices accounting.contacts accounting.payments accounting.banktransactions accounting.settings.read accounting.attachments`. Do not use `accounting.transactions` or `accounting.reports.read`.",
       "Create the config and store the `ac_…` ID. Start a connection per end user with it.",
       "After each connection, call XERO_GET_CONNECTIONS, store the chosen `tenantId` per user, and pass `tenant_id` on every Xero tool call.",
       "When a customer disconnects in your product, also delete their Xero connection (`DELETE https://api.xero.com/connections/{id}`) so it stops counting against your tier cap. Certification requires this too."
-    ]
+    ],
+    "tested": {
+      "probeId": "P5",
+      "testedAt": "2026-10-30",
+      "authorizeUrl": "https://login.xero.com/identity/connect/authorize",
+      "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
+      "defaultScopes": [
+        "offline_access",
+        "email",
+        "profile",
+        "openid",
+        "files",
+        "files.read",
+        "projects",
+        "projects.read",
+        "accounting.manualjournals.read",
+        "accounting.manualjournals",
+        "accounting.banktransactions.read",
+        "accounting.banktransactions",
+        "accounting.payments.read",
+        "accounting.payments",
+        "accounting.invoices.read",
+        "accounting.invoices",
+        "accounting.reports.tenninetynine.read",
+        "accounting.budgets.read",
+        "accounting.attachments.read",
+        "accounting.attachments",
+        "accounting.contacts.read",
+        "accounting.contacts",
+        "accounting.settings.read",
+        "accounting.settings",
+        "accounting.reports.taxreports.read",
+        "accounting.reports.trialbalance.read",
+        "accounting.reports.profitandloss.read",
+        "accounting.reports.executivesummary.read",
+        "accounting.reports.budgetsummary.read",
+        "accounting.reports.banksummary.read",
+        "accounting.reports.aged.read"
+      ],
+      "extraParams": {
+        "response_type": "code"
+      }
+    }
   },
   "evidence": {
     "sources": [
@@ -1000,6 +1053,15 @@
         "summary": "All 9 returned HTTP 200.",
         "detail": "Xero doc pages are client-rendered. Content was read from Gatsby page-data JSON (/__gatsby/page-data/<path>/page-data.json) and the server-rendered /pricing table.",
         "at": "2026-10-29T06:26:36Z"
+      },
+      {
+        "kind": "composio-api",
+        "target": "Composio API: create custom OAuth2 auth config for `xero` with a dummy client → start a connection → follow the redirect (then delete both)",
+        "result": "pass",
+        "summary": "Composio sends users to https://login.xero.com/identity/connect/authorize with redirect_uri=https://backend.composio.dev/api/v1/auth-apps/add; default scopes: offline_access email profile openid files files.read projects projects.read accounting.manualjournals.read accounting.manualjournals accounting.banktransactions.read accounting.banktransactions accounting.payments.read accounting.payments accounting.invoices.read accounting.invoices accounting.reports.tenninetynine.read accounting.budgets.read accounting.attachments.read accounting.attachments accounting.contacts.read accounting.contacts accounting.settings.read accounting.settings accounting.reports.taxreports.read accounting.reports.trialbalance.read accounting.reports.profitandloss.read accounting.reports.executivesummary.read accounting.reports.budgetsummary.read accounting.reports.banksummary.read accounting.reports.aged.read; PKCE on.",
+        "detail": "{\"authorizeUrl\":\"https://login.xero.com/identity/connect/authorize\",\"redirectUri\":\"https://backend.composio.dev/api/v1/auth-apps/add\",\"scopes\":[\"offline_access\",\"email\",\"profile\",\"openid\",\"files\",\"files.read\",\"projects\",\"projects.read\",\"accounting.manualjournals.read\",\"accounting.manualjournals\",\"accounting.banktransactions.read\",\"accounting.banktransactions\",\"accounting.payments.read\",\"accounting.payments\",\"accounting.invoices.read\",\"accounting.invoices\",\"accounting.reports.tenninetynine.read\",\"accounting.budgets.read\",\"accounting.attachments.read\",\"accounting.attachments\",\"accounting.contacts.read\",\"accounting.contacts\",\"accounting.settings.read\",\"accounting.settings\",\"accounting.reports.taxreports.read\",\"accounting.reports.trialbalance.read\",\"accounting.reports.profitandloss.read\",\"accounting.reports.executivesummary.read\",\"accounting.reports.budgetsummary.read\",\"accounting.reports.banksummary.read\",\"accounting.reports.aged.read\"],\"extraParams\":{\"response_type\":\"code\"},\"pkce\":true,\"note\":\"extra params: response_type=code\"}",
+        "id": "P5",
+        "at": "2026-10-30T09:34:15.348Z"
       }
     ],
     "openQuestions": [
@@ -1024,11 +1086,6 @@
         "howToResolve": "Create a test app and request `accounting.reports.profitandloss.read` against the Demo Company. Confirm with Xero support."
       },
       {
-        "question": "What default scopes does Composio's Xero auth config request, and can you edit them in the dashboard?",
-        "whyItMatters": "If the defaults still include broad scopes, every new app fails with invalid_scope.",
-        "howToResolve": "Open the auth config in platform.composio.dev, or check the toolkit API with an API key. Ask Composio support if scopes aren't editable."
-      },
-      {
         "question": "Does sending Xero API data to an LLM provider count as third-party passthrough that needs explicit per-user consent?",
         "whyItMatters": "Terms clause 7(b)(ii) bars passing API data to third parties without user consent. Agent products route data through Composio and model vendors.",
         "howToResolve": "Ask Xero developer support or legal. Meanwhile, put explicit consent in your terms and privacy policy, and use model vendors that don't train on your data."
@@ -1042,55 +1099,86 @@
           "claim": "timeToProduction 4–16 weeks (no official SLA; about 10 customer orgs needed first)",
           "outcome": "unverifiable",
           "note": "Xero publishes no review SLA. Only Codat's \"several months to become a Xero App Partner\" exists. The 4-week floor has no source, so the basis now says \"Estimate\". The review-time open question stays.",
-          "sourceIds": ["S19", "S13"]
+          "sourceIds": [
+            "S19",
+            "S13"
+          ]
         },
         {
           "claim": "2026 tiers: Starter free/5 orgs, Core A$35/50, Plus A$245/1,000, Advanced A$1,445/10,000; A$2.40/GB egress overage",
           "outcome": "corrected",
           "note": "The pricing table matches fees, caps, egress allotments (10/50/250 GB) and card-only billing. Fixed the Egress nuance: \"A$2.40 per GiB\" → \"A$2.40 per GB\", as the page states.",
-          "sourceIds": ["S7", "S8"]
+          "sourceIds": [
+            "S7",
+            "S8"
+          ]
         },
         {
           "claim": "Starter (5 orgs) and Core (50 orgs, card only) need no review; each org can connect at most 5 uncertified apps",
           "outcome": "confirmed",
           "note": "The pricing table lists no prerequisite for Core, only a payment method. The FAQ says the 6th connection needs payment details. Limits page: 5 uncertified apps per org; 1,000 calls/day Starter, 5,000 above.",
-          "sourceIds": ["S7", "S8", "S9"]
+          "sourceIds": [
+            "S7",
+            "S8",
+            "S9"
+          ]
         },
         {
           "claim": "Plus needs certification incl. ~10 active customer connections; security assessment only at Advanced (cap 999)",
           "outcome": "confirmed",
           "note": "Building-and-growing page: upgrade via Manage Plan, ten active customer connections, self-assessment shared at 800, cap 999 until done. Pricing table: Advanced needs a security assessment, as do Journals, XPM and bulk connections.",
-          "sourceIds": ["S13", "S7"]
+          "sourceIds": [
+            "S13",
+            "S7"
+          ]
         },
         {
           "claim": "No business or legal-entity verification step before certification (factor value \"no\")",
           "outcome": "unverifiable",
           "note": "No Xero page states or rules out entity verification, so the factor stays \"inferred\". Terms clause 8 says use cases must be approved by Xero, which may act as a gate. Added an open question.",
-          "sourceIds": ["S13", "S14"]
+          "sourceIds": [
+            "S13",
+            "S14"
+          ]
         },
         {
           "claim": "Apps created from 2 Mar 2026 get granular scopes only; AI/ML training on API data is banned (new developers from 4 Dec 2025)",
           "outcome": "confirmed",
           "note": "Scopes page and FAQ: granular only for new apps, broad scopes kept until Sept 2027. Pricing FAQ and terms 7(b)(i): AI training banned for new developers from 4 Dec 2025, for everyone from 2 Mar 2026.",
-          "sourceIds": ["S5", "S6", "S8", "S14"]
+          "sourceIds": [
+            "S5",
+            "S6",
+            "S8",
+            "S14"
+          ]
         },
         {
           "claim": "Console path: My Apps → New app → Web app, AI-training \"No\", Create app, then Generate a secret",
           "outcome": "corrected",
           "note": "Xero's own docs only say \"add your OAuth 2.0 application\" (added S22). The form fields come from Frontegg and Codat, whose pages match. Changed step new-app confidence from official to reported.",
-          "sourceIds": ["S22", "S17", "S18"]
+          "sourceIds": [
+            "S22",
+            "S17",
+            "S18"
+          ]
         },
         {
           "claim": "Read-only agents skip the account-mapping and tax checkpoints because they cover writes only",
           "outcome": "corrected",
           "note": "Checkpoint 7 (account mapping) is explicitly not applicable to read-only integrations. Checkpoint 8 (taxes) applies if the product \"handles tax in any way\", not only writes. Reworded the read-only easier path.",
-          "sourceIds": ["S12"]
+          "sourceIds": [
+            "S12"
+          ]
         },
         {
           "claim": "Probes P1–P3 still match: discovery, unknown-client authorize error, portal login wall",
           "outcome": "confirmed",
           "note": "Re-run today: discovery 200 with S256-only PKCE and no registration_endpoint; authorize still 302s to the unauthorized_client error page (Error code 500); portal is a 200 SPA with shouldSignInAutomatically true.",
-          "sourceIds": ["P1", "P2", "P3"]
+          "sourceIds": [
+            "P1",
+            "P2",
+            "P3"
+          ]
         }
       ]
     }

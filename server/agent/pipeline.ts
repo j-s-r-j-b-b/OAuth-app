@@ -8,6 +8,7 @@ import { z } from 'zod';
 import type { AgentEvent, QualityReport } from '../../shared/events.ts';
 import {
   Blocker,
+  COMPOSIO_DEFAULT_REDIRECT_URI,
   COMPOSIO_REDIRECT_URI,
   Confidence,
   Duration,
@@ -25,7 +26,7 @@ import {
   parseDurationLabel,
 } from '../../shared/schema.ts';
 import { matchToolkit } from '../catalog.ts';
-import { getToolkitAuth, getToolkitDocs, webSearch } from '../composio.ts';
+import { composioEnabled, connectProbeAuto, describeConnectProbe, getToolkitAuth, getToolkitDocs, webSearch, type ConnectProbeResult } from '../composio.ts';
 import { env } from '../env.ts';
 import { chat, parseJsonLoose, type Usage } from './llm.ts';
 import { IDENTIFY_SYSTEM, PLAN_TASK, RESEARCH_SYSTEM, VERDICT_TASK, WRITE_RULES } from './prompts.ts';
@@ -115,6 +116,7 @@ export async function generateGuide(
     notes: [],
   };
   let composioFaq = '';
+  let connectTest: NonNullable<Guide['composioSetup']['tested']> | undefined;
   let defaultScopes: string[] = [];
   if (toolkit) {
     const docs = await getToolkitDocs(toolkit.slug).catch(() => null);
@@ -145,6 +147,23 @@ export async function generateGuide(
       }
     } catch (e) {
       emit({ type: 'warn', message: `Composio toolkit API unavailable: ${(e as Error).message.slice(0, 120)}` });
+    }
+    // Real setup attempt through Composio with a throwaway client: what does Composio actually send to the provider?
+    if (composioEnabled()) {
+      emit({ type: 'info', message: 'Setup attempt: creating a throwaway Composio auth config to see exactly what Composio sends to the provider' });
+      const r = await connectProbeAuto(toolkit.slug).catch((e: Error) => ({ ok: false, stage: 'auth-config', error: e.message }) as ConnectProbeResult);
+      const p = reg.addProbe(describeConnectProbe(toolkit.slug, r));
+      emit({ type: 'probe', probe: p });
+      if (r.ok) {
+        connectTest = {
+          probeId: p.id,
+          testedAt: p.at.slice(0, 10),
+          authorizeUrl: r.authorizeUrl!,
+          redirectUri: r.redirectUri ?? null,
+          defaultScopes: r.scopes ?? [],
+          extraParams: r.extraParams ?? {},
+        };
+      }
     }
     emit({
       type: 'info',
@@ -258,7 +277,7 @@ export async function generateGuide(
   emit({ type: 'stage', stage: 'write', message: 'Writing the guide' });
   const writeContext = [
     `APP: ${ident.name} (${ident.category}) — ${ident.description}. Website ${ident.website}.`,
-    `COMPOSIO FACTS (authoritative, already in the guide): toolkit ${composio.toolkitSlug ?? 'none'}; managed OAuth ${composio.managedOAuth}; auth schemes ${composio.authSchemes.join(', ') || 'unknown'}; redirect URI ${COMPOSIO_REDIRECT_URI}; extra connection fields ${composio.requiredFields.map((f) => f.name).join(', ') || 'none'}; default scopes ${defaultScopes.join(' ') || 'unknown'}.`,
+    `COMPOSIO FACTS (authoritative, already in the guide): toolkit ${composio.toolkitSlug ?? 'none'}; managed OAuth ${composio.managedOAuth}; auth schemes ${composio.authSchemes.join(', ') || 'unknown'}; redirect URI ${connectTest ? `${connectTest.redirectUri} (tested in ${connectTest.probeId}: this is what Composio sends by default; setting oauth_redirect_uri to ${COMPOSIO_REDIRECT_URI} changes it)` : `${COMPOSIO_DEFAULT_REDIRECT_URI} by default, or ${COMPOSIO_REDIRECT_URI} if the auth config sets oauth_redirect_uri`}; ${connectTest ? `default scopes Composio actually requests (tested, ${connectTest.probeId}): ${connectTest.defaultScopes.join(' ') || '(none)'}${Object.keys(connectTest.extraParams).length ? `; extra params ${JSON.stringify(connectTest.extraParams).slice(0, 600)}` : ''}; ` : ''}extra connection fields ${composio.requiredFields.map((f) => f.name).join(', ') || 'none'}; default scopes ${defaultScopes.join(' ') || 'unknown'}.`,
     composioFaq ? `COMPOSIO TOOLKIT FAQ:\n${composioFaq.slice(0, 2000)}` : '',
     `RESEARCH SUMMARY: ${summary || '(none)'}\nGAPS: ${gaps.join('; ') || '(none)'}`,
     `FINDINGS:\n${ctx.findings.map((f, i) => `${i + 1}. ${f.fact} [${f.sourceIds.join(', ')}]`).join('\n') || '(none)'}`,
@@ -447,7 +466,15 @@ export async function generateGuide(
       developerPortalUrl: ident.developerPortalUrl,
       docsUrl: ident.docsUrl,
     },
-    composio: { ...composio, notes: p2.composioNotes.slice(0, 4) },
+    composio: {
+      ...composio,
+      notes: [
+        ...(connectTest?.redirectUri === COMPOSIO_DEFAULT_REDIRECT_URI
+          ? [`Tested: a custom auth config created without \`oauth_redirect_uri\` sends \`${COMPOSIO_DEFAULT_REDIRECT_URI}\`. Register exactly the URI your auth config sends, or set \`oauth_redirect_uri\` to \`${COMPOSIO_REDIRECT_URI}\` and register that instead.`]
+          : []),
+        ...p2.composioNotes.slice(0, 4),
+      ],
+    },
     assumption: p1.assumption,
     verdict: { ...p1.verdict, difficulty: 'self-serve' as const },
     factors,
@@ -464,13 +491,19 @@ export async function generateGuide(
     })),
     nuances: p2.nuances.map((n, i) => fixRefs(n, `nuance ${i + 1}`)),
     composioSetup: {
-      redirectUri: COMPOSIO_REDIRECT_URI,
+      redirectUri: connectTest?.redirectUri ?? COMPOSIO_DEFAULT_REDIRECT_URI,
+      ...(connectTest ? { tested: connectTest } : {}),
       steps: p2.composioSteps.length
         ? p2.composioSteps
         : ['Create a custom auth config for the toolkit in the Composio dashboard with your client ID and secret.', 'Pass the auth config ID to your session.'],
     },
     evidence: { sources: [] as Guide['evidence']['sources'], probes: reg.probes, openQuestions: p2.openQuestions.slice(0, 6), verification: null },
-    meta: { generatedAt: new Date().toISOString(), generator: 'live' as const, model: env.llm.model, durationSec: null as number | null },
+    meta: {
+      generatedAt: new Date().toISOString(),
+      generator: 'live' as const,
+      model: env.llm.composeModel !== env.llm.model ? `${env.llm.model} (research) + ${env.llm.composeModel} (writing)` : env.llm.model,
+      durationSec: null as number | null,
+    },
   };
 
   // Difficulty is derived, never trusted from the model.

@@ -1,0 +1,703 @@
+{
+  "schemaVersion": 1,
+  "slug": "spotify",
+  "app": {
+    "name": "Spotify",
+    "website": "https://www.spotify.com",
+    "category": "Media and Entertainment",
+    "description": "A digital music, podcast, and video streaming service that provides access to millions of songs and other content from creators worldwide.",
+    "developerPortalUrl": "https://developer.spotify.com/dashboard",
+    "docsUrl": "https://developer.spotify.com/documentation/web-api"
+  },
+  "composio": {
+    "toolkitSlug": "spotify",
+    "managedOAuth": "not-available",
+    "authSchemes": [
+      "OAUTH2"
+    ],
+    "toolkitDocsUrl": "https://docs.composio.dev/toolkits/spotify",
+    "requiredFields": [],
+    "notes": [
+      "Tested: a custom auth config created without `oauth_redirect_uri` sends `https://backend.composio.dev/api/v1/auth-apps/add`. Register exactly the URI your auth config sends, or set `oauth_redirect_uri` to `https://backend.composio.dev/api/v3/toolkits/auth/callback` and register that instead.",
+      "Composio does not provide a default OAuth app for Spotify; you must create your own in the Spotify Developer Dashboard.",
+      "Composio automatically sends default scopes including `user-read-private`, `user-read-email`, `app-remote-control`, `streaming`, `user-modify-playback-state`, `user-read-playback-state`, and `user-read-currently-playing`."
+    ]
+  },
+  "assumption": "An agent that plays, searches, or manages playback and user libraries in any user's Spotify account",
+  "verdict": {
+    "headline": "Spotify requires an active business entity with 250k+ MAUs for production app access, and prohibits AI training on API data.",
+    "summary": "Development mode requires a Spotify Premium account and is strictly capped at 5 test users, which are allowlisted by email. Moving past this limit requires entering Extended Quota Mode, which is gated behind stringent business criteria and a manual review process that takes up to six weeks. Furthermore, the developer terms explicitly forbid using Spotify content to train AI or machine learning models.",
+    "difficulty": "formal-review",
+    "handsOnEffort": {
+      "label": "1–2 hours",
+      "minHours": 1,
+      "maxHours": 2,
+      "basis": "Dashboard app registration and redirect URL configuration take minutes; test user allowlisting is manual."
+    },
+    "timeToFirstConnection": {
+      "label": "Immediate",
+      "minHours": 0,
+      "maxHours": 1,
+      "basis": "Self-serve registration in the developer dashboard allows immediate local testing with allowlisted premium accounts."
+    },
+    "timeToProduction": {
+      "label": "6 weeks",
+      "minHours": 504,
+      "maxHours": 1008,
+      "basis": "Spotify states review and approval take up to 6 weeks once business requirements and form criteria are met."
+    },
+    "longestPole": "Extended Quota Mode eligibility (requires an established business entity with at least 250,000 MAUs) and the subsequent 6-week review process.",
+    "cost": "Free",
+    "costDetail": "Developer dashboard access is free, but development mode requires a personal Spotify Premium account.",
+    "easierPaths": [
+      {
+        "condition": "Keeping the integration strictly to 5 or fewer users",
+        "effect": "Stays in Development Mode without needing business verification or Extended Quota approval."
+      }
+    ]
+  },
+  "factors": [
+    {
+      "key": "self_serve_registration",
+      "value": "yes",
+      "detail": "Anyone can register an app instantly via the Spotify Developer Dashboard.",
+      "sourceIds": [
+        "S2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "review_required",
+      "value": "yes",
+      "detail": "Moving to Extended Quota Mode requires submitting an application and undergoing a review process.",
+      "sourceIds": [
+        "S5"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "business_verification",
+      "value": "yes",
+      "detail": "Extended Quota Mode requires an established business entity operating an active launched service.",
+      "sourceIds": [
+        "S8"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "security_assessment",
+      "value": "no",
+      "detail": "No formal third-party security assessment or penetration test is explicitly required, though strict terms apply.",
+      "sourceIds": [
+        "S5",
+        "S6"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "paid_access",
+      "value": "no",
+      "detail": "API access does not require a paid developer subscription fee.",
+      "sourceIds": [
+        "S2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "partner_or_sales_gate",
+      "value": "no",
+      "detail": "Access is handled via online application forms rather than a direct sales contract negotiation.",
+      "sourceIds": [
+        "S8"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "user_cap_before_review",
+      "value": "yes",
+      "detail": "Development Mode is capped at a maximum of 5 authorized test users.",
+      "sourceIds": [
+        "S5",
+        "S7"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "per_customer_setup",
+      "value": "no",
+      "detail": "Standard OAuth workflow applies per user without custom per-customer enterprise configuration.",
+      "sourceIds": [
+        "S1",
+        "S3"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "phases": [
+    {
+      "id": "p1",
+      "title": "Register your Spotify Developer App",
+      "outcome": "A registered Spotify app with a Client ID and Client Secret.",
+      "steps": [
+        {
+          "id": "s1",
+          "title": "Sign in to the Spotify Developer Dashboard",
+          "actor": "you",
+          "effort": "2 min",
+          "wait": null,
+          "details": "Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and log in using your Spotify account. Note that the app owner account must be a Spotify Premium account [S17].",
+          "agentAssist": null,
+          "links": [
+            {
+              "label": "Spotify Developer Dashboard",
+              "url": "https://developer.spotify.com/dashboard"
+            }
+          ],
+          "sourceIds": [
+            "S2",
+            "S7"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "s2",
+          "title": "Create your application",
+          "actor": "you",
+          "effort": "3 min",
+          "wait": null,
+          "details": "In the dashboard, click **Create an App**. Enter your **App Name** and **App Description**, accept the Developer Terms of Service, and save [S2].",
+          "agentAssist": "Draft your app name and description and prepare the exact use case text required during registration.",
+          "links": [
+            {
+              "label": "Spotify Developer Dashboard",
+              "url": "https://developer.spotify.com/dashboard"
+            }
+          ],
+          "sourceIds": [
+            "S2"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "title": "Configure Redirect URIs and Scopes",
+      "outcome": "Callback URLs and OAuth parameters properly configured in your app settings.",
+      "steps": [
+        {
+          "id": "s3",
+          "title": "Configure redirect URIs",
+          "actor": "you",
+          "effort": "3 min",
+          "wait": null,
+          "details": "Open your app settings in the dashboard. Navigate to **Settings** and add `https://backend.composio.dev/api/v1/auth-apps/add` (or `https://backend.composio.dev/api/v3/toolkits/auth/callback`) to your **Redirect URIs** list. Click **Save**.",
+          "agentAssist": "Provide the exact Composio callback URLs to the developer for pasting into the console.",
+          "links": [
+            {
+              "label": "Spotify Developer Dashboard",
+              "url": "https://developer.spotify.com/dashboard"
+            }
+          ],
+          "sourceIds": [
+            "P2"
+          ],
+          "confidence": "tested"
+        },
+        {
+          "id": "s4",
+          "title": "Copy your Client ID and Client Secret",
+          "actor": "you",
+          "effort": "1 min",
+          "wait": null,
+          "details": "Retrieve your **Client ID** and **Client Secret** from your app dashboard overview page. Store them securely for configuring Composio.",
+          "agentAssist": null,
+          "links": [
+            {
+              "label": "Spotify Developer Dashboard",
+              "url": "https://developer.spotify.com/dashboard"
+            }
+          ],
+          "sourceIds": [
+            "S2"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "title": "Test in Development Mode",
+      "outcome": "Working local connections for up to 5 allowlisted users.",
+      "steps": [
+        {
+          "id": "s5",
+          "title": "Allowlist test users by email",
+          "actor": "you",
+          "effort": "5 min",
+          "wait": null,
+          "details": "In your app dashboard, go to **Users and Access** and add the email addresses of up to 5 authorized test users. All test users must have a Spotify Premium account [S10, S17].",
+          "agentAssist": "Collect test user emails and format them for allowlisting.",
+          "links": [
+            {
+              "label": "Spotify Developer Dashboard",
+              "url": "https://developer.spotify.com/dashboard"
+            }
+          ],
+          "sourceIds": [
+            "S5",
+            "S7"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "p4",
+      "title": "Prepare for Extended Quota Mode (Production)",
+      "outcome": "Meeting the strict 250k MAU business criteria required for public apps.",
+      "steps": [
+        {
+          "id": "s6",
+          "title": "Verify business entity and MAU threshold",
+          "actor": "you",
+          "effort": "1 hour",
+          "wait": null,
+          "details": "Confirm that your application is operated by an established business entity, runs an active launched service, and meets or exceeds 250,000 monthly active users (MAUs) [S21].",
+          "agentAssist": "Draft a summary of user metrics and business documentation to support the Extended Quota application.",
+          "links": [
+            {
+              "label": "Quota Modes Documentation",
+              "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes"
+            }
+          ],
+          "sourceIds": [
+            "S8"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "s7",
+          "title": "Submit the Extended Quota Form",
+          "actor": "you",
+          "effort": "15 min",
+          "wait": "6 weeks",
+          "details": "Submit your application via the official Google Form link provided in the Spotify Quota Modes documentation. Wait up to six weeks for review once submitted [S10, S21].",
+          "agentAssist": "Review form fields and draft responses explaining your service architecture and compliance.",
+          "links": [
+            {
+              "label": "Quota Modes Documentation",
+              "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes"
+            }
+          ],
+          "sourceIds": [
+            "S5",
+            "S8"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "p5",
+      "title": "Go live in Composio",
+      "outcome": "Spotify fully connected and ready for automated agent actions via Composio.",
+      "steps": [
+        {
+          "id": "s8",
+          "title": "Create Custom OAuth2 Auth Config in Composio",
+          "actor": "agent",
+          "effort": "5 min",
+          "wait": null,
+          "details": "Use Composio's API to create a custom OAuth2 auth config for the `spotify` toolkit, providing your Client ID, Client Secret, and redirect URI `https://backend.composio.dev/api/v1/auth-apps/add` [P2].",
+          "agentAssist": "Execute the API call to register your custom OAuth app credentials with Composio.",
+          "links": [
+            {
+              "label": "Composio Spotify Toolkit Docs",
+              "url": "https://docs.composio.dev/toolkits/spotify"
+            }
+          ],
+          "sourceIds": [
+            "P2",
+            "S4"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "s9",
+          "title": "Initiate connection in Composio",
+          "actor": "agent",
+          "effort": "2 min",
+          "wait": null,
+          "details": "Start a connection session using the custom auth config. Composio sends users to `https://accounts.spotify.com/authorize` with PKCE enabled and default scopes (`user-read-private`, `user-read-email`, `app-remote-control`, `streaming`, `user-modify-playback-state`, `user-read-playback-state`, `user-read-currently-playing`) [P2].",
+          "agentAssist": "Trigger the auth flow link and handle the user consent callback.",
+          "links": [
+            {
+              "label": "Composio Spotify Toolkit Docs",
+              "url": "https://docs.composio.dev/toolkits/spotify"
+            }
+          ],
+          "sourceIds": [
+            "P2"
+          ],
+          "confidence": "inferred"
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "item": "Spotify Developer Account",
+      "neededFor": "registration",
+      "detail": "Sign in to the Spotify Developer Dashboard to create and manage client credentials.",
+      "sourceIds": [
+        "S2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "Spotify Premium Account",
+      "neededFor": "testing",
+      "detail": "The app owner must hold a Spotify Premium account for development mode usage.",
+      "sourceIds": [
+        "S7"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "Test User Allowlist",
+      "neededFor": "testing",
+      "detail": "Up to 5 test users must be explicitly allowlisted by email in the Spotify Developer Dashboard.",
+      "sourceIds": [
+        "S5",
+        "S7"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "Business Entity & 250k+ MAUs",
+      "neededFor": "production",
+      "detail": "Extended Quota Mode requires an established business entity running an active service with at least 250,000 MAUs.",
+      "sourceIds": [
+        "S8"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "scopes": [
+    {
+      "scope": "user-read-private",
+      "purpose": "Read access to user's subscription details and personal data.",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "P1",
+        "S9"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "user-read-email",
+      "purpose": "Read access to user's email address.",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "P1",
+        "S9"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "streaming",
+      "purpose": "Control playback of Spotify audio on client applications.",
+      "tier": "sensitive",
+      "note": null,
+      "sourceIds": [
+        "P1",
+        "S9"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "user-modify-playback-state",
+      "purpose": "Control user's playback state (play, pause, skip, seek).",
+      "tier": "sensitive",
+      "note": null,
+      "sourceIds": [
+        "P1",
+        "S9"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "user-read-playback-state",
+      "purpose": "Read user's current playback state and active device.",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "P1",
+        "S9"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "user-read-currently-playing",
+      "purpose": "Read what content is currently playing on the user's device.",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "P1",
+        "S9"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "app-remote-control",
+      "purpose": "Remote control playback of Spotify audio.",
+      "tier": "sensitive",
+      "note": null,
+      "sourceIds": [
+        "P1",
+        "S9"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "blockers": [
+    {
+      "title": "Development Mode User Cap Reached",
+      "symptom": "Non-allowlisted test users get authentication errors or cannot connect to the app.",
+      "likelihood": "common",
+      "howToProceed": "Add the user's email explicitly under **Users and Access** in the Spotify Developer Dashboard, ensuring they hold a Spotify Premium account.",
+      "escalation": null,
+      "sourceIds": [
+        "S5",
+        "S7"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Extended Quota Mode Rejected or Gated",
+      "symptom": "Applications with fewer than 250k MAUs or non-business entities are denied Extended Quota access.",
+      "likelihood": "common",
+      "howToProceed": "Ensure your service meets the active MAU criteria and business entity requirement introduced in May 2025 before reapplying.",
+      "escalation": null,
+      "sourceIds": [
+        "S8"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "AI Training Terms Violation",
+      "symptom": "Account or API access suspended for ingesting Spotify data into machine learning models.",
+      "likelihood": "rare",
+      "howToProceed": "Review Spotify's Developer Terms; strictly ensure that no Spotify content or API data is used to train AI or machine learning models.",
+      "escalation": null,
+      "sourceIds": [
+        "S6"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "nuances": [
+    {
+      "title": "PKCE Requirement",
+      "detail": "Spotify endpoints support authorization code flow with PKCE (S256), which Composio handles automatically during connection flows.",
+      "sourceIds": [
+        "P2",
+        "P4"
+      ],
+      "confidence": "tested"
+    },
+    {
+      "title": "AI Training Prohibited",
+      "detail": "Spotify Developer Terms explicitly prohibit using the Spotify Platform or any Spotify Content to train a machine learning or AI model.",
+      "sourceIds": [
+        "S6"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Development Mode Restrictions",
+      "detail": "Development mode limits each developer to 1 Client ID and a maximum of 5 allowlisted test users who must hold a Premium subscription.",
+      "sourceIds": [
+        "S5",
+        "S7"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "composioSetup": {
+    "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
+    "steps": [
+      "Create your app in the Spotify Developer Dashboard and obtain your Client ID and Client Secret.",
+      "Add `https://backend.composio.dev/api/v1/auth-apps/add` as a Redirect URI in your Spotify app settings.",
+      "Configure a custom OAuth2 auth config in Composio for the `spotify` toolkit using your Client ID and Client Secret.",
+      "Initiate an authentication flow through Composio using the custom auth config ID."
+    ],
+    "tested": {
+      "probeId": "P2",
+      "testedAt": "2026-10-30",
+      "authorizeUrl": "https://accounts.spotify.com/authorize",
+      "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
+      "defaultScopes": [
+        "user-read-private",
+        "user-read-email",
+        "app-remote-control",
+        "streaming",
+        "user-modify-playback-state",
+        "user-read-playback-state",
+        "user-read-currently-playing"
+      ],
+      "extraParams": {
+        "response_type": "code"
+      }
+    }
+  },
+  "evidence": {
+    "sources": [
+      {
+        "id": "S1",
+        "url": "https://developer.spotify.com/documentation/web-api/concepts/authorization",
+        "title": "Authorization | Spotify for Developers",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Authorization | Spotify for Developers",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S2",
+        "url": "https://developer.spotify.com/documentation/web-api/concepts/apps",
+        "title": "Apps | Spotify for Developers",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Apps | Spotify for Developers",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S3",
+        "url": "https://developer.spotify.com/documentation/web-api/tutorials/code-flow",
+        "title": "Authorization Code Flow | Spotify for Developers",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Technical documentation for the Authorization Code Flow.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S4",
+        "url": "https://docs.composio.dev/toolkits/spotify",
+        "title": "Composio docs: Spotify toolkit",
+        "kind": "composio",
+        "accessedAt": "2026-10-30",
+        "note": "Composio documentation for the Spotify integration toolkit.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S5",
+        "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+        "title": "Quota modes | Spotify for Developers",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Quota modes | Spotify for Developers",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S6",
+        "url": "https://developer.spotify.com/terms",
+        "title": "Spotify Developer Terms | Spotify for Developers",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Spotify Developer Terms | Spotify for Developers",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S7",
+        "url": "https://developer.spotify.com/blog/2026-02-06-update-on-developer-access-and-platform-security",
+        "title": "Update on Developer Access and Platform Security | Spotify for Developers",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Update on Developer Access and Platform Security | Spotify for Developers",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S8",
+        "url": "https://developer.spotify.com/blog/2025-04-15-updating-the-criteria-for-web-api-extended-access",
+        "title": "Updating the Criteria for Web API Extended Access | Spotify for Developers",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Updating the Criteria for Web API Extended Access | Spotify for Developers",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S9",
+        "url": "https://developer.spotify.com/documentation/web-api/concepts/scopes",
+        "title": "Scopes | Spotify for Developers",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": null,
+        "retrieval": "search-result"
+      }
+    ],
+    "probes": [
+      {
+        "id": "P1",
+        "kind": "composio-api",
+        "target": "GET https://backend.composio.dev/api/v3.1/toolkits/spotify",
+        "result": "pass",
+        "summary": "Auth schemes: OAUTH2. Connection fields: none. Default scopes: user-read-private user-read-email app-remote-control streaming user-modify-playback-state user-read-playback-state user-read-currently-playing.",
+        "detail": "[{\"scheme\":\"OAUTH2\",\"managed\":false,\"configFields\":[{\"name\":\"client_id\",\"displayName\":\"Client id\",\"required\":true,\"description\":\"Client id of the app\"},{\"name\":\"client_secret\",\"displayName\":\"Client secret\",\"required\":true,\"description\":\"Client secret of the app\"},{\"name\":\"oauth_redirect_uri\",\"displayName\":\"Redirect URI\",\"required\":false,\"description\":\"Add this Redirect URL to your app's OAuth allow list.\"},{\"name\":\"scopes\",\"displayName\":\"Scopes\",\"required\":false,\"description\":\"Scopes to request from the user, comma separated\"}],\"connectionFields\":[],\"defaultScopes\":[\"user-read-private\",\"user-read-email\",\"app-remote-control\",\"streaming\",\"user-modify-playback-state\",\"user-read-playback-state\",\"user-read-currently-playing\"]}]",
+        "at": "2026-10-30T09:42:11.643Z"
+      },
+      {
+        "id": "P2",
+        "kind": "composio-api",
+        "target": "Composio API: create custom OAuth2 auth config for `spotify` with a dummy client → start a connection → follow the redirect (then delete both)",
+        "result": "pass",
+        "summary": "Composio sends users to https://accounts.spotify.com/authorize with redirect_uri=https://backend.composio.dev/api/v1/auth-apps/add; default scopes: user-read-private user-read-email app-remote-control streaming user-modify-playback-state user-read-playback-state user-read-currently-playing; PKCE on.",
+        "detail": "{\"authorizeUrl\":\"https://accounts.spotify.com/authorize\",\"redirectUri\":\"https://backend.composio.dev/api/v1/auth-apps/add\",\"scopes\":[\"user-read-private\",\"user-read-email\",\"app-remote-control\",\"streaming\",\"user-modify-playback-state\",\"user-read-playback-state\",\"user-read-currently-playing\"],\"extraParams\":{\"response_type\":\"code\"},\"pkce\":true,\"note\":\"extra params: response_type=code\"}",
+        "at": "2026-10-30T09:42:14.780Z"
+      },
+      {
+        "id": "P3",
+        "kind": "authorize-endpoint",
+        "target": "GET https://accounts.spotify.com/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=user-read-private+user-read-email",
+        "result": "pass",
+        "summary": "Endpoint is live and rejects an unregistered client (200). Shows what a misconfigured app sees.",
+        "detail": "Chain: 303 accounts.spotify.com/authorize → 200 accounts.spotify.com/en/login\nFinal: https://accounts.spotify.com/en/login?continue=https%3A%2F%2Faccounts.spotify.com%2Fauthorize%3Fscope%3Duser-read-private%2Buser-read-email%26response_type%3Dcode%26redirect_uri%3Dhttps%253A%252F%252Fbackend.composio.dev%252Fapi%252Fv3%252Ftoolkits%252Fauth%252Fcallback%26state%3Doauth-runway-probe%\nExcerpt: title=\"Spotify\" | [Continue with phone number](/en/v2/login/phone?continue=https%3A%2F%2Faccounts.spotify.com%2Fauthorize%3Fscope%3Duser-read-private%2Buser-read-email%26response_type%3Dcode%26redirect_uri%3Dhttps%253A%252F%252Fbackend.composio.dev%252Fapi%252Fv3%252Ftoolkits%252Fauth%252Fcallback%26state%3Doauth-runway-probe%26client_id%3Doauth-runway-probe%26flow_ctx%3D10868e65-959a-4066-a407-3b47abbe5307%253A1793374937&client_id=oauth-runway-probe&flow_ctx=10868e65-959a-4066-a407-3b47abbe5307%3A1793374937)[Continue with Google](/en/login/google?continue=https%3A%2F%2Faccounts.spotify.com%2Fauthorize%3Fscope%3Duser-read-private%2Buser-read-email%26response_type%3Dcode%26redirect_uri%3Dhttp",
+        "at": "2026-10-30T09:42:19.566Z"
+      },
+      {
+        "id": "P4",
+        "kind": "oauth-discovery",
+        "target": "GET https://accounts.spotify.com/.well-known/openid-configuration",
+        "result": "pass",
+        "summary": "Discovery document found. Authorize: https://accounts.spotify.com/oauth2/v2/auth; token: https://accounts.spotify.com/api/token. PKCE: S256.",
+        "detail": "{\"issuer\":\"https://accounts.spotify.com\",\"authorization_endpoint\":\"https://accounts.spotify.com/oauth2/v2/auth\",\"token_endpoint\":\"https://accounts.spotify.com/api/token\",\"registration_endpoint\":null,\"code_challenge_methods_supported\":[\"S256\"],\"grant_types_supported\":[\"authorization_code\",\"refresh_token\",\"urn:ietf:params:oauth:grant-type:device_code\",\"urn:ietf:params:oauth:grant-type:jwt-bearer\"],\"scopes_supported\":[\"email\",\"openid\",\"profile\"]}",
+        "at": "2026-10-30T09:42:20.889Z"
+      },
+      {
+        "id": "P5",
+        "kind": "portal",
+        "target": "GET https://developer.spotify.com/dashboard",
+        "result": "pass",
+        "summary": "Portal reachable (200, \"spotify-for-developers\"); no sign-in redirect seen on the landing page.",
+        "detail": "Chain: 200 developer.spotify.com/dashboard",
+        "at": "2026-10-30T09:42:20.901Z"
+      }
+    ],
+    "openQuestions": [
+      {
+        "question": "What is the exact current approval success rate for newer startups applying under the May 2025 250k MAU threshold?",
+        "whyItMatters": "Helps developers evaluate whether to build on Spotify if they are pre-revenue or scaling up.",
+        "howToResolve": "Monitor Spotify Developer community forums and platform blog announcements."
+      }
+    ],
+    "verification": null
+  },
+  "meta": {
+    "generatedAt": "2026-10-30T09:43:02.647Z",
+    "generator": "live",
+    "model": "gemini-3.5-flash-lite (research) + gemini-3.6-flash (writing)",
+    "durationSec": 56
+  }
+}
