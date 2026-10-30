@@ -1,0 +1,414 @@
+{
+  "query": "Shopify",
+  "events": [
+    {
+      "type": "stage",
+      "stage": "resolve",
+      "message": "Identifying “Shopify”",
+      "t": 2
+    },
+    {
+      "type": "search",
+      "query": "Shopify API OAuth app developer documentation",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 2503
+    },
+    {
+      "type": "info",
+      "message": "Identified Shopify — Shopify is a complete e-commerce platform that lets anyone start, run, and grow a business.",
+      "t": 4490
+    },
+    {
+      "type": "stage",
+      "stage": "composio",
+      "message": "Checking Composio’s toolkit catalog",
+      "t": 4490
+    },
+    {
+      "type": "info",
+      "message": "Setup attempt: creating a throwaway Composio auth config to see exactly what Composio sends to the provider",
+      "t": 7169
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "composio-api",
+        "target": "Composio API: create custom OAuth2 auth config for `shopify` with a dummy client → start a connection → follow the redirect (then delete both)",
+        "result": "pass",
+        "summary": "Composio sends users to https://oauth-runway-probe.myshopify.com/admin/oauth/authorize with redirect_uri=https://backend.composio.dev/api/v1/auth-apps/add; default scopes: read_products write_products read_orders write_orders read_customers write_customers read_inventory write_inventory read_fulfillments write_fulfillments read_assigned_fulfillment_orders write_assigned_fulfillment_orders read_content write_content read_themes write_themes read_locations read_shipping write_shipping read_gift_cards write_gift_cards read_script_tags write_script_tags read_marketing_events write_marketing_events read_price_rules write_price_rules read_discounts write_discounts read_draft_orders write_draft_orders read_metaobjects write_metaobjects read_webhooks write_webhooks read_publications; PKCE on.",
+        "detail": "{\"authorizeUrl\":\"https://oauth-runway-probe.myshopify.com/admin/oauth/authorize\",\"redirectUri\":\"https://backend.composio.dev/api/v1/auth-apps/add\",\"scopes\":[\"read_products\",\"write_products\",\"read_orders\",\"write_orders\",\"read_customers\",\"write_customers\",\"read_inventory\",\"write_inventory\",\"read_fulfillments\",\"write_fulfillments\",\"read_assigned_fulfillment_orders\",\"write_assigned_fulfillment_orders\",\"read_content\",\"write_content\",\"read_themes\",\"write_themes\",\"read_locations\",\"read_shipping\",\"write_shipping\",\"read_gift_cards\",\"write_gift_cards\",\"read_script_tags\",\"write_script_tags\",\"read_marketing_events\",\"write_marketing_events\",\"read_price_rules\",\"write_price_rules\",\"read_discounts\",\"write_discounts\",\"read_draft_orders\",\"write_draft_orders\",\"read_metaobjects\",\"write_metaobjects\",\"read_webhooks\",\"write_webhooks\",\"read_publications\"],\"extraParams\":{\"response_type\":\"code\"},\"pkce\":true,\"note\":\"extra params: response_type=code\"}",
+        "id": "P2",
+        "at": "2026-10-30T11:48:37.691Z"
+      },
+      "t": 10163
+    },
+    {
+      "type": "info",
+      "message": "Composio toolkit `shopify` has no managed OAuth app: you must register your own before anyone can connect.",
+      "t": 10163
+    },
+    {
+      "type": "stage",
+      "stage": "research",
+      "message": "Researching docs, policies and real-world reports",
+      "t": 10163
+    },
+    {
+      "type": "search",
+      "query": "Shopify OAuth app approval how long experience reddit OR forum",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 12392
+    },
+    {
+      "type": "search",
+      "query": "Shopify API pricing plans tiers limits for developers connections",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 12443
+    },
+    {
+      "type": "search",
+      "query": "Shopify OAuth app review approval verification publish requirements",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 12772
+    },
+    {
+      "type": "finding",
+      "fact": "Shopify custom OAuth credentials can be created via the Shopify Partners / Dev Dashboard.",
+      "sourceIds": [
+        "S7",
+        "S8"
+      ],
+      "t": 15487
+    },
+    {
+      "type": "finding",
+      "fact": "GraphQL Admin API rate limits start at 100 points/second for Standard stores, up to 1,000 points/second for Shopify Plus.",
+      "sourceIds": [
+        "S18",
+        "S19"
+      ],
+      "t": 15488
+    },
+    {
+      "type": "finding",
+      "fact": "REST Admin API rate limits start at 2 requests/second for Standard stores up to 20 requests/second for Shopify Plus.",
+      "sourceIds": [
+        "S18",
+        "S20"
+      ],
+      "t": 15488
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "authorize-endpoint",
+        "target": "GET https://admin.shopify.com/oauth/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=read_products+read_orders",
+        "result": "info",
+        "summary": "Request blocked by the provider (403), likely bot protection; inconclusive.",
+        "detail": "Chain: 403 admin.shopify.com/oauth/authorize\nFinal: https://admin.shopify.com/oauth/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=read_products+read_orders\nExcerpt: title=\"Verifying your connection...\"",
+        "id": "P3",
+        "at": "2026-10-30T11:48:43.899Z"
+      },
+      "t": 16371
+    },
+    {
+      "type": "search",
+      "query": "site:shopify.dev/docs/apps/build/dev-dashboard/create-apps-using-dev-dashboard",
+      "count": 1,
+      "engine": "composio:exa",
+      "t": 17201
+    },
+    {
+      "type": "search",
+      "query": "site:shopify.dev/docs/apps/build/authentication-authorization/manage-credentials",
+      "count": 1,
+      "engine": "composio:exa",
+      "t": 17384
+    },
+    {
+      "type": "search",
+      "query": "site:shopify.dev/docs/apps/auth/oauth/getting-started",
+      "count": 1,
+      "engine": "composio:exa",
+      "t": 17608
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "oauth-discovery",
+        "target": "GET https://shopify.dev/.well-known/openid-configuration | https://shopify.dev/.well-known/oauth-authorization-server",
+        "result": "info",
+        "summary": "No public OAuth/OIDC discovery document; endpoints must come from the provider docs.",
+        "detail": "404 https://shopify.dev/.well-known/openid-configuration\n404 https://shopify.dev/.well-known/oauth-authorization-server",
+        "id": "P4",
+        "at": "2026-10-30T11:48:45.758Z"
+      },
+      "t": 18230
+    },
+    {
+      "type": "finding",
+      "fact": "Shopify supports both online access tokens (tied to an active staff session, expiring) and offline access tokens (persistent, do not expire until uninstalled or revoked).",
+      "sourceIds": [
+        "S33"
+      ],
+      "t": 20760
+    },
+    {
+      "type": "finding",
+      "fact": "Shopify app distribution methods include public apps (for the Shopify App Store or custom install URLs) and custom apps (built directly for a single merchant store without review).",
+      "sourceIds": [
+        "S34",
+        "S35"
+      ],
+      "t": 20760
+    },
+    {
+      "type": "search",
+      "query": "site:shopify.dev/docs/apps/launch/shopify-app-store distribution methods custom vs public",
+      "count": 1,
+      "engine": "composio:exa",
+      "t": 22542
+    },
+    {
+      "type": "search",
+      "query": "site:shopify.dev/docs/apps/auth/oauth/getting-started offline online access tokens",
+      "count": 1,
+      "engine": "composio:exa",
+      "t": 22961
+    },
+    {
+      "type": "search",
+      "query": "site:shopify.dev/docs/apps/build/authentication-authorization/public-apps custom app unlisted",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 23032
+    },
+    {
+      "type": "search",
+      "query": "site:shopify.dev/docs/api/access-scopes sensitive protected customer data",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 23652
+    },
+    {
+      "type": "read",
+      "url": "https://shopify.dev/docs/apps/build/authentication-authorization/authenticate-standalone-apps?lang=node",
+      "title": "Authenticate a standalone or API-only app",
+      "ok": true,
+      "chars": 14000,
+      "via": "direct",
+      "sourceId": "S46",
+      "t": 24584
+    },
+    {
+      "type": "finding",
+      "fact": "Shopify API rate limits use a leaky bucket algorithm where requests restore over time based on the store's tier.",
+      "sourceIds": [
+        "S18"
+      ],
+      "t": 29666
+    },
+    {
+      "type": "finding",
+      "fact": "Community reports indicate official app review times are stated as 5-10 business days, but can extend significantly in practice.",
+      "sourceIds": [
+        "S10",
+        "S11"
+      ],
+      "t": 29666
+    },
+    {
+      "type": "read",
+      "url": "https://community.shopify.com/t/how-long-does-it-take-for-an-app-review-to-be-completed/264027",
+      "title": "How long does it take for an app review to be completed?",
+      "ok": true,
+      "chars": 8025,
+      "via": "direct",
+      "sourceId": "S10",
+      "t": 30200
+    },
+    {
+      "type": "read",
+      "url": "https://shopify.dev/docs/api/usage/limits",
+      "title": "Shopify API limits",
+      "ok": true,
+      "chars": 5330,
+      "via": "direct",
+      "sourceId": "S18",
+      "t": 31392
+    },
+    {
+      "type": "finding",
+      "fact": "Shopify access tokens can be requested as online tokens or offline tokens via the authorization code grant flow.",
+      "sourceIds": [
+        "S47"
+      ],
+      "t": 36161
+    },
+    {
+      "type": "read",
+      "url": "https://shopify.dev/docs/apps/build/authentication-authorization/access-tokens",
+      "title": "Access tokens",
+      "ok": true,
+      "chars": 14000,
+      "via": "direct",
+      "sourceId": "S47",
+      "t": 37036
+    },
+    {
+      "type": "info",
+      "message": "Research done: 8 findings, 5 pages read, 4 probes.",
+      "t": 39549
+    },
+    {
+      "type": "stage",
+      "stage": "write",
+      "message": "Writing the guide",
+      "t": 39550
+    },
+    {
+      "type": "warn",
+      "message": "gemini-3.6-flash unavailable (429); falling back to gemini-3.5-flash-lite",
+      "t": 39994
+    },
+    {
+      "type": "info",
+      "message": "Verdict drafted: Shopify provides self-serve app registration for testing, but public app deployment requires review and strict compliance checks.",
+      "t": 46842
+    },
+    {
+      "type": "warn",
+      "message": "gemini-3.6-flash unavailable (429); falling back to gemini-3.5-flash-lite",
+      "t": 47333
+    },
+    {
+      "type": "warn",
+      "message": "Draft failed validation; repairing (Expected double-quoted property name in JSON at position 11026 (line 211 column 7))",
+      "t": 55318
+    },
+    {
+      "type": "warn",
+      "message": "gemini-3.6-flash unavailable (429); falling back to gemini-3.5-flash-lite",
+      "t": 63913
+    },
+    {
+      "type": "warn",
+      "message": "Draft failed validation; repairing (Expected double-quoted property name in JSON at position 11589 (line 304 column 7))",
+      "t": 82938
+    },
+    {
+      "type": "warn",
+      "message": "gemini-3.6-flash unavailable (429); falling back to gemini-3.5-flash-lite",
+      "t": 83367
+    },
+    {
+      "type": "stage",
+      "stage": "check",
+      "message": "Checking citations, confidence labels and ratings",
+      "t": 96066
+    },
+    {
+      "type": "info",
+      "message": "Verifier: re-reading the cited sources for the rating factors, timeline and cost",
+      "t": 96067
+    },
+    {
+      "type": "warn",
+      "message": "gemini-3.6-flash unavailable (429); falling back to gemini-3.5-flash-lite",
+      "t": 96772
+    },
+    {
+      "type": "info",
+      "message": "Verifier: 7 confirmed, 0 corrected, 3 unverifiable",
+      "t": 98995
+    },
+    {
+      "type": "quality",
+      "report": {
+        "claims": {
+          "tested": 4,
+          "official": 31,
+          "reported": 1,
+          "inferred": 0
+        },
+        "sources": {
+          "total": 20,
+          "fetched": 4,
+          "snippetOnly": 16,
+          "official": 16,
+          "community": 3,
+          "composio": 1
+        },
+        "probes": {
+          "total": 4,
+          "pass": 2,
+          "info": 2,
+          "fail": 0
+        },
+        "fixes": [
+          "step Select API access scopes: \"tested\" on a claim no probe can confirm → official",
+          "step Configure custom auth in Composio: \"tested\" on a claim no probe can confirm → official",
+          "step Initiate connection session with store s: \"tested\" on a claim no probe can confirm → official",
+          "scope read_products: \"tested\" on a claim no probe can confirm → official",
+          "scope write_products: \"tested\" on a claim no probe can confirm → official",
+          "scope read_orders: \"tested\" on a claim no probe can confirm → official",
+          "scope write_orders: \"tested\" on a claim no probe can confirm → official",
+          "scope read_customers: \"tested\" on a claim no probe can confirm → official",
+          "scope write_customers: \"tested\" on a claim no probe can confirm → official",
+          "verifier: user_cap_before_review unsupported by its sources → reported"
+        ],
+        "llm": {
+          "calls": 13,
+          "inputTokens": 84582,
+          "outputTokens": 17245,
+          "model": "gemini-3.5-flash-lite"
+        }
+      },
+      "t": 98997
+    }
+  ],
+  "quality": {
+    "claims": {
+      "tested": 4,
+      "official": 31,
+      "reported": 1,
+      "inferred": 0
+    },
+    "sources": {
+      "total": 20,
+      "fetched": 4,
+      "snippetOnly": 16,
+      "official": 16,
+      "community": 3,
+      "composio": 1
+    },
+    "probes": {
+      "total": 4,
+      "pass": 2,
+      "info": 2,
+      "fail": 0
+    },
+    "fixes": [
+      "step Select API access scopes: \"tested\" on a claim no probe can confirm → official",
+      "step Configure custom auth in Composio: \"tested\" on a claim no probe can confirm → official",
+      "step Initiate connection session with store s: \"tested\" on a claim no probe can confirm → official",
+      "scope read_products: \"tested\" on a claim no probe can confirm → official",
+      "scope write_products: \"tested\" on a claim no probe can confirm → official",
+      "scope read_orders: \"tested\" on a claim no probe can confirm → official",
+      "scope write_orders: \"tested\" on a claim no probe can confirm → official",
+      "scope read_customers: \"tested\" on a claim no probe can confirm → official",
+      "scope write_customers: \"tested\" on a claim no probe can confirm → official",
+      "verifier: user_cap_before_review unsupported by its sources → reported"
+    ],
+    "llm": {
+      "calls": 13,
+      "inputTokens": 84582,
+      "outputTokens": 17245,
+      "model": "gemini-3.5-flash-lite"
+    }
+  }
+}

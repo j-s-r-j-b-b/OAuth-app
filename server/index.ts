@@ -2,6 +2,8 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import express, { type Request, type Response } from 'express';
 import { guideToMarkdown } from '../shared/markdown.ts';
+import { askGuide, matchBlockers } from './ask.ts';
+import { recordDemand, topDemand } from './demand.ts';
 import { DIFFICULTY_INFO } from '../shared/schema.ts';
 import { catalog, catalogMeta, matchToolkit, slugify } from './catalog.ts';
 import { composioEnabled } from './composio.ts';
@@ -45,6 +47,65 @@ app.get('/api/guides/:slug/trace', (req, res) => {
   res.json(store.trace(req.params.slug));
 });
 
+// Compact readiness summary for a Composio toolkit: what a dashboard or CLI would show when a developer creates a custom auth config.
+app.get('/api/readiness/:toolkitSlug', (req, res) => {
+  const slug = req.params.toolkitSlug.toLowerCase();
+  const tk = catalog.find((t) => t.slug === slug);
+  const g = store.findFor({ toolkitSlug: slug });
+  const base = baseUrl(req);
+  if (!g) {
+    return res.json({ toolkit: slug, inCatalog: Boolean(tk), managedOAuth: tk ? tk.managed : null, guide: null, generate: { method: 'POST', url: `${base}/api/generate`, body: { query: tk?.name ?? slug } } });
+  }
+  const next = g.phases.flatMap((p) => p.steps)[0];
+  res.json({
+    toolkit: slug,
+    managedOAuth: g.composio.managedOAuth,
+    guide: {
+      url: `${base}/guides/${g.slug}`,
+      markdown: `${base}/guides/${g.slug}.md`,
+      source: g.meta.generator,
+      verified: Boolean(g.evidence.verification),
+      difficulty: g.verdict.difficulty,
+      headline: g.verdict.headline,
+      timeToFirstConnection: g.verdict.timeToFirstConnection.label,
+      timeToProduction: g.verdict.timeToProduction.label,
+      cost: g.verdict.cost,
+      firstStep: next ? { title: next.title, actor: next.actor, effort: next.effort } : null,
+      composio: {
+        redirectUriSentByDefault: g.composioSetup.tested?.redirectUri ?? g.composioSetup.redirectUri,
+        defaultScopeCount: g.composioSetup.tested?.defaultScopes.length ?? null,
+        testedAt: g.composioSetup.tested?.testedAt ?? null,
+      },
+      topBlockers: g.blockers.filter((b) => b.likelihood === 'common').slice(0, 3).map((b) => b.title),
+    },
+  });
+});
+
+app.post('/api/guides/:slug/request-review', (req, res) => {
+  const g = store.get(req.params.slug);
+  if (!g) return res.status(404).json({ error: 'Guide not found' });
+  res.json(recordDemand(g.app.name, 'reviewRequests'));
+});
+app.get('/api/demand', (_req, res) => res.json(topDemand()));
+
+const askHits = new Map<string, number[]>();
+app.post('/api/guides/:slug/ask', async (req, res) => {
+  const g = store.get(req.params.slug);
+  if (!g) return res.status(404).json({ error: 'Guide not found' });
+  const question = String(req.body?.question ?? '').trim().slice(0, 2000);
+  if (question.length < 3) return res.status(400).json({ error: 'Paste an error message or describe where you are stuck.' });
+  const ip = req.ip ?? 'unknown';
+  const now = Date.now();
+  const recent = (askHits.get(ip) ?? []).filter((t) => now - t < 3_600_000);
+  if (recent.length >= 30) return res.status(429).json({ error: 'Too many questions this hour. The blockers section below still has every known fix.' });
+  askHits.set(ip, [...recent, now]);
+  try {
+    res.json(await askGuide(g, question));
+  } catch (e) {
+    res.json({ matches: matchBlockers(g, question), answer: null, error: `The assistant is unavailable right now (${(e as Error).message.slice(0, 80)}).` });
+  }
+});
+
 const hits = new Map<string, number[]>();
 function rateLimited(ip: string): boolean {
   const now = Date.now();
@@ -71,6 +132,7 @@ app.post('/api/generate', (req, res) => {
     return res.status(429).json({ error: `Limit of ${env.generateLimitPerHour} new guides per hour reached. Existing guides still work.` });
   }
   const job = startJob(query);
+  recordDemand(matchToolkit(query)?.name ?? query, 'generated');
   res.json({ jobId: job.id });
 });
 

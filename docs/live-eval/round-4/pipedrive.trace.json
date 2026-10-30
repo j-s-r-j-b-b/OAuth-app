@@ -1,0 +1,269 @@
+{
+  "query": "Pipedrive",
+  "events": [
+    {
+      "type": "stage",
+      "stage": "resolve",
+      "message": "Identifying “Pipedrive”",
+      "t": 2
+    },
+    {
+      "type": "search",
+      "query": "Pipedrive API OAuth app developer documentation",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 2630
+    },
+    {
+      "type": "info",
+      "message": "Identified Pipedrive — A web-based Sales CRM and pipeline management tool designed to help small teams manage sales processes.",
+      "t": 8220
+    },
+    {
+      "type": "stage",
+      "stage": "composio",
+      "message": "Checking Composio’s toolkit catalog",
+      "t": 8220
+    },
+    {
+      "type": "info",
+      "message": "Composio toolkit `pipedrive` has no managed OAuth app: you must register your own before anyone can connect.",
+      "t": 9956
+    },
+    {
+      "type": "stage",
+      "stage": "research",
+      "message": "Researching docs, policies and real-world reports",
+      "t": 9956
+    },
+    {
+      "type": "search",
+      "query": "Pipedrive OAuth app review approval verification publish requirements",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 12159
+    },
+    {
+      "type": "search",
+      "query": "Pipedrive OAuth app approval how long experience reddit OR forum",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 12303
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "portal",
+        "target": "GET https://developers.pipedrive.com",
+        "result": "pass",
+        "summary": "Portal reachable (200, \"Pipedrive Developers Corner | Pipedrive API sandbox\"); no sign-in redirect seen on the landing page.",
+        "detail": "Chain: 200 developers.pipedrive.com/",
+        "id": "P2",
+        "at": "2026-10-29T12:53:56.420Z"
+      },
+      "t": 18029
+    },
+    {
+      "type": "read",
+      "url": "https://pipedrive.readme.io/docs/marketplace-registering-the-app",
+      "title": "Registering a public app",
+      "ok": true,
+      "chars": 14000,
+      "via": "direct",
+      "sourceId": "S10",
+      "t": 18260
+    },
+    {
+      "type": "read",
+      "url": "https://pipedrive.readme.io/docs/marketplace-oauth-authorization",
+      "title": "OAuth authorization",
+      "ok": true,
+      "chars": 10654,
+      "via": "direct",
+      "sourceId": "S2",
+      "t": 18371
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "authorize-endpoint",
+        "target": "GET https://oauth.pipedrive.com/oauth/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=deals%3Afull+contacts%3Afull",
+        "result": "pass",
+        "summary": "Endpoint is live; it sends the browser to sign-in before validating the client (200).",
+        "detail": "Chain: 302 oauth.pipedrive.com/oauth/authorize → 200 oauth.pipedrive.com/auth/login\nFinal: https://oauth.pipedrive.com/auth/login?return_url=https%3A%2F%2Foauth.pipedrive.com%2Foauth%2Fauthorize%3Fresponse_type%3Dcode%26client_id%3Doauth-runway-probe%26redirect_uri%3Dhttps%253A%252F%252Fbackend.composio.dev%252Fapi%252Fv3%252Ftoolkits%252Fauth%252Fcallback%26state%3Doauth-runway-probe%26s\nExcerpt: title=\"Log in\"",
+        "id": "P3",
+        "at": "2026-10-29T12:53:56.937Z"
+      },
+      "t": 18546
+    },
+    {
+      "type": "read",
+      "url": "https://pipedrive.readme.io/docs/marketplace-creating-a-proper-app",
+      "title": "Creating an app",
+      "ok": true,
+      "chars": 8959,
+      "via": "direct",
+      "sourceId": "S3",
+      "t": 18841
+    },
+    {
+      "type": "search",
+      "query": "site:pipedrive.readme.io scopes or permissions api v1",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 20197
+    },
+    {
+      "type": "finding",
+      "fact": "To create custom OAuth credentials for Pipedrive, a developer must sign up for a developer sandbox account at developers.pipedrive.com, navigate to Developer Hub via Settings, and create a new Public App or Private App.",
+      "sourceIds": [
+        "S3",
+        "S10"
+      ],
+      "t": 25834
+    },
+    {
+      "type": "finding",
+      "fact": "Public apps require registration in the Developer Hub, configuration of Basic info (App name, single OAuth callback URL) and OAuth & access scopes, and submission for formal Pipedrive Marketplace review before arbitrary users can connect.",
+      "sourceIds": [
+        "S3",
+        "S10"
+      ],
+      "t": 25834
+    },
+    {
+      "type": "finding",
+      "fact": "Private apps are shared via a direct unlisted installation link, do not appear in the Marketplace, and do not require the app approval process.",
+      "sourceIds": [
+        "S3"
+      ],
+      "t": 25834
+    },
+    {
+      "type": "finding",
+      "fact": "Pipedrive officially states public app reviews take up to 21 business days, but community reports show real-world waiting times exceeding two months.",
+      "sourceIds": [
+        "S11",
+        "S18",
+        "S20"
+      ],
+      "t": 25834
+    },
+    {
+      "type": "finding",
+      "fact": "Pipedrive OAuth authorize endpoint is https://oauth.pipedrive.com/oauth/authorize and token endpoint is https://oauth.pipedrive.com/oauth/token.",
+      "sourceIds": [
+        "S2"
+      ],
+      "t": 25834
+    },
+    {
+      "type": "finding",
+      "fact": "Access tokens expire in 60 minutes (returned in expires_in), while refresh tokens expire in 60 days if unused, with their expiry resetting on each use.",
+      "sourceIds": [
+        "S2"
+      ],
+      "t": 25834
+    },
+    {
+      "type": "info",
+      "message": "Research done: 6 findings, 4 pages read, 3 probes.",
+      "t": 30778
+    },
+    {
+      "type": "stage",
+      "stage": "write",
+      "message": "Writing the guide",
+      "t": 30778
+    },
+    {
+      "type": "info",
+      "message": "Verdict drafted: Pipedrive requires formal Marketplace review for public OAuth apps, with waiting times often exceeding two months.",
+      "t": 39592
+    },
+    {
+      "type": "stage",
+      "stage": "check",
+      "message": "Checking citations, confidence labels and ratings",
+      "t": 50248
+    },
+    {
+      "type": "quality",
+      "report": {
+        "claims": {
+          "tested": 2,
+          "official": 22,
+          "reported": 2,
+          "inferred": 0
+        },
+        "sources": {
+          "total": 9,
+          "fetched": 4,
+          "snippetOnly": 5,
+          "official": 4,
+          "community": 4,
+          "composio": 1
+        },
+        "probes": {
+          "total": 3,
+          "pass": 3,
+          "info": 0,
+          "fail": 0
+        },
+        "fixes": [
+          "step Select required scopes: \"tested\" on a claim no probe can confirm → official",
+          "step Wait for Pipedrive Marketplace approval: \"official\" but only community sources → reported",
+          "step \"Create custom OAuth config in Composio\": Composio auth-config creation is agent-doable via API → agent",
+          "step Create custom OAuth config in Composio: \"tested\" on a claim no probe can confirm → official",
+          "scope deals:full: \"tested\" on a claim no probe can confirm → official",
+          "scope contacts:full: \"tested\" on a claim no probe can confirm → official",
+          "blocker 2: \"official\" but only community sources → reported"
+        ],
+        "llm": {
+          "calls": 6,
+          "inputTokens": 30666,
+          "outputTokens": 5234,
+          "model": "gemini-3.5-flash-lite"
+        }
+      },
+      "t": 50253
+    }
+  ],
+  "quality": {
+    "claims": {
+      "tested": 2,
+      "official": 22,
+      "reported": 2,
+      "inferred": 0
+    },
+    "sources": {
+      "total": 9,
+      "fetched": 4,
+      "snippetOnly": 5,
+      "official": 4,
+      "community": 4,
+      "composio": 1
+    },
+    "probes": {
+      "total": 3,
+      "pass": 3,
+      "info": 0,
+      "fail": 0
+    },
+    "fixes": [
+      "step Select required scopes: \"tested\" on a claim no probe can confirm → official",
+      "step Wait for Pipedrive Marketplace approval: \"official\" but only community sources → reported",
+      "step \"Create custom OAuth config in Composio\": Composio auth-config creation is agent-doable via API → agent",
+      "step Create custom OAuth config in Composio: \"tested\" on a claim no probe can confirm → official",
+      "scope deals:full: \"tested\" on a claim no probe can confirm → official",
+      "scope contacts:full: \"tested\" on a claim no probe can confirm → official",
+      "blocker 2: \"official\" but only community sources → reported"
+    ],
+    "llm": {
+      "calls": 6,
+      "inputTokens": 30666,
+      "outputTokens": 5234,
+      "model": "gemini-3.5-flash-lite"
+    }
+  }
+}

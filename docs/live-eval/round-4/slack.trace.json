@@ -1,0 +1,354 @@
+{
+  "query": "Slack",
+  "events": [
+    {
+      "type": "stage",
+      "stage": "resolve",
+      "message": "Identifying “Slack”",
+      "t": 1
+    },
+    {
+      "type": "search",
+      "query": "Slack API OAuth app developer documentation",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 2270
+    },
+    {
+      "type": "info",
+      "message": "Identified Slack — Slack is a channel-based messaging platform for teams to communicate and integrate with developer tools.",
+      "t": 3565
+    },
+    {
+      "type": "stage",
+      "stage": "composio",
+      "message": "Checking Composio’s toolkit catalog",
+      "t": 3565
+    },
+    {
+      "type": "info",
+      "message": "Setup attempt: creating a throwaway Composio auth config to see exactly what Composio sends to the provider",
+      "t": 5007
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "composio-api",
+        "target": "Composio API: create custom OAuth2 auth config for `slack` with a dummy client → start a connection → follow the redirect (then delete both)",
+        "result": "pass",
+        "summary": "Composio sends users to https://slack.com/oauth/v2/authorize with redirect_uri=https://backend.composio.dev/api/v1/auth-apps/add; default scopes: (none sent).",
+        "detail": "{\"authorizeUrl\":\"https://slack.com/oauth/v2/authorize\",\"redirectUri\":\"https://backend.composio.dev/api/v1/auth-apps/add\",\"scopes\":[],\"extraParams\":{\"response_type\":\"code\",\"user_scope\":\"calls:read calls:write channels:history channels:read channels:write chat:write dnd:read dnd:write emoji:read files:read files:write groups:history groups:read groups:write im:history im:read im:write links:read links:write lists:read lists:write mpim:history mpim:read mpim:write pins:read pins:write reactions:read reactions:write reminders:read reminders:write remote_files:read remote_files:share search:read search:read.files search:read.im search:read.mpim search:read.private search:read.public search:read.users team:read usergroups:read usergroups:write users.profile:read users.profile:write users:read users:read.email users:write\",\"user_scopes\":\"admin\"},\"pkce\":false,\"note\":\"extra params: response_type=code, user_scope=calls:read calls:write channels:history channels:read channels:write chat:write dnd:read dnd:write emoji:read files:read files:write groups:history groups:read groups:write im:history im:read im:write links:read links:write lists:read lists:write mpim:history mpim:read mpim:write pins:read pins:write reactions:read reactions:write reminders:read reminders:write remote_files:read remote_files:share search:read search:read.files search:read.im search:read.mpim search:read.private search:read.public search:read.users team:read usergroups:read usergroups:write users.profile:read u",
+        "id": "P2",
+        "at": "2026-10-30T09:45:00.563Z"
+      },
+      "t": 7710
+    },
+    {
+      "type": "info",
+      "message": "Composio toolkit `slack` has a managed OAuth app: you can prototype today and need your own app for production branding, scopes or quota.",
+      "t": 7711
+    },
+    {
+      "type": "stage",
+      "stage": "research",
+      "message": "Researching docs, policies and real-world reports",
+      "t": 7711
+    },
+    {
+      "type": "search",
+      "query": "Slack OAuth app review approval verification publish requirements",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 9603
+    },
+    {
+      "type": "search",
+      "query": "Slack API pricing plans tiers limits for developers connections",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 9851
+    },
+    {
+      "type": "search",
+      "query": "Slack OAuth app approval how long experience reddit OR forum",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 9927
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "authorize-endpoint",
+        "target": "GET https://slack.com/oauth/v2/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=channels%3Aread+chat%3Awrite",
+        "result": "info",
+        "summary": "Endpoint responded 200 with a client-rendered page; client validation happens in the browser, so this probe is inconclusive.",
+        "detail": "Chain: 200 slack.com/oauth/v2/authorize\nFinal: https://slack.com/oauth/v2/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=channels%3Aread+chat%3Awrite\nExcerpt: ",
+        "id": "P3",
+        "at": "2026-10-30T09:45:05.083Z"
+      },
+      "t": 12231
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "portal",
+        "target": "GET https://api.slack.com/apps",
+        "result": "pass",
+        "summary": "Portal reachable (200, \"Slack API: Applications | Slack\"); no sign-in redirect seen on the landing page.",
+        "detail": "Chain: 200 api.slack.com/apps",
+        "id": "P4",
+        "at": "2026-10-30T09:45:05.227Z"
+      },
+      "t": 12374
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "oauth-discovery",
+        "target": "GET https://slack.com/.well-known/openid-configuration",
+        "result": "pass",
+        "summary": "Discovery document found. Authorize: https://slack.com/openid/connect/authorize; token: https://slack.com/api/openid.connect.token.",
+        "detail": "{\"issuer\":\"https://slack.com\",\"authorization_endpoint\":\"https://slack.com/openid/connect/authorize\",\"token_endpoint\":\"https://slack.com/api/openid.connect.token\",\"registration_endpoint\":null,\"code_challenge_methods_supported\":null,\"grant_types_supported\":[\"authorization_code\"],\"scopes_supported\":[\"openid\",\"profile\",\"email\"]}",
+        "id": "P5",
+        "at": "2026-10-30T09:45:05.254Z"
+      },
+      "t": 12401
+    },
+    {
+      "type": "search",
+      "query": "site:docs.slack.dev scopes bot user tokens",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 13811
+    },
+    {
+      "type": "search",
+      "query": "site:docs.slack.dev distribution public app",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 14163
+    },
+    {
+      "type": "read",
+      "url": "https://docs.slack.dev/authentication/using-token-rotation/",
+      "title": "Using token rotation | Slack Developer Docs",
+      "ok": true,
+      "chars": 11841,
+      "via": "direct",
+      "sourceId": "S6",
+      "t": 17030
+    },
+    {
+      "type": "read",
+      "url": "https://docs.slack.dev/app-management/distribution/",
+      "title": "App lifecycle & distribution | Slack Developer Docs",
+      "ok": true,
+      "chars": 14000,
+      "via": "direct",
+      "sourceId": "S13",
+      "t": 17455
+    },
+    {
+      "type": "search",
+      "query": "site:docs.slack.dev oauth token rotation expiration",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 17822
+    },
+    {
+      "type": "search",
+      "query": "site:docs.slack.dev rate limits non-marketplace apps",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 17899
+    },
+    {
+      "type": "search",
+      "query": "site:slack.com/blog/developers AI training terms API data",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 18496
+    },
+    {
+      "type": "finding",
+      "fact": "Slack apps are created at https://api.slack.com/apps by signing in with a Slack account and clicking 'Create New App'. No paid plan or partner program is required to create an app, configure OAuth, or enable public/unlisted distribution.",
+      "sourceIds": [
+        "S4",
+        "S13",
+        "P4"
+      ],
+      "t": 23216
+    },
+    {
+      "type": "finding",
+      "fact": "Slack requires no formal review or approval to distribute an app via unlisted distribution (sharing an installation URL/button). Public distribution is activated directly in the app dashboard under 'Manage Distribution' -> 'Activate Public Distribution'. Formal Marketplace review is optional and only required if listing in the Slack App Directory (which requires at least 10 active workspaces and can take up to 10 weeks).",
+      "sourceIds": [
+        "S10",
+        "S13",
+        "S36"
+      ],
+      "t": 23216
+    },
+    {
+      "type": "finding",
+      "fact": "As of May 29, 2025, Slack enforces strict rate limits on non-Marketplace distributed apps: conversations.history and conversations.replies are limited to 1 request per minute with a max of 15 objects per request (returning HTTP 429 when exceeded). Internal apps and existing installations are exempt.",
+      "sourceIds": [
+        "S49",
+        "S51"
+      ],
+      "t": 23216
+    },
+    {
+      "type": "finding",
+      "fact": "Typical scopes for agentic toolkits include channels:read, chat:write, files:read, users:read, and reactions:write. Workspace-level OAuth tokens (granular bot tokens xoxb- and user tokens xoxp-) are supported.",
+      "sourceIds": [
+        "S9",
+        "S31",
+        "S32"
+      ],
+      "t": 23216
+    },
+    {
+      "type": "finding",
+      "fact": "Slack OAuth uses standard authorization code flow at https://slack.com/oauth/v2/authorize and token exchange at https://slack.com/api/oauth.v2.access. When token rotation is enabled, access tokens expire every 12 hours (43,200 seconds) and must be refreshed using single-use refresh tokens.",
+      "sourceIds": [
+        "S1",
+        "S43"
+      ],
+      "t": 23216
+    },
+    {
+      "type": "finding",
+      "fact": "Slack platform policies explicitly prohibit third-party apps from using customer Slack data to train Large Language Models (LLMs).",
+      "sourceIds": [
+        "S55"
+      ],
+      "t": 23216
+    },
+    {
+      "type": "read",
+      "url": "https://docs.slack.dev/apis/web-api/rate-limits/",
+      "title": "Rate limits | Slack Developer Docs",
+      "ok": true,
+      "chars": 11047,
+      "via": "direct",
+      "sourceId": "S20",
+      "t": 27439
+    },
+    {
+      "type": "read",
+      "url": "https://docs.slack.dev/changelog/2025/05/29/rate-limit-changes-for-non-marketplace-apps/",
+      "title": "Rate limit changes for non-Marketplace apps | Slack Developer Docs",
+      "ok": true,
+      "chars": 12873,
+      "via": "direct",
+      "sourceId": "S63",
+      "t": 28382
+    },
+    {
+      "type": "finding",
+      "fact": "Effective May 29, 2025, Slack restricts non-Marketplace commercially distributed apps on conversations.history and conversations.replies to 1 request per minute and a max of 15 objects per request, while Marketplace-approved apps retain normal limits (Tier 3/50+ req/min, 1,000 objects).",
+      "sourceIds": [
+        "S49",
+        "S630"
+      ],
+      "t": 30535
+    },
+    {
+      "type": "info",
+      "message": "Research done: 7 findings, 5 pages read, 5 probes.",
+      "t": 32122
+    },
+    {
+      "type": "stage",
+      "stage": "write",
+      "message": "Writing the guide",
+      "t": 32122
+    },
+    {
+      "type": "info",
+      "message": "Verdict drafted: Slack allows instant self-serve OAuth distribution, but Marketplace review is required to bypass strict conversation rate limits.",
+      "t": 53403
+    },
+    {
+      "type": "stage",
+      "stage": "check",
+      "message": "Checking citations, confidence labels and ratings",
+      "t": 86018
+    },
+    {
+      "type": "quality",
+      "report": {
+        "claims": {
+          "tested": 3,
+          "official": 33,
+          "reported": 0,
+          "inferred": 0
+        },
+        "sources": {
+          "total": 20,
+          "fetched": 4,
+          "snippetOnly": 16,
+          "official": 17,
+          "community": 2,
+          "composio": 1
+        },
+        "probes": {
+          "total": 5,
+          "pass": 4,
+          "info": 1,
+          "fail": 0
+        },
+        "fixes": [
+          "step Create Slack App: \"tested\" on a claim no probe can confirm → official",
+          "step Retrieve App Credentials: \"tested\" on a claim no probe can confirm → official",
+          "step Create Custom Auth Config in Composio: \"tested\" on a claim no probe can confirm → official",
+          "step Initiate Connection and Authenticate Wor: \"tested\" on a claim no probe can confirm → official",
+          "requirement 1: \"tested\" on a claim no probe can confirm → official"
+        ],
+        "llm": {
+          "calls": 10,
+          "inputTokens": 81470,
+          "outputTokens": 8128,
+          "model": "gemini-3.5-flash-lite"
+        }
+      },
+      "t": 86026
+    }
+  ],
+  "quality": {
+    "claims": {
+      "tested": 3,
+      "official": 33,
+      "reported": 0,
+      "inferred": 0
+    },
+    "sources": {
+      "total": 20,
+      "fetched": 4,
+      "snippetOnly": 16,
+      "official": 17,
+      "community": 2,
+      "composio": 1
+    },
+    "probes": {
+      "total": 5,
+      "pass": 4,
+      "info": 1,
+      "fail": 0
+    },
+    "fixes": [
+      "step Create Slack App: \"tested\" on a claim no probe can confirm → official",
+      "step Retrieve App Credentials: \"tested\" on a claim no probe can confirm → official",
+      "step Create Custom Auth Config in Composio: \"tested\" on a claim no probe can confirm → official",
+      "step Initiate Connection and Authenticate Wor: \"tested\" on a claim no probe can confirm → official",
+      "requirement 1: \"tested\" on a claim no probe can confirm → official"
+    ],
+    "llm": {
+      "calls": 10,
+      "inputTokens": 81470,
+      "outputTokens": 8128,
+      "model": "gemini-3.5-flash-lite"
+    }
+  }
+}

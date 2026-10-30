@@ -125,3 +125,11 @@ ACTORS — be precise, this is what developers most want to know:
 - "agent" for anything doable without the developer's login, signature or payment: checking endpoints, drafting the privacy policy / scope justifications / review answers, preparing the demo-video script, and creating the Composio auth config via Composio's API with the developer's Composio key.
 - "provider" for every review, verification or approval wait. Give it its own step with the wait in "wait" (e.g. "Pipedrive reviews the app — up to 21 business days").
 - "you" only for steps that need the developer's account, legal acceptance, documents, payment or judgment. Even then, fill "agentAssist" with what an agent can prepare.`;
+
+export const VERIFY_TASK = `You are an independent, adversarial verifier. Another agent wrote the CLAIMS below. Check each one against the SOURCE TEXTS and FINDINGS only. Your job is to find what is wrong, not to agree.
+Return JSON only: {"items": [{"claimKey": string, "outcome": "confirmed" | "corrected" | "unverifiable", "note": string, "sourceIds": string[], "fix": null | {"value": "yes" | "no" | "depends" | "unknown", "detail": string}}]}
+- One item per claimKey, in the order given.
+- "confirmed": the cited source text supports the claim as written.
+- "corrected": a source contradicts it. For factor claims, give the corrected factor value and detail in "fix"; for other claims, explain in "note" with fix null.
+- "unverifiable": the source texts neither support nor contradict it.
+- note ≤ 40 words, concrete ("Pricing page says…"). sourceIds: the ids you relied on.`;

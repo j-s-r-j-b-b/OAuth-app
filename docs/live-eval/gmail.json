@@ -1,0 +1,1013 @@
+{
+  "schemaVersion": 1,
+  "slug": "gmail",
+  "app": {
+    "name": "Gmail",
+    "website": "https://mail.google.com",
+    "category": "Email",
+    "description": "Gmail is a popular email service provided by Google that offers a comprehensive REST API for integration.",
+    "developerPortalUrl": "https://console.cloud.google.com/",
+    "docsUrl": "https://developers.google.com/workspace/gmail/api"
+  },
+  "composio": {
+    "toolkitSlug": "gmail",
+    "managedOAuth": "available",
+    "authSchemes": [
+      "OAUTH2"
+    ],
+    "toolkitDocsUrl": "https://docs.composio.dev/toolkits/gmail",
+    "requiredFields": [],
+    "notes": [
+      "Tested: a custom auth config created without `oauth_redirect_uri` sends `https://backend.composio.dev/api/v1/auth-apps/add`. Register exactly the URI your auth config sends, or set `oauth_redirect_uri` to `https://backend.composio.dev/api/v3/toolkits/auth/callback` and register that instead.",
+      "By default, Composio uses its own shared OAuth app, which displays 'Composio' on the consent screen.",
+      "Adding extra unverified scopes beyond Composio defaults will trigger Google's 'App is blocked' warning.",
+      "Ensure the Gmail API is enabled in your own Google Cloud project when using custom credentials to avoid API errors."
+    ]
+  },
+  "assumption": "An AI agent that reads, modifies, and sends emails in any user's Gmail account using Google OAuth credentials.",
+  "verdict": {
+    "headline": "Full production access requires passing Google's sensitive/restricted scope review and mandatory annual CASA security assessments.",
+    "summary": "You can immediately register an app and test locally with up to 100 users, but production deployment without warning screens requires Google's verification. Because agent scopes like `mail.google.com` or `gmail.modify` are restricted, you must provide a detailed justification video and potentially pass a third-party CASA security assessment.",
+    "difficulty": "formal-review",
+    "handsOnEffort": {
+      "label": "2–4 hours",
+      "minHours": 2,
+      "maxHours": 4,
+      "basis": "Cloud console setup, redirect URI configuration, and screen/video recording for verification."
+    },
+    "timeToFirstConnection": {
+      "label": "15–30 min",
+      "minHours": 0.25,
+      "maxHours": 0.5,
+      "basis": "Instant self-serve Google Cloud Console project creation and testing in Development mode."
+    },
+    "timeToProduction": {
+      "label": "2–10 weeks",
+      "minHours": 336,
+      "maxHours": 1680,
+      "basis": "Official review takes 3–10 business days, but real-world community reports cite 8–10 weeks plus CASA testing time."
+    },
+    "longestPole": "Google OAuth restricted scope verification and third-party CASA security assessment queues.",
+    "cost": "Free to $4,500",
+    "costDetail": "Google OAuth verification is free, but an annual CASA security assessment by an authorized lab typically costs $500–$4,500 if mandated for restricted scopes.",
+    "easierPaths": [
+      {
+        "condition": "Limit scopes to basic profile and email data",
+        "effect": "Avoids sensitive/restricted scope verification workflows entirely."
+      },
+      {
+        "condition": "Keep app in Testing mode (≤100 test users)",
+        "effect": "Allows immediate production use for internal teams without verification, though refresh tokens expire after 7 days."
+      }
+    ]
+  },
+  "factors": [
+    {
+      "key": "self_serve_registration",
+      "value": "yes",
+      "detail": "Developers can instantly create a project, configure consent screens, and set up OAuth credentials in the Google Cloud Console.",
+      "sourceIds": [
+        "S6",
+        "S7",
+        "S10"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "review_required",
+      "value": "yes",
+      "detail": "External apps requesting sensitive or restricted Gmail scopes must submit for Google OAuth verification to remove warning screens.",
+      "sourceIds": [
+        "S5",
+        "S7",
+        "S9"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "business_verification",
+      "value": "yes",
+      "detail": "Brand verification requires domain ownership validation in Search Console, a privacy policy, and developer identity confirmation.",
+      "sourceIds": [
+        "S5",
+        "S7",
+        "S9"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "security_assessment",
+      "value": "yes",
+      "detail": "Restricted scopes storing or transmitting user data via third-party servers require an annual CASA security assessment by an authorized lab.",
+      "sourceIds": [
+        "S2",
+        "S9"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "paid_access",
+      "value": "no",
+      "detail": "Standard Gmail API usage and OAuth access are free, with planned billing for threshold-exceeding usage starting late 2026.",
+      "sourceIds": [
+        "S8"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "partner_or_sales_gate",
+      "value": "no",
+      "detail": "No special partner program or sales contract is required to submit an app for verification.",
+      "sourceIds": [
+        "S7",
+        "S9"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "user_cap_before_review",
+      "value": "yes",
+      "detail": "Unverified apps in Testing mode are capped at 100 test users, and refresh tokens expire after 7 days.",
+      "sourceIds": [
+        "S4",
+        "S7",
+        "S12"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "per_customer_setup",
+      "value": "no",
+      "detail": "Standard multi-tenant OAuth flow handles end-user connections once the primary client is verified.",
+      "sourceIds": [
+        "S1"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "phases": [
+    {
+      "id": "p1",
+      "title": "Project Creation and Setup",
+      "outcome": "A Google Cloud Project with the Gmail API enabled and configured consent screen.",
+      "steps": [
+        {
+          "id": "s1",
+          "title": "Create a Google Cloud Project",
+          "actor": "you",
+          "effort": "5 min",
+          "wait": null,
+          "details": "Go to the [Google Cloud Console](https://console.cloud.google.com), click the project dropdown at the top, and click **New Project**. Enter a project name and click **Create**.",
+          "agentAssist": "Can generate project naming conventions and organizational guidelines.",
+          "links": [
+            {
+              "label": "Google Cloud Console",
+              "url": "https://console.cloud.google.com"
+            }
+          ],
+          "sourceIds": [
+            "S6",
+            "S10"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "s2",
+          "title": "Enable the Gmail API",
+          "actor": "you",
+          "effort": "2 min",
+          "wait": null,
+          "details": "Navigate to **APIs & Services → Library**, search for `Gmail API`, and click **Enable**.",
+          "agentAssist": "Can provide direct deep links or verify API availability status.",
+          "links": [
+            {
+              "label": "Google Cloud Console",
+              "url": "https://console.cloud.google.com"
+            }
+          ],
+          "sourceIds": [
+            "S3",
+            "S6"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "title": "Configure OAuth Consent Screen",
+      "outcome": "An OAuth consent screen configured with required app branding and scopes.",
+      "steps": [
+        {
+          "id": "s3",
+          "title": "Configure Consent Screen Details",
+          "actor": "you",
+          "effort": "10 min",
+          "wait": null,
+          "details": "Go to **APIs & Services → OAuth consent screen**. Select **External** (or Internal if restricted to Workspace organization), fill in App name, User support email, and Developer contact information.",
+          "agentAssist": "Can draft all application descriptions, privacy policy text, and support email structures.",
+          "links": [
+            {
+              "label": "Google Cloud Console",
+              "url": "https://console.cloud.google.com"
+            }
+          ],
+          "sourceIds": [
+            "S6",
+            "S14"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "s4",
+          "title": "Add Scopes",
+          "actor": "you",
+          "effort": "5 min",
+          "wait": null,
+          "details": "Under **Scopes**, click **Add or Remove Scopes**, and select the required scopes such as `https://www.googleapis.com/auth/gmail.readonly`, `gmail.modify`, `gmail.send`, and `mail.google.com`.",
+          "agentAssist": "Can list exact scope strings required for specific agent workflows.",
+          "links": [
+            {
+              "label": "Google Cloud Console",
+              "url": "https://console.cloud.google.com"
+            }
+          ],
+          "sourceIds": [
+            "S2",
+            "S14"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "title": "Create OAuth Client Credentials",
+      "outcome": "OAuth client ID and client secret generated for application authentication.",
+      "steps": [
+        {
+          "id": "s5",
+          "title": "Create OAuth Client ID",
+          "actor": "you",
+          "effort": "5 min",
+          "wait": null,
+          "details": "Go to **APIs & Services → Credentials**, click **Create Credentials**, and select **OAuth client ID**. Choose **Web application** as the application type.",
+          "agentAssist": "Can document step-by-step instructions for selecting the correct credential type.",
+          "links": [
+            {
+              "label": "Google Cloud Console",
+              "url": "https://console.cloud.google.com"
+            }
+          ],
+          "sourceIds": [
+            "S6",
+            "S10"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "s6",
+          "title": "Add Authorized Redirect URIs",
+          "actor": "you",
+          "effort": "2 min",
+          "wait": null,
+          "details": "Under **Authorized redirect URIs**, add Composio's redirect URI: `https://backend.composio.dev/api/v1/auth-apps/add` (or your custom callback URI). Click **Save** and copy your Client ID and Client Secret.",
+          "agentAssist": "Can format and validate redirect URI strings for configuration.",
+          "links": [
+            {
+              "label": "Google Cloud Console",
+              "url": "https://console.cloud.google.com"
+            }
+          ],
+          "sourceIds": [
+            "P2"
+          ],
+          "confidence": "tested"
+        }
+      ]
+    },
+    {
+      "id": "p4",
+      "title": "Test with Own Account",
+      "outcome": "Verified local connection in testing mode with up to 100 test users.",
+      "steps": [
+        {
+          "id": "s7",
+          "title": "Add Test Users",
+          "actor": "you",
+          "effort": "5 min",
+          "wait": null,
+          "details": "In **APIs & Services → OAuth consent screen**, scroll down to **Test users** and add your personal or team Google account emails. This allows testing before public verification.",
+          "agentAssist": "Can list team email addresses required for test user inclusion.",
+          "links": [
+            {
+              "label": "Google Cloud Console",
+              "url": "https://console.cloud.google.com"
+            }
+          ],
+          "sourceIds": [
+            "S7",
+            "S13"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "s8",
+          "title": "Initiate Test Connection",
+          "actor": "you",
+          "effort": "5 min",
+          "wait": null,
+          "details": "Trigger the OAuth flow via Composio or your local client. Note that unverified apps will display a prominent full-page warning screen ('Access blocked: App hasn't been verified') which you must bypass via Advanced links during testing.",
+          "agentAssist": "Can generate test scripts to initiate the OAuth flow against endpoints.",
+          "links": [
+            {
+              "label": "Google Cloud Console",
+              "url": "https://console.cloud.google.com"
+            }
+          ],
+          "sourceIds": [
+            "S4",
+            "S12"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "p5",
+      "title": "Prepare for Review and Submit",
+      "outcome": "Submitted verification request for sensitive/restricted Gmail scopes.",
+      "steps": [
+        {
+          "id": "s9",
+          "title": "Record YouTube Demo Video",
+          "actor": "you",
+          "effort": "30 min",
+          "wait": null,
+          "details": "Record an unlisted YouTube video showing the client ID, the consent screen with your app name, the complete OAuth sign-in flow, scope permission dialog, and how your application handles user data.",
+          "agentAssist": "Can write the complete script and shot list for the required verification video.",
+          "links": [
+            {
+              "label": "Google Cloud Console Help",
+              "url": "https://support.google.com/cloud/answer/13804565?hl=en"
+            }
+          ],
+          "sourceIds": [
+            "S7",
+            "S9",
+            "S11"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "s10",
+          "title": "Submit for Google OAuth Verification",
+          "actor": "you",
+          "effort": "15 min",
+          "wait": null,
+          "details": "Go to **APIs & Services → OAuth consent screen** and click **Publish App** or **Submit for Verification**. Provide detailed justifications for each sensitive and restricted scope.",
+          "agentAssist": "Can draft comprehensive, policy-compliant scope justifications for `mail.google.com` and other agent scopes.",
+          "links": [
+            {
+              "label": "Google Cloud Console",
+              "url": "https://console.cloud.google.com"
+            }
+          ],
+          "sourceIds": [
+            "S5",
+            "S7",
+            "S9"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "s11",
+          "title": "Gmail reviews the submission",
+          "actor": "provider",
+          "effort": "None (waiting)",
+          "wait": "3–10 business days",
+          "details": "Nothing to do but wait and watch for reviewer questions. The wait is 3–10 business days.",
+          "agentAssist": "An agent can watch the review inbox and draft replies to reviewer questions.",
+          "links": [],
+          "sourceIds": [
+            "S5",
+            "S7",
+            "S9"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "p6",
+      "title": "Go live in Composio",
+      "outcome": "Gmail integration fully wired and operational via Composio with your custom credentials.",
+      "steps": [
+        {
+          "id": "s12",
+          "title": "Create Custom Auth Config in Composio",
+          "actor": "agent",
+          "effort": "5 min",
+          "wait": null,
+          "details": "Use Composio's CLI or API to create a custom auth config for `gmail`, providing your Google Client ID and Client Secret.",
+          "agentAssist": "Can generate the exact API payload or CLI command to register the custom auth config with Composio.",
+          "links": [
+            {
+              "label": "Composio Docs",
+              "url": "https://docs.composio.dev/toolkits/gmail"
+            }
+          ],
+          "sourceIds": [
+            "S4"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "s13",
+          "title": "Pass Auth Config ID in Tool Execution",
+          "actor": "agent",
+          "effort": "2 min",
+          "wait": null,
+          "details": "Reference your custom auth config ID when initiating tool connections or executing actions via the Composio SDK.",
+          "agentAssist": "Can integrate the auth config ID into your agent's execution runtime code.",
+          "links": [
+            {
+              "label": "Composio Docs",
+              "url": "https://docs.composio.dev/toolkits/gmail"
+            }
+          ],
+          "sourceIds": [
+            "S4"
+          ],
+          "confidence": "official"
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "item": "Google Cloud Project",
+      "neededFor": "registration",
+      "detail": "Create a project in the Google Cloud Console to house OAuth credentials and enable the Gmail API.",
+      "sourceIds": [
+        "S6",
+        "S10"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "Authorized Redirect URI",
+      "neededFor": "registration",
+      "detail": "Configure callback URLs such as Composio's default URI (https://backend.composio.dev/api/v1/auth-apps/add) in the console.",
+      "sourceIds": [
+        "P2"
+      ],
+      "confidence": "tested"
+    },
+    {
+      "item": "Domain Verification & Privacy Policy",
+      "neededFor": "review",
+      "detail": "Host a public privacy policy and verify domain ownership via Google Search Console for brand verification.",
+      "sourceIds": [
+        "S5",
+        "S7"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "Unlisted YouTube Demo Video",
+      "neededFor": "review",
+      "detail": "Provide a screen recording showing the end-to-end OAuth consent flow, requested scopes, and how user data is handled.",
+      "sourceIds": [
+        "S7",
+        "S9",
+        "S11"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "CASA Security Assessment",
+      "neededFor": "production",
+      "detail": "Complete an annual third-party security assessment via the CASA framework if handling restricted scope data on third-party servers.",
+      "sourceIds": [
+        "S2",
+        "S9"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "scopes": [
+    {
+      "scope": "https://www.googleapis.com/auth/userinfo.profile",
+      "purpose": "Access user's basic profile information.",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "P1"
+      ],
+      "confidence": "inferred"
+    },
+    {
+      "scope": "https://www.googleapis.com/auth/userinfo.email",
+      "purpose": "View user's email address.",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "P1"
+      ],
+      "confidence": "inferred"
+    },
+    {
+      "scope": "https://www.googleapis.com/auth/contacts.readonly",
+      "purpose": "Read user's contacts.",
+      "tier": "sensitive",
+      "note": null,
+      "sourceIds": [
+        "P1"
+      ],
+      "confidence": "inferred"
+    },
+    {
+      "scope": "https://www.googleapis.com/auth/gmail.readonly",
+      "purpose": "Read all resources and metadata for user's email messages.",
+      "tier": "restricted",
+      "note": "Common agent scope for reading emails",
+      "sourceIds": [
+        "S2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "https://www.googleapis.com/auth/gmail.modify",
+      "purpose": "All read/write operations except delete.",
+      "tier": "restricted",
+      "note": "Common agent scope for managing labels and messages",
+      "sourceIds": [
+        "S2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "https://www.googleapis.com/auth/gmail.send",
+      "purpose": "Send messages and insert drafts.",
+      "tier": "restricted",
+      "note": "Common agent scope for sending emails",
+      "sourceIds": [
+        "S2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "https://www.googleapis.com/auth/gmail.compose",
+      "purpose": "Create drafts and send messages.",
+      "tier": "restricted",
+      "note": null,
+      "sourceIds": [
+        "S2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "https://www.googleapis.com/auth/gmail.metadata",
+      "purpose": "Read email headers, labels, and metadata without message body access.",
+      "tier": "restricted",
+      "note": null,
+      "sourceIds": [
+        "S2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "https://www.googleapis.com/auth/gmail.settings.basic",
+      "purpose": "Manage basic mail settings.",
+      "tier": "restricted",
+      "note": null,
+      "sourceIds": [
+        "S2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "mail.google.com",
+      "purpose": "Full access to read, send, delete, and manage email messages.",
+      "tier": "restricted",
+      "note": "Default full-access scope requested by Composio toolkit",
+      "sourceIds": [
+        "P1"
+      ],
+      "confidence": "inferred"
+    }
+  ],
+  "blockers": [
+    {
+      "title": "App is blocked warning screen",
+      "symptom": "Users see 'Access blocked: App hasn't been verified' when attempting to connect.",
+      "likelihood": "common",
+      "howToProceed": "During testing, click 'Advanced' and then 'Go to app (unsafe)'. For production use, submit your app for Google OAuth verification.",
+      "escalation": null,
+      "sourceIds": [
+        "S4",
+        "S12"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Gmail API has not been used in project error",
+      "symptom": "API calls fail with an error stating the Gmail API has not been used in the project.",
+      "likelihood": "occasional",
+      "howToProceed": "Enable the Gmail API in Google Cloud Console under APIs & Services, wait a few minutes for propagation, and retry.",
+      "escalation": null,
+      "sourceIds": [
+        "S3",
+        "S6"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Error 400: invalid_scope",
+      "symptom": "Authentication URL returns an invalid scope error.",
+      "likelihood": "occasional",
+      "howToProceed": "Verify your scope values against Google's official scope documentation and ensure proper URL encoding.",
+      "escalation": null,
+      "sourceIds": [
+        "S2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "CASA Security Assessment Requirement",
+      "symptom": "Google requests a third-party security audit for restricted scopes.",
+      "likelihood": "occasional",
+      "howToProceed": "Complete an annual security assessment via an authorized CASA lab, costing $500–$4,500 and taking 2–6 weeks.",
+      "escalation": null,
+      "sourceIds": [
+        "S2",
+        "S9"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "nuances": [
+    {
+      "title": "Refresh Token Expiry in Testing Mode",
+      "detail": "For apps in 'Testing' mode, refresh tokens expire automatically after 7 days, requiring re-authentication.",
+      "sourceIds": [
+        "S4",
+        "S7",
+        "S12"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Restricted Scope Security Requirements",
+      "detail": "Scopes like `mail.google.com` or `gmail.modify` are restricted and may trigger mandatory annual CASA security assessments.",
+      "sourceIds": [
+        "S2",
+        "S9"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Gmail API Quotas and Rate Limits",
+      "detail": "Standard free usage allows 1,200,000 quota units per minute per project, 6,000 quota units per minute per user per project, and 80,000,000 daily quota units.",
+      "sourceIds": [
+        "S8"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Verification Timelines Discrepancy",
+      "detail": "Officially, reviews take 3–10 business days, but community reports frequently cite 8–10 weeks if requests stall or lack proper documentation.",
+      "sourceIds": [
+        "S15",
+        "S16",
+        "S17"
+      ],
+      "confidence": "reported"
+    }
+  ],
+  "composioSetup": {
+    "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
+    "steps": [
+      "Create a custom OAuth app in Google Cloud Console with redirect URI `https://backend.composio.dev/api/v1/auth-apps/add`.",
+      "Obtain your Google OAuth Client ID and Client Secret.",
+      "Register your custom credentials with Composio using the CLI or API auth config creation endpoint.",
+      "Pass your custom auth config ID when initiating user connections in Composio."
+    ],
+    "tested": {
+      "probeId": "P2",
+      "testedAt": "2026-10-30",
+      "authorizeUrl": "https://accounts.google.com/o/oauth2/v2/auth",
+      "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
+      "defaultScopes": [
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/contacts.readonly",
+        "https://www.googleapis.com/auth/contacts.other.readonly",
+        "https://www.googleapis.com/auth/profile.language.read",
+        "https://www.googleapis.com/auth/user.addresses.read",
+        "https://www.googleapis.com/auth/user.birthday.read",
+        "https://www.googleapis.com/auth/user.emails.read",
+        "https://www.googleapis.com/auth/user.phonenumbers.read",
+        "https://www.googleapis.com/auth/profile.emails.read",
+        "https://mail.google.com/"
+      ],
+      "extraParams": {
+        "response_type": "code",
+        "access_type": "offline",
+        "prompt": "consent"
+      }
+    }
+  },
+  "evidence": {
+    "sources": [
+      {
+        "id": "S1",
+        "url": "https://developers.google.com/identity/protocols/oauth2",
+        "title": "Using OAuth 2.0 to Access Google APIs  |  Authorization  |  Google for Developers",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Using OAuth 2.0 protocol to access Google APIs securely.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S2",
+        "url": "https://developers.google.com/workspace/gmail/api/auth/scopes",
+        "title": "Choose Gmail API scopes | Google for Developers",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Choose Gmail API scopes and definitions for sensitive and restricted access.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S3",
+        "url": "https://developers.google.com/workspace/gmail/postmaster/guides/setup",
+        "title": "Set up the API  |  Gmail  |  Google for Developers",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Set up the Gmail API in Google Cloud Console.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S4",
+        "url": "https://docs.composio.dev/toolkits/gmail",
+        "title": "Composio docs: Gmail toolkit",
+        "kind": "composio",
+        "accessedAt": "2026-10-30",
+        "note": "Composio docs for Gmail toolkit configuration and limitations.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S5",
+        "url": "https://developers.google.com/identity/verification/authentication-verification",
+        "title": "Submit for brand verification  |  Brand Verification for Google Authentication APIs  |  Google for Developers",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Submit for brand verification via Google Search Console.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S6",
+        "url": "https://developers.google.com/workspace/marketplace/configure-oauth-consent-screen",
+        "title": "Configure OAuth  |  Google Workspace Marketplace  |  Google for Developers",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Configure OAuth consent screen and project credentials.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S7",
+        "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/sensitive-scope-verification",
+        "title": "Sensitive scope verification | App verification to use Google Authorization APIs | Google for Developers",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Sensitive scope verification and testing mode limitations.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S8",
+        "url": "https://developers.google.com/workspace/gmail/api/reference/quota",
+        "title": "Usage limits | Gmail | Google for Developers",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Gmail API usage limits, quotas, and quota units.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S9",
+        "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification",
+        "title": "Restricted scope verification  |  App verification to use Google Authorization APIs  |  Google for Developers",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Restricted scope verification and CASA security assessment requirements.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S10",
+        "url": "https://support.google.com/cloud/answer/15544987?hl=en",
+        "title": "Get started with the Google Auth Platform - Google Cloud Platform Console Help",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Get started with the Google Auth Platform and project creation.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S11",
+        "url": "https://support.google.com/cloud/answer/13804565?hl=en",
+        "title": "Demo Video - Google Cloud Platform Console Help",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Demo video requirements for Google OAuth verification.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S12",
+        "url": "https://support.google.com/googleapi/answer/7454865?hl=en",
+        "title": "Unverified apps - API Console Help",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Unverified apps warning screens and test user caps.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S13",
+        "url": "https://support.google.com/cloud/answer/15549945?hl=en",
+        "title": "Manage App Audience - Google Cloud Platform Console Help",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Managing application audience settings in Google Cloud Console.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S14",
+        "url": "https://developers.google.com/workspace/guides/configure-oauth-consent",
+        "title": "Configure the OAuth consent screen and choose scopes | Google Workspace | Google for Developers",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Configure OAuth consent screen and choose scopes guide.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S15",
+        "url": "https://missionseo.com/blog/google-oauth-verification/",
+        "title": "Guide to passing Google OAuth app verification | Mission SEO",
+        "kind": "community",
+        "accessedAt": "2026-10-30",
+        "note": "Guide to passing Google OAuth app verification.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S16",
+        "url": "https://security.googlecloudcommunity.com/security-validation-5/oauth-verification-for-workspace-add-on-stuck-for-8-weeks-client-critical-6543",
+        "title": "OAuth Verification for Workspace Add-on Stuck for 8+ Weeks (Client Critical) | Community",
+        "kind": "community",
+        "accessedAt": "2026-10-30",
+        "note": "Community reports on OAuth verification delays for Workspace apps.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S17",
+        "url": "https://stackoverflow.com/questions/79958935/google-oauth-verification-stalled-for-10-weeks-no-feedback-provided",
+        "title": "Google OAuth Verification Stalled for 10+ Weeks - No Feedback Provided",
+        "kind": "community",
+        "accessedAt": "2026-10-30",
+        "note": "Developer reports on stalled Google OAuth verifications.",
+        "retrieval": "search-result"
+      }
+    ],
+    "probes": [
+      {
+        "id": "P1",
+        "kind": "composio-api",
+        "target": "GET https://backend.composio.dev/api/v3.1/toolkits/gmail",
+        "result": "pass",
+        "summary": "Auth schemes: OAUTH2 (managed). Connection fields: none. Default scopes: https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/contacts.other.readonly https://www.googleapis.com/auth/profile.language.read https://www.googleapis.com/auth/user.addresses.read https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/user.emails.read https://www.googleapis.com/auth/user.phonenumbers.read https://www.googleapis.com/auth/profile.emails.read https://mail.google.com/.",
+        "detail": "[{\"scheme\":\"OAUTH2\",\"managed\":true,\"configFields\":[{\"name\":\"client_id\",\"displayName\":\"Client id\",\"required\":true,\"description\":\"Client id of the app\"},{\"name\":\"client_secret\",\"displayName\":\"Client secret\",\"required\":true,\"description\":\"Client secret of the app\"},{\"name\":\"oauth_redirect_uri\",\"displayName\":\"Redirect URI\",\"required\":false,\"description\":\"Add this Redirect URL to your app's OAuth allow list.\"},{\"name\":\"scopes\",\"displayName\":\"Scopes\",\"required\":false,\"description\":\"Scopes to request from the user, comma separated\"}],\"connectionFields\":[],\"defaultScopes\":[\"https://www.googleapis.com/auth/userinfo.profile\",\"https://www.googleapis.com/auth/userinfo.email\",\"https://www.googleapis.com/auth/contacts.readonly\",\"https://www.googleapis.com/auth/contacts.other.readonly\",\"https://www.googleapis.com/auth/profile.language.read\",\"https://www.googleapis.com/auth/user.addresses.read\",\"https://www.googleapis.com/auth/user.birthday.read\",\"https://www.googleapis.com/auth/user.emails.read\",\"https://www.googleapis.com/auth/user.phonenumbers.read\",\"https://www.googleapis.com/auth/profile.emails.read\",\"https://mail.google.com/\"]}]",
+        "at": "2026-10-30T11:44:44.100Z"
+      },
+      {
+        "id": "P2",
+        "kind": "composio-api",
+        "target": "Composio API: create custom OAuth2 auth config for `gmail` with a dummy client → start a connection → follow the redirect (then delete both)",
+        "result": "pass",
+        "summary": "Composio sends users to https://accounts.google.com/o/oauth2/v2/auth with redirect_uri=https://backend.composio.dev/api/v1/auth-apps/add; default scopes: https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/contacts.other.readonly https://www.googleapis.com/auth/profile.language.read https://www.googleapis.com/auth/user.addresses.read https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/user.emails.read https://www.googleapis.com/auth/user.phonenumbers.read https://www.googleapis.com/auth/profile.emails.read https://mail.google.com/; PKCE on.",
+        "detail": "{\"authorizeUrl\":\"https://accounts.google.com/o/oauth2/v2/auth\",\"redirectUri\":\"https://backend.composio.dev/api/v1/auth-apps/add\",\"scopes\":[\"https://www.googleapis.com/auth/userinfo.profile\",\"https://www.googleapis.com/auth/userinfo.email\",\"https://www.googleapis.com/auth/contacts.readonly\",\"https://www.googleapis.com/auth/contacts.other.readonly\",\"https://www.googleapis.com/auth/profile.language.read\",\"https://www.googleapis.com/auth/user.addresses.read\",\"https://www.googleapis.com/auth/user.birthday.read\",\"https://www.googleapis.com/auth/user.emails.read\",\"https://www.googleapis.com/auth/user.phonenumbers.read\",\"https://www.googleapis.com/auth/profile.emails.read\",\"https://mail.google.com/\"],\"extraParams\":{\"response_type\":\"code\",\"access_type\":\"offline\",\"prompt\":\"consent\"},\"pkce\":true,\"note\":\"extra params: response_type=code, access_type=offline, prompt=consent\"}",
+        "at": "2026-10-30T11:44:47.559Z"
+      },
+      {
+        "id": "P3",
+        "kind": "oauth-discovery",
+        "target": "GET https://accounts.google.com/.well-known/openid-configuration",
+        "result": "pass",
+        "summary": "Discovery document found. Authorize: https://accounts.google.com/o/oauth2/v2/auth; token: https://oauth2.googleapis.com/token. PKCE: plain, S256.",
+        "detail": "{\"issuer\":\"https://accounts.google.com\",\"authorization_endpoint\":\"https://accounts.google.com/o/oauth2/v2/auth\",\"token_endpoint\":\"https://oauth2.googleapis.com/token\",\"registration_endpoint\":null,\"code_challenge_methods_supported\":[\"plain\",\"S256\"],\"grant_types_supported\":[\"authorization_code\",\"refresh_token\",\"urn:ietf:params:oauth:grant-type:device_code\",\"urn:ietf:params:oauth:grant-type:jwt-bearer\"],\"scopes_supported\":[\"openid\",\"email\",\"profile\"]}",
+        "at": "2026-10-30T11:44:51.395Z"
+      }
+    ],
+    "openQuestions": [
+      {
+        "question": "Will Google introduce mandatory billing for Gmail API usage earlier than late 2026?",
+        "whyItMatters": "Affects long-term cost projections for high-volume AI agent deployments.",
+        "howToResolve": "Monitor Google Workspace release notes and official Gmail API quota pricing announcements."
+      }
+    ],
+    "verification": {
+      "reviewedAt": "2026-10-30",
+      "method": "Automated verifier pass (gemini-3.6-flash): re-read the cited source text for the 8 rating factors, the production timeline and the cost.",
+      "items": [
+        {
+          "claim": "self_serve_registration = yes: Developers can instantly create a project, configure consent screens, and set up OAuth credentials in the Goo",
+          "outcome": "confirmed",
+          "note": "Self-serve registration is fully supported in the Google Cloud Console.",
+          "sourceIds": [
+            "S6",
+            "S7",
+            "S10"
+          ]
+        },
+        {
+          "claim": "review_required = yes: External apps requesting sensitive or restricted Gmail scopes must submit for Google OAuth verification to remove war",
+          "outcome": "confirmed",
+          "note": "Google OAuth verification is required for external apps requesting sensitive or restricted scopes.",
+          "sourceIds": [
+            "S5",
+            "S7",
+            "S9"
+          ]
+        },
+        {
+          "claim": "business_verification = yes: Brand verification requires domain ownership validation in Search Console, a privacy policy, and developer iden",
+          "outcome": "confirmed",
+          "note": "Brand verification requires domain ownership validation, privacy policy, etc.",
+          "sourceIds": [
+            "S5",
+            "S7",
+            "S9"
+          ]
+        },
+        {
+          "claim": "security_assessment = yes: Restricted scopes storing or transmitting user data via third-party servers require an annual CASA security asses",
+          "outcome": "confirmed",
+          "note": "CASA security assessment required for restricted scopes storing/transmitting user data via third-party servers.",
+          "sourceIds": [
+            "S2",
+            "S9"
+          ]
+        },
+        {
+          "claim": "paid_access = no: Standard Gmail API usage and OAuth access are free, with planned billing for threshold-exceeding usage starting late 2026.",
+          "outcome": "confirmed",
+          "note": "Standard Gmail API usage is free with billing planned for late 2026.",
+          "sourceIds": [
+            "S8"
+          ]
+        },
+        {
+          "claim": "partner_or_sales_gate = no: No special partner program or sales contract is required to submit an app for verification.",
+          "outcome": "confirmed",
+          "note": "No special partner program or sales contract required to submit for verification.",
+          "sourceIds": [
+            "S7",
+            "S9"
+          ]
+        },
+        {
+          "claim": "user_cap_before_review = yes: Unverified apps in Testing mode are capped at 100 test users, and refresh tokens expire after 7 days.",
+          "outcome": "confirmed",
+          "note": "Unverified apps in testing mode have 100 user cap and 7-day token expiration.",
+          "sourceIds": [
+            "S4",
+            "S7",
+            "S12"
+          ]
+        },
+        {
+          "claim": "per_customer_setup = no: Standard multi-tenant OAuth flow handles end-user connections once the primary client is verified.",
+          "outcome": "confirmed",
+          "note": "Standard multi-tenant OAuth flow handles user connections after primary client verification.",
+          "sourceIds": [
+            "S1"
+          ]
+        },
+        {
+          "claim": "Time until any user can connect: 2–10 weeks. Official review takes 3–10 business days, but real-world community reports cite 8–10 weeks plus",
+          "outcome": "confirmed",
+          "note": "Time to production and review timelines are accurately stated based on official and community data.",
+          "sourceIds": []
+        },
+        {
+          "claim": "Cost: Free to $4,500. Google OAuth verification is free, but an annual CASA security assessment by an authorized lab typically costs $500–$4",
+          "outcome": "confirmed",
+          "note": "Verification is free, CASA assessment costs $500–$4,500.",
+          "sourceIds": []
+        }
+      ]
+    }
+  },
+  "meta": {
+    "generatedAt": "2026-10-30T11:45:44.776Z",
+    "generator": "live",
+    "model": "gemini-3.5-flash-lite (research) + gemini-3.6-flash (writing)",
+    "durationSec": 86
+  }
+}

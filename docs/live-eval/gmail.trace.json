@@ -1,0 +1,383 @@
+{
+  "query": "Gmail",
+  "events": [
+    {
+      "type": "stage",
+      "stage": "resolve",
+      "message": "Identifying “Gmail”",
+      "t": 1
+    },
+    {
+      "type": "search",
+      "query": "Gmail API OAuth app developer documentation",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 3407
+    },
+    {
+      "type": "info",
+      "message": "Identified Gmail — Gmail is a popular email service provided by Google that offers a comprehensive REST API for integration.",
+      "t": 11819
+    },
+    {
+      "type": "stage",
+      "stage": "composio",
+      "message": "Checking Composio’s toolkit catalog",
+      "t": 11820
+    },
+    {
+      "type": "info",
+      "message": "Setup attempt: creating a throwaway Composio auth config to see exactly what Composio sends to the provider",
+      "t": 13627
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "composio-api",
+        "target": "Composio API: create custom OAuth2 auth config for `gmail` with a dummy client → start a connection → follow the redirect (then delete both)",
+        "result": "pass",
+        "summary": "Composio sends users to https://accounts.google.com/o/oauth2/v2/auth with redirect_uri=https://backend.composio.dev/api/v1/auth-apps/add; default scopes: https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/contacts.other.readonly https://www.googleapis.com/auth/profile.language.read https://www.googleapis.com/auth/user.addresses.read https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/user.emails.read https://www.googleapis.com/auth/user.phonenumbers.read https://www.googleapis.com/auth/profile.emails.read https://mail.google.com/; PKCE on.",
+        "detail": "{\"authorizeUrl\":\"https://accounts.google.com/o/oauth2/v2/auth\",\"redirectUri\":\"https://backend.composio.dev/api/v1/auth-apps/add\",\"scopes\":[\"https://www.googleapis.com/auth/userinfo.profile\",\"https://www.googleapis.com/auth/userinfo.email\",\"https://www.googleapis.com/auth/contacts.readonly\",\"https://www.googleapis.com/auth/contacts.other.readonly\",\"https://www.googleapis.com/auth/profile.language.read\",\"https://www.googleapis.com/auth/user.addresses.read\",\"https://www.googleapis.com/auth/user.birthday.read\",\"https://www.googleapis.com/auth/user.emails.read\",\"https://www.googleapis.com/auth/user.phonenumbers.read\",\"https://www.googleapis.com/auth/profile.emails.read\",\"https://mail.google.com/\"],\"extraParams\":{\"response_type\":\"code\",\"access_type\":\"offline\",\"prompt\":\"consent\"},\"pkce\":true,\"note\":\"extra params: response_type=code, access_type=offline, prompt=consent\"}",
+        "id": "P2",
+        "at": "2026-10-30T11:44:47.559Z"
+      },
+      "t": 17086
+    },
+    {
+      "type": "info",
+      "message": "Composio toolkit `gmail` has a managed OAuth app: you can prototype today and need your own app for production branding, scopes or quota.",
+      "t": 17086
+    },
+    {
+      "type": "stage",
+      "stage": "research",
+      "message": "Researching docs, policies and real-world reports",
+      "t": 17086
+    },
+    {
+      "type": "search",
+      "query": "Gmail OAuth app review approval verification publish requirements",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 19075
+    },
+    {
+      "type": "search",
+      "query": "Gmail OAuth app approval how long experience reddit OR forum",
+      "count": 7,
+      "engine": "composio:exa",
+      "t": 19154
+    },
+    {
+      "type": "search",
+      "query": "Gmail API pricing plans tiers limits for developers connections",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 19274
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "oauth-discovery",
+        "target": "GET https://accounts.google.com/.well-known/openid-configuration",
+        "result": "pass",
+        "summary": "Discovery document found. Authorize: https://accounts.google.com/o/oauth2/v2/auth; token: https://oauth2.googleapis.com/token. PKCE: plain, S256.",
+        "detail": "{\"issuer\":\"https://accounts.google.com\",\"authorization_endpoint\":\"https://accounts.google.com/o/oauth2/v2/auth\",\"token_endpoint\":\"https://oauth2.googleapis.com/token\",\"registration_endpoint\":null,\"code_challenge_methods_supported\":[\"plain\",\"S256\"],\"grant_types_supported\":[\"authorization_code\",\"refresh_token\",\"urn:ietf:params:oauth:grant-type:device_code\",\"urn:ietf:params:oauth:grant-type:jwt-bearer\"],\"scopes_supported\":[\"openid\",\"email\",\"profile\"]}",
+        "id": "P3",
+        "at": "2026-10-30T11:44:51.395Z"
+      },
+      "t": 20922
+    },
+    {
+      "type": "read",
+      "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/sensitive-scope-verification",
+      "title": "Sensitive scope verification | App verification to use Google Authorization APIs | Google for Developers",
+      "ok": true,
+      "chars": 14000,
+      "via": "direct",
+      "sourceId": "S14",
+      "t": 21680
+    },
+    {
+      "type": "search",
+      "query": "site:developers.google.com/identity/protocols/oauth2/production-readiness \"sensitive-scope-verification\"",
+      "count": 6,
+      "engine": "composio:exa",
+      "t": 22790
+    },
+    {
+      "type": "search",
+      "query": "site:developers.google.com \"CASA\" security assessment Google OAuth verification",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 22807
+    },
+    {
+      "type": "read",
+      "url": "https://developers.google.com/workspace/gmail/api/auth/scopes",
+      "title": "Choose Gmail API scopes | Google for Developers",
+      "ok": true,
+      "chars": 6451,
+      "via": "direct",
+      "sourceId": "S4",
+      "t": 23279
+    },
+    {
+      "type": "search",
+      "query": "\"Google Cloud\" OAuth consent screen verification requirements sensitive restricted scopes Gmail",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 23876
+    },
+    {
+      "type": "finding",
+      "fact": "Google OAuth registration console is the Google Cloud Console (console.cloud.google.com), where developers create a project, configure the OAuth consent screen (App type: Internal or External), and create OAuth client ID credentials (application type: Web application).",
+      "sourceIds": [
+        "S12",
+        "S14",
+        "S45"
+      ],
+      "t": 26714
+    },
+    {
+      "type": "finding",
+      "fact": "Google OAuth verification requirements for production: External apps requesting sensitive or restricted scopes must complete Google OAuth verification. This includes brand verification (domain verification in Search Console, privacy policy, home page, branding page) and sensitive/restricted scope verification (submitting a detailed scope justification and an unlisted YouTube demo video showing the end-to-end OAuth flow and scope usage).",
+      "sourceIds": [
+        "S11",
+        "S14",
+        "S32"
+      ],
+      "t": 26715
+    },
+    {
+      "type": "finding",
+      "fact": "Google restricted scopes (such as gmail.readonly, gmail.modify, gmail.compose, gmail.insert, gmail.metadata, gmail.settings.basic, and mail.google.com) carry strict requirements. If restricted data is stored or transmitted via a third-party server, an annual security assessment via the Cloud Application Security Assessment (CASA) framework by an authorized third-party lab (costing $500–$4,500, taking 2–6 weeks) is mandatory upon Google request.",
+      "sourceIds": [
+        "S4",
+        "S32"
+      ],
+      "t": 26715
+    },
+    {
+      "type": "finding",
+      "fact": "Development-mode / unverified app limits: Unverified apps in 'Testing' mode have a cap of 100 test users, and refresh tokens expire after 7 days if the app is unverified or in testing status. Unverified apps also trigger a prominent full-page warning screen (\"Access blocked: App hasn't been verified\") for arbitrary external users.",
+      "sourceIds": [
+        "S9",
+        "S14",
+        "S48"
+      ],
+      "t": 26715
+    },
+    {
+      "type": "finding",
+      "fact": "Gmail API quotas and rate limits: Free standard use provides 1,200,000 quota units per minute per project and 6,000 quota units per minute per user per project, with a daily cap of 80,000,000 quota units per project.",
+      "sourceIds": [
+        "S24"
+      ],
+      "t": 26715
+    },
+    {
+      "type": "finding",
+      "fact": "Typical Gmail agent scopes include sensitive and restricted scopes like https://www.googleapis.com/auth/gmail.readonly, https://www.googleapis.com/auth/gmail.modify, https://www.googleapis.com/auth/gmail.send, and https://www.googleapis.com/auth/gmail.compose.",
+      "sourceIds": [
+        "S4"
+      ],
+      "t": 26715
+    },
+    {
+      "type": "finding",
+      "fact": "Google OAuth technical details: Authorization endpoint is https://accounts.google.com/o/oauth2/v2/auth, token endpoint is https://oauth2.googleapis.com/token, and PKCE (methods plain, S256) is fully supported.",
+      "sourceIds": [
+        "P3"
+      ],
+      "t": 26715
+    },
+    {
+      "type": "read",
+      "url": "https://developers.google.com/workspace/guides/configure-oauth-consent",
+      "title": "Configure the OAuth consent screen and choose scopes | Google Workspace | Google for Developers",
+      "ok": true,
+      "chars": 7176,
+      "via": "direct",
+      "sourceId": "S50",
+      "t": 30168
+    },
+    {
+      "type": "read",
+      "url": "https://developers.google.com/workspace/gmail/api/reference/quota",
+      "title": "Usage limits | Gmail | Google for Developers",
+      "ok": true,
+      "chars": 9338,
+      "via": "direct",
+      "sourceId": "S24",
+      "t": 30588
+    },
+    {
+      "type": "search",
+      "query": "site:stackoverflow.com \"gmail\" \"oauth\" verification pending OR rejected",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 31277
+    },
+    {
+      "type": "search",
+      "query": "\"Google OAuth\" verification time review duration reddit 2025 OR 2026",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 31506
+    },
+    {
+      "type": "finding",
+      "fact": "Google OAuth verification timelines (official vs real world): Officially, brand verification takes 2–3 business days, sensitive scope verification takes 3–10 business days, and restricted scope verification can take up to 6 weeks. Real-world community reports frequently indicate reviews stalling for 8–10 weeks if actions/responses are missed or queues are backed up.",
+      "sourceIds": [
+        "S58",
+        "S60",
+        "S62"
+      ],
+      "t": 34237
+    },
+    {
+      "type": "finding",
+      "fact": "Gmail API usage limits & quotas: Standard free tier provides 1,200,000 quota units per minute per project, 6,000 quota units per minute per user per project, and 80,000,000 quota units per day per project. Standard use is free, with planned billing for daily usage exceeding threshold units starting late 2026. Exponential backoff with random jitter is required for HTTP 429 errors.",
+      "sourceIds": [
+        "S24"
+      ],
+      "t": 34237
+    },
+    {
+      "type": "info",
+      "message": "Research done: 9 findings, 5 pages read, 3 probes.",
+      "t": 35908
+    },
+    {
+      "type": "stage",
+      "stage": "write",
+      "message": "Writing the guide",
+      "t": 35908
+    },
+    {
+      "type": "warn",
+      "message": "gemini-3.6-flash unavailable (429); falling back to gemini-3.5-flash-lite",
+      "t": 36427
+    },
+    {
+      "type": "info",
+      "message": "Verdict drafted: Full production access requires passing Google's sensitive/restricted scope review and mandatory annual CASA security assessments.",
+      "t": 45888
+    },
+    {
+      "type": "warn",
+      "message": "gemini-3.6-flash unavailable (429); falling back to gemini-3.5-flash-lite",
+      "t": 46303
+    },
+    {
+      "type": "warn",
+      "message": "Draft failed validation; repairing (phases.0.steps.3.confidence: Invalid input: expected string, received undefined)",
+      "t": 57239
+    },
+    {
+      "type": "warn",
+      "message": "gemini-3.6-flash unavailable (429); falling back to gemini-3.5-flash-lite",
+      "t": 57756
+    },
+    {
+      "type": "stage",
+      "stage": "check",
+      "message": "Checking citations, confidence labels and ratings",
+      "t": 74301
+    },
+    {
+      "type": "info",
+      "message": "Verifier: re-reading the cited sources for the rating factors, timeline and cost",
+      "t": 74303
+    },
+    {
+      "type": "warn",
+      "message": "gemini-3.6-flash unavailable (429); falling back to gemini-3.5-flash-lite",
+      "t": 80301
+    },
+    {
+      "type": "info",
+      "message": "Verifier: 10 confirmed, 0 corrected, 0 unverifiable",
+      "t": 86442
+    },
+    {
+      "type": "quality",
+      "report": {
+        "claims": {
+          "tested": 2,
+          "official": 37,
+          "reported": 1,
+          "inferred": 4
+        },
+        "sources": {
+          "total": 17,
+          "fetched": 5,
+          "snippetOnly": 12,
+          "official": 13,
+          "community": 3,
+          "composio": 1
+        },
+        "probes": {
+          "total": 3,
+          "pass": 3,
+          "info": 0,
+          "fail": 0
+        },
+        "fixes": [
+          "step \"Submit for Google OAuth Verification\": split its review wait into a provider step",
+          "step \"Create Custom Auth Config in Composio\": Composio auth-config creation is agent-doable via API → agent",
+          "scope https://www.googleapis.com/auth/userinfo.profile: \"tested\" on a claim no probe can confirm → inferred",
+          "scope https://www.googleapis.com/auth/userinfo.email: \"tested\" on a claim no probe can confirm → inferred",
+          "scope https://www.googleapis.com/auth/contacts.readonly: \"tested\" on a claim no probe can confirm → inferred",
+          "scope mail.google.com: \"tested\" on a claim no probe can confirm → inferred",
+          "nuance 4: \"official\" but only community sources → reported"
+        ],
+        "llm": {
+          "calls": 11,
+          "inputTokens": 86767,
+          "outputTokens": 13897,
+          "model": "gemini-3.5-flash-lite"
+        }
+      },
+      "t": 86444
+    }
+  ],
+  "quality": {
+    "claims": {
+      "tested": 2,
+      "official": 37,
+      "reported": 1,
+      "inferred": 4
+    },
+    "sources": {
+      "total": 17,
+      "fetched": 5,
+      "snippetOnly": 12,
+      "official": 13,
+      "community": 3,
+      "composio": 1
+    },
+    "probes": {
+      "total": 3,
+      "pass": 3,
+      "info": 0,
+      "fail": 0
+    },
+    "fixes": [
+      "step \"Submit for Google OAuth Verification\": split its review wait into a provider step",
+      "step \"Create Custom Auth Config in Composio\": Composio auth-config creation is agent-doable via API → agent",
+      "scope https://www.googleapis.com/auth/userinfo.profile: \"tested\" on a claim no probe can confirm → inferred",
+      "scope https://www.googleapis.com/auth/userinfo.email: \"tested\" on a claim no probe can confirm → inferred",
+      "scope https://www.googleapis.com/auth/contacts.readonly: \"tested\" on a claim no probe can confirm → inferred",
+      "scope mail.google.com: \"tested\" on a claim no probe can confirm → inferred",
+      "nuance 4: \"official\" but only community sources → reported"
+    ],
+    "llm": {
+      "calls": 11,
+      "inputTokens": 86767,
+      "outputTokens": 13897,
+      "model": "gemini-3.5-flash-lite"
+    }
+  }
+}

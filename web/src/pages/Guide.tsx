@@ -5,6 +5,7 @@ import { guideToMarkdown } from '../../../shared/markdown.ts';
 import { DIFFICULTY_INFO, type Actor, type Guide, type Step } from '../../../shared/schema.ts';
 import { api, type GuideSummary, type Health, type Trace } from '../api.ts';
 import { EventFeed, QualitySummary } from '../components/EventFeed.tsx';
+import { NextAction, RequestReview, StuckBox } from '../components/GuideHelpers.tsx';
 import { ActorChip, CONF, CopyButton, DIFF_BAR, DifficultyPill, Evidence, ManagedBadge, RunwayBar, Section } from '../components/ui.tsx';
 import { renderInline, renderMd } from '../lib/md.ts';
 
@@ -57,6 +58,7 @@ export default function GuidePage() {
   const [trace, setTrace] = useState<Trace | null>(null);
   const [health, setHealth] = useState<Health | null>(null);
   const [allGuides, setAllGuides] = useState<GuideSummary[]>([]);
+  const [expandAll, setExpandAll] = useState(false);
   const storageKey = `runway:${slug}:done`;
   const [done, setDone] = useState<Set<string>>(new Set());
 
@@ -149,6 +151,7 @@ export default function GuidePage() {
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <ManagedBadge m={g.composio.managedOAuth} />
             <Provenance g={g} />
+            <RequestReview g={g} />
           </div>
           {(() => {
             const twin =
@@ -234,8 +237,14 @@ export default function GuidePage() {
             <NeedOwnApp g={g} />
           </section>
 
+          <NextAction g={g} steps={steps} done={done} onDone={toggle} />
+          <StuckBox g={g} />
+
           {/* Plan */}
           <Section id="plan" title="Step by step" kicker={`${steps.length} steps · ${progress}% done`}>
+            <button className="btn no-print mb-3" onClick={() => setExpandAll(!expandAll)}>
+              {expandAll ? 'Collapse all steps' : 'Expand all steps'}
+            </button>
             <div className="space-y-6">
               {g.phases.map((p, pi) => (
                 <div key={p.id}>
@@ -250,7 +259,7 @@ export default function GuidePage() {
                   </div>
                   <ol className="mt-3 space-y-2 border-l-2 border-slate-200 pl-5 ml-3 dark:border-slate-800">
                     {p.steps.map((s) => (
-                      <StepCard key={s.id} s={s} checked={done.has(s.id)} onToggle={() => toggle(s.id)} />
+                      <StepCard key={s.id} s={s} checked={done.has(s.id)} onToggle={() => toggle(s.id)} expandAll={expandAll} />
                     ))}
                   </ol>
                 </div>
@@ -531,14 +540,17 @@ function NeedOwnApp({ g }: { g: Guide }) {
   );
 }
 
-function StepCard({ s, checked, onToggle }: { s: Step; checked: boolean; onToggle: () => void }) {
+function StepCard({ s, checked, onToggle, expandAll }: { s: Step; checked: boolean; onToggle: () => void; expandAll: boolean }) {
+  const [open, setOpen] = useState(false);
+  const show = open || expandAll;
+  const preview = s.details.replace(/[*`#>]/g, '').split(/(?<=[.!?])\s/)[0].slice(0, 160);
   return (
-    <li className={`card relative p-4 transition ${checked ? 'opacity-60' : ''}`}>
+    <li id={`step-${s.id}`} className={`card relative scroll-mt-24 p-4 transition ${checked ? 'opacity-60' : ''}`}>
       <span className="absolute top-5 -left-[27px] h-3 w-3 rounded-full border-2 border-white bg-slate-300 dark:border-slate-950 dark:bg-slate-600" />
       <div className="flex items-start gap-3">
         <input type="checkbox" checked={checked} onChange={onToggle} className="mt-1 h-4 w-4 shrink-0 accent-emerald-600" aria-label={`Mark "${s.title}" done`} />
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
+          <button type="button" onClick={() => setOpen(!show)} className="flex w-full flex-wrap items-center gap-2 text-left" aria-expanded={show}>
             <h4 className={`font-semibold text-slate-900 dark:text-white ${checked ? 'line-through' : ''}`}>{s.title}</h4>
             <ActorChip actor={s.actor} />
             <span className="text-xs text-slate-500">{s.effort}</span>
@@ -547,7 +559,11 @@ function StepCard({ s, checked, onToggle }: { s: Step; checked: boolean; onToggl
                 then wait {s.wait}
               </span>
             )}
-          </div>
+            <span className="ml-auto text-xs text-slate-400">{show ? '▾' : '▸'}</span>
+          </button>
+          {!show && <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{preview}{preview.length < s.details.length ? '…' : ''}</p>}
+          {show && (
+            <>
           <div className="md mt-1.5 text-sm text-slate-700 dark:text-slate-300" dangerouslySetInnerHTML={{ __html: renderMd(s.details) }} />
           {s.agentAssist && (
             <div className="mt-2 rounded-lg bg-violet-50 px-3 py-2 text-sm text-violet-900 dark:bg-violet-500/10 dark:text-violet-200">
@@ -564,6 +580,8 @@ function StepCard({ s, checked, onToggle }: { s: Step; checked: boolean; onToggl
             </div>
             <Evidence c={s.confidence} ids={s.sourceIds} onCite={cite} />
           </div>
+            </>
+          )}
         </div>
       </div>
     </li>

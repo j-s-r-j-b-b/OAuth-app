@@ -39,6 +39,43 @@ Composio's own [setup guides](https://composio.dev/auth) cover the console click
    Every run publishes its full trace.
 5. **The live agent is evaluated against the verified library** ([LIVE_EVAL.md](LIVE_EVAL.md)). Real failures drove the fixes, and the failures that remain are reported.
 
+## Where this lives in Composio
+
+The developer's moment of need is predictable, so the guide should meet them there rather than wait to be found:
+
+| Moment | Surface | Built here as |
+|---|---|---|
+| Picking toolkits for an agent | Toolkit page and catalog: show the rating and "time until any user can connect" next to "Composio-managed OAuth available?" | `GET /api/readiness/:toolkitSlug` (a compact summary for any surface) |
+| Clicking **Create Auth Config → Use your own credentials** | An inline panel: redirect URI to register (tested), default scopes and their review impact, first step, top blockers | Readiness API + the guide's "Tested setup attempt" card |
+| A coding agent setting up the integration | The skill or MCP context the agent already reads | `/guides/<slug>.md`, `/llms.txt`, and the per-guide agent brief |
+| A connection failing (`redirect_uri_mismatch`, `AADSTS…`) | Error page, support or the knowledge base: "Paste your error" | `POST /api/guides/:slug/ask` (blocker match plus a cited answer) |
+
+## Rollout
+
+1. **Weeks 1–2:** deep, verified guides for the 20 most-used bring-your-own toolkits, plus Gmail, Slack and Microsoft, where managed users move to their own app at launch. Ship them as docs pages and the readiness panel.
+2. **Weeks 3–6:** turn on live generation for the long tail. Each live guide is labelled, and demand (`/api/demand`) decides which ones get a deep pass next.
+3. **Ongoing:** weekly `replay` and `connect-probe`. A changed probe or a moved provider changelog triggers re-research, and "last verified" is shown on every guide.
+
+## Risks and how they're handled
+
+| Risk | Mitigation |
+|---|---|
+| Stale or wrong advice costs a developer weeks | Evidence labels on every claim, a verifier pass, probe replay, a visible "last verified" date, and live guides labelled as drafts |
+| The agent over-claims certainty | Deterministic checks the model can't skip: citations must resolve, "tested" needs a probe, the rating is computed and not chosen |
+| Probing providers looks like abuse | Read-only GETs only, no accounts, logins or form posts, and a fake client ID that's obviously a probe |
+| Setup attempts leave debris in a Composio project | Throwaway auth configs and connections are deleted in a `finally` block |
+| Costs at scale | About 12 free-tier model calls and 25 Composio tool calls per live guide. Deep guides cost more and are reserved for demand. |
+
+## How we'd know it works
+
+| Metric | Target | Why |
+|---|---|---|
+| Median time from guide view to first ACTIVE custom-auth connection | < 1 day for self-serve apps | It's the job: get to a working connection |
+| Share of guide users who submit a provider review on their first try without rejection | +20 pts vs. those without a guide | Measures whether the requirements and blockers sections actually prevent rework |
+| `redirect_uri_mismatch` failures on new custom auth configs | −80% | Directly addressed by the tested redirect URI |
+| Share of claims in top-20 guides labelled tested or official | ≥ 85% | Evidence quality |
+| Live guides that matched a later deep review on the rating | ≥ 80% | Live-agent accuracy at scale, the same comparison as LIVE_EVAL.md |
+
 ## What I would build next
 
 - **Scale to 100 guides.** Batch-generate guides for Composio's 258 bring-your-own toolkits with the deep pipeline, prioritised by toolkit usage. Then run the verifier on every guide and have a person review the top 20.

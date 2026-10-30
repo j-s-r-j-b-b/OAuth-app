@@ -1,0 +1,453 @@
+{
+  "query": "GitHub",
+  "events": [
+    {
+      "type": "stage",
+      "stage": "resolve",
+      "message": "Identifying “GitHub”",
+      "t": 2
+    },
+    {
+      "type": "search",
+      "query": "GitHub API OAuth app developer documentation",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 2391
+    },
+    {
+      "type": "info",
+      "message": "Identified GitHub — A web-based platform for version control and collaboration using Git.",
+      "t": 3858
+    },
+    {
+      "type": "stage",
+      "stage": "composio",
+      "message": "Checking Composio’s toolkit catalog",
+      "t": 3858
+    },
+    {
+      "type": "info",
+      "message": "Setup attempt: creating a throwaway Composio auth config to see exactly what Composio sends to the provider",
+      "t": 7400
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "composio-api",
+        "target": "Composio API: create custom OAuth2 auth config for `github` with a dummy client → start a connection → follow the redirect (then delete both)",
+        "result": "pass",
+        "summary": "Composio sends users to https://github.com/login/oauth/authorize with redirect_uri=https://backend.composio.dev/api/v1/auth-apps/add; default scopes: repo user gist notifications project workflow codespace; PKCE on.",
+        "detail": "{\"authorizeUrl\":\"https://github.com/login/oauth/authorize\",\"redirectUri\":\"https://backend.composio.dev/api/v1/auth-apps/add\",\"scopes\":[\"repo\",\"user\",\"gist\",\"notifications\",\"project\",\"workflow\",\"codespace\"],\"extraParams\":{\"response_type\":\"code\",\"prompt\":\"select_account\"},\"pkce\":true,\"note\":\"extra params: response_type=code, prompt=select_account\"}",
+        "id": "P2",
+        "at": "2026-10-30T11:46:09.545Z"
+      },
+      "t": 10506
+    },
+    {
+      "type": "info",
+      "message": "Composio toolkit `github` has a managed OAuth app: you can prototype today and need your own app for production branding, scopes or quota.",
+      "t": 10507
+    },
+    {
+      "type": "stage",
+      "stage": "research",
+      "message": "Researching docs, policies and real-world reports",
+      "t": 10507
+    },
+    {
+      "type": "search",
+      "query": "GitHub OAuth app review approval verification publish requirements",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 12801
+    },
+    {
+      "type": "search",
+      "query": "GitHub API pricing plans tiers limits for developers connections",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 13163
+    },
+    {
+      "type": "search",
+      "query": "GitHub OAuth app approval how long experience reddit OR forum",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 13411
+    },
+    {
+      "type": "finding",
+      "fact": "GitHub API rate limits for REST API are 5,000 requests per hour for authenticated requests (OAuth apps/Personal access tokens), and 15,000 requests per hour for GitHub Enterprise Cloud organizations. Unauthenticated requests are limited to 60 per hour.",
+      "sourceIds": [
+        "S17"
+      ],
+      "t": 15406
+    },
+    {
+      "type": "finding",
+      "fact": "GitHub GraphQL API rate limit is 5,000 points per hour for standard users and apps, scaling to 10,000 points per hour for Enterprise Cloud.",
+      "sourceIds": [
+        "S18"
+      ],
+      "t": 15406
+    },
+    {
+      "type": "finding",
+      "fact": "Composio supports bringing your own GitHub App by configuring its client ID and client secret in the GitHub auth config, though GitHub App installation is a separate step from OAuth credential setup.",
+      "sourceIds": [
+        "S9"
+      ],
+      "t": 15406
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "portal",
+        "target": "GET https://github.com/settings/developers",
+        "result": "pass",
+        "summary": "Portal reachable; it requires signing in (redirected to github.com/login). A human takes over here.",
+        "detail": "Chain: 302 github.com/settings/developers → 200 github.com/login",
+        "id": "P3",
+        "at": "2026-10-30T11:46:15.870Z"
+      },
+      "t": 16832
+    },
+    {
+      "type": "search",
+      "query": "\"GitHub\" OAuth app expiration refresh token lifetime docs.github.com",
+      "count": 6,
+      "engine": "composio:exa",
+      "t": 17672
+    },
+    {
+      "type": "search",
+      "query": "site:docs.github.com \"refresh tokens\" \"OAuth apps\"",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 17675
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "oauth-discovery",
+        "target": "GET https://github.com/.well-known/openid-configuration | https://github.com/.well-known/oauth-authorization-server",
+        "result": "info",
+        "summary": "No public OAuth/OIDC discovery document; endpoints must come from the provider docs.",
+        "detail": "404 https://github.com/.well-known/openid-configuration\n404 https://github.com/.well-known/oauth-authorization-server",
+        "id": "P4",
+        "at": "2026-10-30T11:46:18.515Z"
+      },
+      "t": 19476
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "authorize-endpoint",
+        "target": "GET https://github.com/login/oauth/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=repo+read%3Auser",
+        "result": "pass",
+        "summary": "Endpoint is live and rejects an unregistered client (200). Shows what a misconfigured app sees.",
+        "detail": "Chain: 302 github.com/login/oauth/authorize → 200 github.com/login\nFinal: https://github.com/login?client_id=oauth-runway-probe&return_to=%2Flogin%2Foauth%2Fauthorize%3Fclient_id%3Doauth-runway-probe%26redirect_uri%3Dhttps%253A%252F%252Fbackend.composio.dev%252Fapi%252Fv3%252Ftoolkits%252Fauth%252Fcallback%26response_type%3Dcode%26scope%3Drepo%2Bread%253Auser%26state%3Doa\nExcerpt: title=\"Sign in to GitHub · GitHub\" | There was an error while loading. Please reload this page. | New to GitHub? [Create an account](/join?return_to=%2Flogin%2Foauth%2Fauthorize%3Fclient_id%3Doauth-runway-probe%26redirect_uri%3Dhttps%253A%252F%252Fbackend.composio.dev%252Fapi%252Fv3%252Ftoolkits%252Fauth%252Fcallback%26response_type%3Dcode%26scope%3Drepo%2Bread%253Auser%26state%3Doauth-runway-probe&source=oauth)",
+        "id": "P5",
+        "at": "2026-10-30T11:46:18.685Z"
+      },
+      "t": 19646
+    },
+    {
+      "type": "search",
+      "query": "site:docs.github.com \"creating an OAuth app\" steps developer settings",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 20680
+    },
+    {
+      "type": "search",
+      "query": "site:docs.github.com \"scopes for OAuth apps\"",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 20856
+    },
+    {
+      "type": "finding",
+      "fact": "Creating a GitHub OAuth app is self-serve via developer settings (Settings -> Developer settings -> OAuth apps -> New OAuth App). Each user or organization can own up to 100 OAuth apps. Required fields: Application name, Homepage URL, Authorization callback URL.",
+      "sourceIds": [
+        "S38"
+      ],
+      "t": 23024
+    },
+    {
+      "type": "finding",
+      "fact": "GitHub does not require a prior review, approval, or verification process for registering or deploying custom OAuth apps. Apps are immediately live for users upon creation.",
+      "sourceIds": [
+        "S24"
+      ],
+      "t": 23024
+    },
+    {
+      "type": "finding",
+      "fact": "GitHub OAuth apps support expiring tokens (opt-in). When enabled, access tokens expire after 8 hours (28,800 seconds) and refresh tokens expire after 6 months of inactivity. Token rotation is enforced on refresh.",
+      "sourceIds": [
+        "S30",
+        "S34"
+      ],
+      "t": 23024
+    },
+    {
+      "type": "finding",
+      "fact": "GitHub OAuth apps do not have OIDC/OAuth discovery documents at /.well-known/openid-configuration or /.well-known/oauth-authorization-server. Authorize endpoint is at https://github.com/login/oauth/authorize and token endpoint is at https://github.com/login/oauth/access_token.",
+      "sourceIds": [
+        "P4",
+        "S3"
+      ],
+      "t": 23024
+    },
+    {
+      "type": "search",
+      "query": "site:docs.github.com \"scopes for OAuth apps\" repo user workflow",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 25987
+    },
+    {
+      "type": "search",
+      "query": "GitHub OAuth app review verification process required or optional",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 26655
+    },
+    {
+      "type": "finding",
+      "fact": "Creating an OAuth app requires an application name, homepage URL, and an authorization callback URL. Users can also configure whether user access tokens expire.",
+      "sourceIds": [
+        "S38"
+      ],
+      "t": 30600
+    },
+    {
+      "type": "finding",
+      "fact": "The REST API rate limit is 5,000 requests per hour for authenticated requests (OAuth apps/PATs) and 15,000 requests per hour for GitHub Enterprise Cloud organizations. Unauthenticated requests are limited to 60 per hour.",
+      "sourceIds": [
+        "S17"
+      ],
+      "t": 30600
+    },
+    {
+      "type": "finding",
+      "fact": "Authorizing OAuth apps uses a web flow where users grant permissions. Optional parameters include state, login, and allow_signup. Expiring token flows support refresh tokens valid for 6 months.",
+      "sourceIds": [
+        "S3"
+      ],
+      "t": 30600
+    },
+    {
+      "type": "finding",
+      "fact": "Typical agent scopes include repo (full control of private/public repositories), workflow (managing GitHub Actions), and read:user (reading user profile data).",
+      "sourceIds": [
+        "S7"
+      ],
+      "t": 30600
+    },
+    {
+      "type": "read",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app",
+      "title": "Creating an OAuth app - GitHub Docs",
+      "ok": true,
+      "chars": 2756,
+      "via": "direct",
+      "sourceId": "S38",
+      "t": 31167
+    },
+    {
+      "type": "read",
+      "url": "https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api",
+      "title": "Rate limits for the REST API - GitHub Docs",
+      "ok": true,
+      "chars": 12665,
+      "via": "direct",
+      "sourceId": "S17",
+      "t": 31276
+    },
+    {
+      "type": "read",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps",
+      "title": "Scopes for OAuth apps - GitHub Docs",
+      "ok": true,
+      "chars": 9201,
+      "via": "direct",
+      "sourceId": "S7",
+      "t": 31307
+    },
+    {
+      "type": "read",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps",
+      "title": "Authorizing OAuth apps - GitHub Docs",
+      "ok": true,
+      "chars": 14000,
+      "via": "direct",
+      "sourceId": "S3",
+      "t": 31578
+    },
+    {
+      "type": "info",
+      "message": "Research done: 11 findings, 5 pages read, 5 probes.",
+      "t": 33628
+    },
+    {
+      "type": "stage",
+      "stage": "write",
+      "message": "Writing the guide",
+      "t": 33629
+    },
+    {
+      "type": "warn",
+      "message": "gemini-3.6-flash unavailable (429); falling back to gemini-3.5-flash-lite",
+      "t": 33995
+    },
+    {
+      "type": "info",
+      "message": "Verdict drafted: GitHub OAuth app registration is entirely self-serve with zero review or approval required.",
+      "t": 39802
+    },
+    {
+      "type": "warn",
+      "message": "gemini-3.6-flash unavailable (429); falling back to gemini-3.5-flash-lite",
+      "t": 40622
+    },
+    {
+      "type": "stage",
+      "stage": "check",
+      "message": "Checking citations, confidence labels and ratings",
+      "t": 49793
+    },
+    {
+      "type": "info",
+      "message": "Verifier: re-reading the cited sources for the rating factors, timeline and cost",
+      "t": 49795
+    },
+    {
+      "type": "warn",
+      "message": "gemini-3.6-flash unavailable (429); falling back to gemini-3.5-flash-lite",
+      "t": 50204
+    },
+    {
+      "type": "info",
+      "message": "Verifier: 10 confirmed, 0 corrected, 0 unverifiable",
+      "t": 65332
+    },
+    {
+      "type": "quality",
+      "report": {
+        "claims": {
+          "tested": 1,
+          "official": 5,
+          "reported": 20,
+          "inferred": 5
+        },
+        "sources": {
+          "total": 11,
+          "fetched": 5,
+          "snippetOnly": 6,
+          "official": 0,
+          "community": 10,
+          "composio": 1
+        },
+        "probes": {
+          "total": 5,
+          "pass": 4,
+          "info": 1,
+          "fail": 0
+        },
+        "fixes": [
+          "factor self_serve_registration: \"official\" but only community sources → reported",
+          "factor review_required: \"official\" but only community sources → reported",
+          "factor business_verification: \"official\" but only community sources → reported",
+          "factor security_assessment: \"official\" but only community sources → reported",
+          "factor paid_access: \"official\" but only community sources → reported",
+          "factor partner_or_sales_gate: \"official\" but only community sources → reported",
+          "factor user_cap_before_review: \"official\" but only community sources → reported",
+          "factor per_customer_setup: \"official\" but only community sources → reported",
+          "step Navigate to GitHub Developer Settings: \"official\" but only community sources → reported",
+          "step Generate Client Secret: \"official\" but only community sources → reported",
+          "step Configure User Access Token Expiration: \"official\" but only community sources → reported",
+          "step \"Create Custom Auth Config in Composio\": Composio auth-config creation is agent-doable via API → agent",
+          "step Verify Default Scopes: \"tested\" on a claim no probe can confirm → inferred",
+          "requirement 1: \"official\" but only community sources → reported",
+          "requirement 2: \"official\" but only community sources → reported",
+          "scope repo: \"official\" but only community sources → reported",
+          "scope workflow: \"official\" but only community sources → reported",
+          "scope read:user: \"official\" but only community sources → reported",
+          "scope gist: \"tested\" on a claim no probe can confirm → inferred",
+          "scope notifications: \"tested\" on a claim no probe can confirm → inferred",
+          "scope project: \"tested\" on a claim no probe can confirm → inferred",
+          "scope codespace: \"tested\" on a claim no probe can confirm → inferred",
+          "blocker 1: \"official\" but only community sources → reported",
+          "blocker 2: \"official\" but only community sources → reported",
+          "nuance 1: \"official\" but only community sources → reported",
+          "nuance 4: \"official\" but only community sources → reported"
+        ],
+        "llm": {
+          "calls": 10,
+          "inputTokens": 67640,
+          "outputTokens": 7280,
+          "model": "gemini-3.5-flash-lite"
+        }
+      },
+      "t": 65333
+    }
+  ],
+  "quality": {
+    "claims": {
+      "tested": 1,
+      "official": 5,
+      "reported": 20,
+      "inferred": 5
+    },
+    "sources": {
+      "total": 11,
+      "fetched": 5,
+      "snippetOnly": 6,
+      "official": 0,
+      "community": 10,
+      "composio": 1
+    },
+    "probes": {
+      "total": 5,
+      "pass": 4,
+      "info": 1,
+      "fail": 0
+    },
+    "fixes": [
+      "factor self_serve_registration: \"official\" but only community sources → reported",
+      "factor review_required: \"official\" but only community sources → reported",
+      "factor business_verification: \"official\" but only community sources → reported",
+      "factor security_assessment: \"official\" but only community sources → reported",
+      "factor paid_access: \"official\" but only community sources → reported",
+      "factor partner_or_sales_gate: \"official\" but only community sources → reported",
+      "factor user_cap_before_review: \"official\" but only community sources → reported",
+      "factor per_customer_setup: \"official\" but only community sources → reported",
+      "step Navigate to GitHub Developer Settings: \"official\" but only community sources → reported",
+      "step Generate Client Secret: \"official\" but only community sources → reported",
+      "step Configure User Access Token Expiration: \"official\" but only community sources → reported",
+      "step \"Create Custom Auth Config in Composio\": Composio auth-config creation is agent-doable via API → agent",
+      "step Verify Default Scopes: \"tested\" on a claim no probe can confirm → inferred",
+      "requirement 1: \"official\" but only community sources → reported",
+      "requirement 2: \"official\" but only community sources → reported",
+      "scope repo: \"official\" but only community sources → reported",
+      "scope workflow: \"official\" but only community sources → reported",
+      "scope read:user: \"official\" but only community sources → reported",
+      "scope gist: \"tested\" on a claim no probe can confirm → inferred",
+      "scope notifications: \"tested\" on a claim no probe can confirm → inferred",
+      "scope project: \"tested\" on a claim no probe can confirm → inferred",
+      "scope codespace: \"tested\" on a claim no probe can confirm → inferred",
+      "blocker 1: \"official\" but only community sources → reported",
+      "blocker 2: \"official\" but only community sources → reported",
+      "nuance 1: \"official\" but only community sources → reported",
+      "nuance 4: \"official\" but only community sources → reported"
+    ],
+    "llm": {
+      "calls": 10,
+      "inputTokens": 67640,
+      "outputTokens": 7280,
+      "model": "gemini-3.5-flash-lite"
+    }
+  }
+}

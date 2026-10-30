@@ -1,0 +1,276 @@
+{
+  "query": "Calendly",
+  "events": [
+    {
+      "type": "stage",
+      "stage": "resolve",
+      "message": "Identifying “Calendly”",
+      "t": 1
+    },
+    {
+      "type": "search",
+      "query": "Calendly API OAuth app developer documentation",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 2588
+    },
+    {
+      "type": "info",
+      "message": "Identified Calendly — Calendly is an automated scheduling platform for individuals and teams to streamline meeting booking.",
+      "t": 7160
+    },
+    {
+      "type": "stage",
+      "stage": "composio",
+      "message": "Checking Composio’s toolkit catalog",
+      "t": 7160
+    },
+    {
+      "type": "info",
+      "message": "Composio toolkit `calendly` has a managed OAuth app: you can prototype today and need your own app for production branding, scopes or quota.",
+      "t": 8312
+    },
+    {
+      "type": "stage",
+      "stage": "research",
+      "message": "Researching docs, policies and real-world reports",
+      "t": 8312
+    },
+    {
+      "type": "search",
+      "query": "Calendly OAuth app review approval verification publish requirements",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 10561
+    },
+    {
+      "type": "search",
+      "query": "Calendly OAuth app approval how long experience reddit OR forum",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 10665
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "oauth-discovery",
+        "target": "GET https://auth.calendly.com/.well-known/openid-configuration | https://auth.calendly.com/.well-known/oauth-authorization-server",
+        "result": "info",
+        "summary": "No public OAuth/OIDC discovery document; endpoints must come from the provider docs.",
+        "detail": "404 https://auth.calendly.com/.well-known/openid-configuration\n404 https://auth.calendly.com/.well-known/oauth-authorization-server",
+        "id": "P2",
+        "at": "2026-10-29T12:58:04.163Z"
+      },
+      "t": 16995
+    },
+    {
+      "type": "read",
+      "url": "https://developer.calendly.com/docs/authentication/scopes",
+      "title": "Authorization Scopes | Calendly | Developer Documentation",
+      "ok": true,
+      "chars": 7018,
+      "via": "direct",
+      "sourceId": "S3",
+      "t": 17186
+    },
+    {
+      "type": "read",
+      "url": "https://developer.calendly.com/docs/authentication/creating-an-oauth-app",
+      "title": "Creating an OAuth app | Calendly | Developer Documentation",
+      "ok": true,
+      "chars": 4549,
+      "via": "direct",
+      "sourceId": "S1",
+      "t": 17387
+    },
+    {
+      "type": "read",
+      "url": "https://developer.calendly.com/docs/authentication/overview",
+      "title": "Authentication | Calendly | Developer Documentation",
+      "ok": true,
+      "chars": 1766,
+      "via": "direct",
+      "sourceId": "S2",
+      "t": 17555
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "authorize-endpoint",
+        "target": "GET https://auth.calendly.com/oauth/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=event_types%3Aread+scheduling%3Aread+scheduling%3Awrite",
+        "result": "pass",
+        "summary": "Endpoint is live; it sends the browser to sign-in before validating the client (200).",
+        "detail": "Chain: 301 auth.calendly.com/oauth/authorize → 302 calendly.com/oauth/authorize → 200 calendly.com/app/login\nFinal: https://calendly.com/app/login\nExcerpt: title=\"Calendly\"",
+        "id": "P3",
+        "at": "2026-10-29T12:58:04.997Z"
+      },
+      "t": 17829
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "portal",
+        "target": "GET https://developer.calendly.com",
+        "result": "pass",
+        "summary": "Portal reachable (200, \"Build with Calendly | Calendly | Developer Documentation\"); no sign-in redirect seen on the landing page.",
+        "detail": "Chain: 307 developer.calendly.com/ → 200 developer.calendly.com/docs/getting-started/overview",
+        "id": "P4",
+        "at": "2026-10-29T12:58:05.516Z"
+      },
+      "t": 18348
+    },
+    {
+      "type": "finding",
+      "fact": "Calendly OAuth apps are created via Developer tools at calendly.com/app/developer (or developer.calendly.com/login if the account is still being migrated), under the OAuth apps tab by selecting Create OAuth app.",
+      "sourceIds": [
+        "S1"
+      ],
+      "t": 21944
+    },
+    {
+      "type": "finding",
+      "fact": "Creating a Calendly OAuth app requires specifying App name, Redirect URI, Environment type (Sandbox or Production), and selecting at least one scope.",
+      "sourceIds": [
+        "S1"
+      ],
+      "t": 21944
+    },
+    {
+      "type": "finding",
+      "fact": "Calendly OAuth creation is self-serve with no documented app review or approval gate before arbitrary users can authorize it.",
+      "sourceIds": [
+        "S1",
+        "S10"
+      ],
+      "t": 21944
+    },
+    {
+      "type": "finding",
+      "fact": "Sandbox redirect URIs allow https URIs and http URIs on localhost (e.g. http://localhost:1234/callback). Production requires https URIs only.",
+      "sourceIds": [
+        "S1"
+      ],
+      "t": 21945
+    },
+    {
+      "type": "finding",
+      "fact": "Composio's redirect URI for Calendly is https://backend.composio.dev/api/v3/toolkits/auth/callback.",
+      "sourceIds": [
+        "S9"
+      ],
+      "t": 21945
+    },
+    {
+      "type": "finding",
+      "fact": "Client ID, client secret, and webhook signing key are shown once upon creation and cannot be retrieved again; they must be copied immediately.",
+      "sourceIds": [
+        "S1"
+      ],
+      "t": 21945
+    },
+    {
+      "type": "finding",
+      "fact": "Calendly OAuth 2.1 requires Proof Key for Code Exchange (PKCE) with the S256 method (code_challenge_method=S256).",
+      "sourceIds": [
+        "S1"
+      ],
+      "t": 21945
+    },
+    {
+      "type": "finding",
+      "fact": "Calendly does not let end users selectively approve individual scopes during the OAuth connection flow; the scopes configured in the OAuth app are requested as a fixed set.",
+      "sourceIds": [
+        "S9"
+      ],
+      "t": 21945
+    },
+    {
+      "type": "info",
+      "message": "Research done: 8 findings, 4 pages read, 4 probes.",
+      "t": 25014
+    },
+    {
+      "type": "stage",
+      "stage": "write",
+      "message": "Writing the guide",
+      "t": 25014
+    },
+    {
+      "type": "info",
+      "message": "Verdict drafted: Calendly provides a completely self-serve OAuth setup with no review gate required for production use.",
+      "t": 32971
+    },
+    {
+      "type": "stage",
+      "stage": "check",
+      "message": "Checking citations, confidence labels and ratings",
+      "t": 41878
+    },
+    {
+      "type": "quality",
+      "report": {
+        "claims": {
+          "tested": 0,
+          "official": 29,
+          "reported": 0,
+          "inferred": 0
+        },
+        "sources": {
+          "total": 4,
+          "fetched": 3,
+          "snippetOnly": 1,
+          "official": 2,
+          "community": 1,
+          "composio": 1
+        },
+        "probes": {
+          "total": 4,
+          "pass": 3,
+          "info": 1,
+          "fail": 0
+        },
+        "fixes": [
+          "step \"Create a custom auth config in Composio\": Composio auth-config creation is agent-doable via API → agent"
+        ],
+        "llm": {
+          "calls": 6,
+          "inputTokens": 22660,
+          "outputTokens": 4849,
+          "model": "gemini-3.5-flash-lite"
+        }
+      },
+      "t": 41880
+    }
+  ],
+  "quality": {
+    "claims": {
+      "tested": 0,
+      "official": 29,
+      "reported": 0,
+      "inferred": 0
+    },
+    "sources": {
+      "total": 4,
+      "fetched": 3,
+      "snippetOnly": 1,
+      "official": 2,
+      "community": 1,
+      "composio": 1
+    },
+    "probes": {
+      "total": 4,
+      "pass": 3,
+      "info": 1,
+      "fail": 0
+    },
+    "fixes": [
+      "step \"Create a custom auth config in Composio\": Composio auth-config creation is agent-doable via API → agent"
+    ],
+    "llm": {
+      "calls": 6,
+      "inputTokens": 22660,
+      "outputTokens": 4849,
+      "model": "gemini-3.5-flash-lite"
+    }
+  }
+}

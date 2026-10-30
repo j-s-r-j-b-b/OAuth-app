@@ -29,7 +29,7 @@ import { matchToolkit } from '../catalog.ts';
 import { composioEnabled, connectProbeAuto, describeConnectProbe, getToolkitAuth, getToolkitDocs, webSearch, type ConnectProbeResult } from '../composio.ts';
 import { env } from '../env.ts';
 import { chat, parseJsonLoose, type Usage } from './llm.ts';
-import { IDENTIFY_SYSTEM, PLAN_TASK, RESEARCH_SYSTEM, VERDICT_TASK, WRITE_RULES } from './prompts.ts';
+import { IDENTIFY_SYSTEM, PLAN_TASK, RESEARCH_SYSTEM, VERDICT_TASK, VERIFY_TASK, WRITE_RULES } from './prompts.ts';
 import { EvidenceRegistry } from './registry.ts';
 import { RESEARCH_TOOLS, runTool, type ToolContext } from './tools.ts';
 
@@ -506,6 +506,77 @@ export async function generateGuide(
     },
   };
 
+  // ── Verifier pass: re-read the cited source text for the claims that set the rating ──
+  emit({ type: 'info', message: 'Verifier: re-reading the cited sources for the rating factors, timeline and cost' });
+  const claims = [
+    ...draft.factors.map((f) => ({ claimKey: `factor:${f.key}`, claim: `${f.key} = ${f.value}: ${f.detail}`, sourceIds: f.sourceIds })),
+    { claimKey: 'timeToProduction', claim: `Time until any user can connect: ${draft.verdict.timeToProduction.label}. ${draft.verdict.timeToProduction.basis ?? ''}`, sourceIds: [] as string[] },
+    { claimKey: 'cost', claim: `Cost: ${draft.verdict.cost}. ${draft.verdict.costDetail ?? ''}`, sourceIds: [] as string[] },
+  ];
+  const textIds = [...new Set(claims.flatMap((c) => c.sourceIds))].filter((id) => id.startsWith('S')).slice(0, 10);
+  const fetchedExtra = reg.sources.filter((x) => x.text && !textIds.includes(x.id)).slice(0, Math.max(0, 6 - textIds.length)).map((x) => x.id);
+  const sourceTexts = [...textIds, ...fetchedExtra]
+    .map((id) => reg.sources.find((x) => x.id === id))
+    .filter(Boolean)
+    .map((x) => `[${x!.id}] ${x!.title} (${x!.url})\n${(x!.text ?? x!.excerpt).slice(0, 3500)}`)
+    .join('\n\n---\n\n');
+  try {
+    const vr = await chat(
+      {
+        model: env.llm.composeModel,
+        messages: [
+          { role: 'system', content: VERIFY_TASK },
+          {
+            role: 'user',
+            content: [
+              `CLAIMS:\n${claims.map((c) => `- ${c.claimKey} (cites ${c.sourceIds.join(', ') || 'none'}): ${c.claim}`).join('\n')}`,
+              `FINDINGS:\n${ctx.findings.map((f) => `- ${f.fact} [${f.sourceIds.join(', ')}]`).join('\n')}`,
+              `PROBES:\n${reg.probes.map((x) => `[${x.id}] ${x.summary}`).join('\n')}`,
+              `SOURCE TEXTS:\n${sourceTexts}`,
+            ].join('\n\n'),
+          },
+        ],
+        response_format: { type: 'json_object' },
+      },
+      usage,
+      onWait,
+    );
+    const parsed = parseJsonLoose(vr.choices[0].message.content ?? '') as { items?: { claimKey: string; outcome: string; note: string; sourceIds?: string[]; fix?: { value: string; detail: string } | null }[] };
+    const items: NonNullable<Guide['evidence']['verification']>['items'] = [];
+    for (const it of parsed.items ?? []) {
+      const c = claims.find((x) => x.claimKey === it.claimKey);
+      if (!c || !['confirmed', 'corrected', 'unverifiable'].includes(it.outcome)) continue;
+      const ids = (it.sourceIds ?? []).filter((id) => known.has(id));
+      ids.forEach((id) => cited.add(id));
+      if (it.outcome === 'corrected' && it.fix && c.claimKey.startsWith('factor:') && ['yes', 'no', 'depends', 'unknown'].includes(it.fix.value)) {
+        const f = draft.factors.find((x) => `factor:${x.key}` === c.claimKey)!;
+        fixes.push(`verifier: ${f.key} ${f.value} → ${it.fix.value}`);
+        f.value = it.fix.value as typeof f.value;
+        f.detail = it.fix.detail || f.detail;
+        f.sourceIds = [...new Set([...f.sourceIds, ...ids])];
+      }
+      if (it.outcome === 'unverifiable' && c.claimKey.startsWith('factor:')) {
+        const f = draft.factors.find((x) => `factor:${x.key}` === c.claimKey)!;
+        if (f.confidence === 'official') {
+          f.confidence = 'reported';
+          fixes.push(`verifier: ${f.key} unsupported by its sources → reported`);
+        }
+      }
+      items.push({ claim: c.claim.slice(0, 140), outcome: it.outcome as 'confirmed' | 'corrected' | 'unverifiable', note: String(it.note ?? '').slice(0, 300), sourceIds: ids });
+    }
+    if (items.length) {
+      draft.evidence.verification = {
+        reviewedAt: new Date().toISOString().slice(0, 10),
+        method: `Automated verifier pass (${env.llm.composeModel}): re-read the cited source text for the 8 rating factors, the production timeline and the cost.`,
+        items,
+      } as any;
+      const n = (o: string) => items.filter((i) => i.outcome === o).length;
+      emit({ type: 'info', message: `Verifier: ${n('confirmed')} confirmed, ${n('corrected')} corrected, ${n('unverifiable')} unverifiable` });
+    }
+  } catch (e) {
+    emit({ type: 'warn', message: `Verifier pass skipped: ${(e as Error).message.slice(0, 120)}` });
+  }
+
   // Difficulty is derived, never trusted from the model.
   const derived = deriveDifficulty(draft as unknown as Guide);
   if (derived !== p1.verdict.difficulty) fixes.push(`difficulty: model said "${p1.verdict.difficulty}", factors imply "${derived}"`);
@@ -533,7 +604,7 @@ export async function generateGuide(
       Object.values(o).forEach(walk);
     }
   };
-  walk([draft.factors, draft.phases, draft.requirements, draft.scopes, draft.blockers, draft.nuances]);
+  walk([draft.factors, draft.phases, draft.requirements, draft.scopes, draft.blockers, draft.nuances, draft.evidence.verification]);
 
   if (!reg.probes.some((p) => p.result === 'pass' && p.kind !== 'composio-api')) {
     draft.evidence.openQuestions.push({

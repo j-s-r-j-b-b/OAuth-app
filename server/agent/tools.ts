@@ -83,6 +83,7 @@ export async function runTool(name: string, args: Record<string, any>, ctx: Tool
       try {
         const page = await readPage(url);
         const s = reg.addSource(page.finalUrl || url, page.title, 'fetched', page.text.slice(0, 600));
+        s.text = page.text.slice(0, 8000); // kept for the verifier pass
         emit({ type: 'read', url: s.url, title: page.title, ok: true, chars: page.text.length, via: page.via, sourceId: s.id });
         return `[${s.id}] ${page.title} — ${s.url}\n\n${page.text}`;
       } catch (e) {

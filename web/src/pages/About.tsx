@@ -117,7 +117,7 @@ export default function About() {
             .{' '}
             <strong>Live guides</strong> are produced on demand in a few minutes by a smaller agent built on Composio's own search tools and a free-tier model.
             Before a live guide is published, every citation is checked automatically: citations to pages the agent never retrieved are removed, a “tested”
-            label without a probe is downgraded, and the rating is recomputed. Live guides are a fast first answer; check the evidence before committing.
+            label without a probe is downgraded, an automated verifier re-reads the cited source text for the rating factors, timeline and cost (unsupported claims are downgraded, contradicted ones corrected), and the rating is recomputed. Live guides are a fast first answer; check the evidence before committing.
           </p>
         </section>
 

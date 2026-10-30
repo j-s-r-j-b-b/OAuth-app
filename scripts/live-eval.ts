@@ -71,7 +71,8 @@ const ROUNDS: [string, string][] = [
   ['round-1', 'Baseline'],
   ['round-2', 'Pricing search, ≥4 page reads before finishing, question about unlisted-app limits'],
   ['round-3', '+ gotcha checklist from the library, stronger writing model, Composio setup attempt'],
-  ['.', '+ explicit factor definitions (thresholds count as a gate; review = any approval needed for full access)'],
+  ['round-4', '+ explicit factor definitions (thresholds count as a gate; review = any approval needed for full access)'],
+  ['.', '+ automated verifier pass; evaluated on 7 apps (adds Gmail, GitHub, Webflow, Shopify)'],
 ];
 out.push('\n## Rounds\n');
 out.push('| Round | Changes | Rating matched | Production ranges overlap | Factors agree |');

@@ -4,7 +4,7 @@
  */
 import type { Probe, Source } from '../../shared/schema.ts';
 
-export type RegSource = Source & { retrieval: 'fetched' | 'search-result'; excerpt: string };
+export type RegSource = Source & { retrieval: 'fetched' | 'search-result'; excerpt: string; text?: string };
 
 const COMMUNITY = /(reddit\.com|stackoverflow\.com|stackexchange\.com|medium\.com|dev\.to|news\.ycombinator\.com|quora\.com|youtube\.com|hashnode|substack\.com|github\.com|community\.|forum|discuss)/i;
 const COMPOSIO = /(^|\.)composio\.dev$/i;

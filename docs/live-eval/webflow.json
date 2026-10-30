@@ -1,0 +1,833 @@
+{
+  "schemaVersion": 1,
+  "slug": "webflow",
+  "app": {
+    "name": "Webflow",
+    "website": "https://webflow.com",
+    "category": "CMS",
+    "description": "Webflow is a SaaS application that allows builders to design, build, and launch websites visually while translating code behind the scenes.",
+    "developerPortalUrl": "https://developers.webflow.com",
+    "docsUrl": "https://developers.webflow.com/data/reference/rest-introduction/quick-start"
+  },
+  "composio": {
+    "toolkitSlug": "webflow",
+    "managedOAuth": "not-available",
+    "authSchemes": [
+      "OAUTH2",
+      "API_KEY"
+    ],
+    "toolkitDocsUrl": "https://docs.composio.dev/toolkits/webflow",
+    "requiredFields": [],
+    "notes": [
+      "Tested: a custom auth config created without `oauth_redirect_uri` sends `https://backend.composio.dev/api/v1/auth-apps/add`. Register exactly the URI your auth config sends, or set `oauth_redirect_uri` to `https://backend.composio.dev/api/v3/toolkits/auth/callback` and register that instead.",
+      "Composio automatically requests the standard default scopes (`assets:read`, `cms:read`, `cms:write`, `sites:read`, etc.) during the redirect.",
+      "Ensure your Webflow application's configured redirect URI matches the callback URL expected by Composio."
+    ]
+  },
+  "assumption": "An agent that reads, writes, and manages content, custom code, forms, and pages across any customer's Webflow workspace.",
+  "verdict": {
+    "headline": "Webflow requires app registration via the Workspace settings and mandates a formal review process before public marketplace launch.",
+    "summary": "Developers can self-serve register applications and test within their own developer workspace. Custom apps are initially restricted to the developer's workspace by default, and deploying to external users requires app review. Production scale requires handling API rate limits tied to user site plans.",
+    "difficulty": "light-review",
+    "handsOnEffort": {
+      "label": "2–4 hours",
+      "minHours": 2,
+      "maxHours": 4,
+      "basis": "Configuring OAuth app in Webflow workspace and implementing endpoints."
+    },
+    "timeToFirstConnection": {
+      "label": "1–2 hours",
+      "minHours": 1,
+      "maxHours": 2,
+      "basis": "Immediate self-serve app creation under the developer workspace."
+    },
+    "timeToProduction": {
+      "label": "1–2 weeks",
+      "minHours": 168,
+      "maxHours": 336,
+      "basis": "App review and approval timeline for external workspace access."
+    },
+    "longestPole": "App review and approval for marketplace or public workspace access.",
+    "cost": "Free",
+    "costDetail": "Webflow offers a free Developer Workspace plan for building and testing integrations, while site hosting and specific plans are billed separately.",
+    "easierPaths": [
+      {
+        "condition": "Private apps or internal workspace integrations",
+        "effect": "Avoids public marketplace listing while still requiring the standard review submission process."
+      }
+    ]
+  },
+  "factors": [
+    {
+      "key": "self_serve_registration",
+      "value": "yes",
+      "detail": "Developers can self-serve register applications in Workspace settings under Apps & Integrations.",
+      "sourceIds": [
+        "S3"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "review_required",
+      "value": "yes",
+      "detail": "Apps must undergo review before being available to external workspaces or the marketplace.",
+      "sourceIds": [
+        "S5",
+        "S7",
+        "S9"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "business_verification",
+      "value": "no",
+      "detail": "No explicit business verification documents or DUNS number required for standard developer registration.",
+      "sourceIds": [
+        "S3"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "security_assessment",
+      "value": "no",
+      "detail": "No mandatory third-party security assessment or penetration test for basic data client integrations.",
+      "sourceIds": [
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "paid_access",
+      "value": "no",
+      "detail": "Developer workspace plan is free for building and testing integrations.",
+      "sourceIds": [
+        "S10"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "partner_or_sales_gate",
+      "value": "no",
+      "detail": "No partner program or sales contact required to register an app and develop.",
+      "sourceIds": [
+        "S3"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "user_cap_before_review",
+      "value": "yes",
+      "detail": "Unapproved apps are restricted to the developer's own workspace by default, with up to 5 test user accounts requestable via support.",
+      "sourceIds": [
+        "S9"
+      ],
+      "confidence": "official"
+    },
+    {
+      "key": "per_customer_setup",
+      "value": "no",
+      "detail": "Customers authorize the application via standard OAuth flow without custom manual onboarding.",
+      "sourceIds": [
+        "S1"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "phases": [
+    {
+      "id": "p1",
+      "title": "Register your Webflow App",
+      "outcome": "An active Webflow application with a Client ID and Client Secret.",
+      "steps": [
+        {
+          "id": "s1",
+          "title": "Create a Developer Workspace",
+          "actor": "you",
+          "effort": "5 min",
+          "wait": null,
+          "details": "Log in to Webflow and ensure you are using a workspace with Administrator access. Webflow provides a free Developer Workspace plan for building and testing integrations.",
+          "agentAssist": null,
+          "links": [
+            {
+              "label": "Webflow Developer Workspace",
+              "url": "https://developers.webflow.com/data/docs/developer-workspace"
+            }
+          ],
+          "sourceIds": [
+            "S1",
+            "S3",
+            "S10"
+          ],
+          "confidence": "official"
+        },
+        {
+          "id": "s2",
+          "title": "Register the Application",
+          "actor": "you",
+          "effort": "10 min",
+          "wait": null,
+          "details": "Navigate to **Workspace settings → Apps & Integrations**, select **App Development**, and create a new app using the **Data Client** building block.",
+          "agentAssist": "Draft a checklist of required app metadata such as app name, description, and website URL.",
+          "links": [
+            {
+              "label": "Register an App",
+              "url": "https://developers.webflow.com/apps/data/docs/register-an-app.md"
+            }
+          ],
+          "sourceIds": [
+            "S3"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "title": "Configure OAuth Settings & Redirect URIs",
+      "outcome": "Configured redirect URLs and credential securely generated.",
+      "steps": [
+        {
+          "id": "s3",
+          "title": "Configure Redirect URI and Scopes",
+          "actor": "you",
+          "effort": "10 min",
+          "wait": null,
+          "details": "In your app configuration, set the redirect URI to `https://backend.composio.dev/api/v1/auth-apps/add` (or `https://backend.composio.dev/api/v3/toolkits/auth/callback`). Select the necessary data and CMS scopes (`assets:read`, `cms:read`, `cms:write`, `sites:read`, etc.).",
+          "agentAssist": "Prepare the full list of required scopes for your integration agent.",
+          "links": [
+            {
+              "label": "OAuth App Reference",
+              "url": "https://developers.webflow.com/data/reference/oauth-app"
+            }
+          ],
+          "sourceIds": [
+            "S1",
+            "P2"
+          ],
+          "confidence": "tested"
+        },
+        {
+          "id": "s4",
+          "title": "Retrieve Client ID and Client Secret",
+          "actor": "you",
+          "effort": "2 min",
+          "wait": null,
+          "details": "Copy the generated Client ID. As a workspace administrator, view and securely copy the Client Secret. Store these credentials safely.",
+          "agentAssist": null,
+          "links": [
+            {
+              "label": "Authentication Guide",
+              "url": "https://developers.webflow.com/data/reference/authentication"
+            }
+          ],
+          "sourceIds": [
+            "S1"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "title": "Test with Your Own Account",
+      "outcome": "Verified authorization handshake using your developer workspace.",
+      "steps": [
+        {
+          "id": "s5",
+          "title": "Execute Test Authorization Flow",
+          "actor": "agent",
+          "effort": "15 min",
+          "wait": null,
+          "details": "Initiate an OAuth connection targeting `https://webflow.com/oauth/authorize` with `response_type=code` and verify that the authorization code is successfully returned and exchanged via POST to `https://api.webflow.com/oauth/access_token`.",
+          "agentAssist": "Run automated probe checks against Webflow's authorization endpoint to ensure parameters match requirements.",
+          "links": [
+            {
+              "label": "OAuth Reference",
+              "url": "https://developers.webflow.com/data/reference/oauth-app"
+            }
+          ],
+          "sourceIds": [
+            "S1",
+            "P4"
+          ],
+          "confidence": "tested"
+        }
+      ]
+    },
+    {
+      "id": "p4",
+      "title": "Prepare for Review",
+      "outcome": "Submission-ready application package.",
+      "steps": [
+        {
+          "id": "s6",
+          "title": "Prepare App for Submission",
+          "actor": "you",
+          "effort": "30 min",
+          "wait": null,
+          "details": "Ensure your app handles rate limits correctly (Starter/Basic: 60 RPM, CMS/Business: 120 RPM) and meets all Webflow Marketplace guidelines.",
+          "agentAssist": "Draft documentation, privacy policy statements, and scope justifications required for the review process.",
+          "links": [
+            {
+              "label": "Marketplace Guidelines",
+              "url": "https://developers.webflow.com/apps/docs/marketplace-guidelines.md"
+            }
+          ],
+          "sourceIds": [
+            "S6",
+            "S8"
+          ],
+          "confidence": "official"
+        }
+      ]
+    },
+    {
+      "id": "p5",
+      "title": "Go live in Composio",
+      "outcome": "Webflow fully wired into Composio for execution.",
+      "steps": [
+        {
+          "id": "s7",
+          "title": "Create Custom Auth Config in Composio",
+          "actor": "agent",
+          "effort": "10 min",
+          "wait": null,
+          "details": "Provide your Webflow Client ID and Client Secret to Composio via the developer dashboard or custom auth configuration API to enable managed execution for your Webflow toolkit.",
+          "agentAssist": "Generate the API payload needed to configure the custom OAuth2 integration inside Composio.",
+          "links": [
+            {
+              "label": "Composio Webflow Toolkit",
+              "url": "https://docs.composio.dev/toolkits/webflow"
+            }
+          ],
+          "sourceIds": [
+            "S4",
+            "P2"
+          ],
+          "confidence": "official"
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "item": "Webflow Account & Workspace",
+      "neededFor": "registration",
+      "detail": "A Webflow account with access to Workspace settings to create a new app under the App Development section.",
+      "sourceIds": [
+        "S3"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "Workspace Administrator Access",
+      "neededFor": "registration",
+      "detail": "Only workspace administrators are authorized to view a client secret in Webflow.",
+      "sourceIds": [
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "item": "OAuth 2.0 Redirect URI",
+      "neededFor": "testing",
+      "detail": "Configured callback URL (e.g., https://backend.composio.dev/api/v1/auth-apps/add) to receive authorization codes.",
+      "sourceIds": [
+        "S1",
+        "P2"
+      ],
+      "confidence": "tested"
+    }
+  ],
+  "scopes": [
+    {
+      "scope": "assets:read",
+      "purpose": "Read access to workspace assets",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "S2",
+        "P2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "assets:write",
+      "purpose": "Write access to workspace assets",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "S2",
+        "P2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "authorized_user:read",
+      "purpose": "Read access to authorized user information",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "S2",
+        "P2"
+      ],
+      "confidence": "tested"
+    },
+    {
+      "scope": "cms:read",
+      "purpose": "Read access to CMS collections and items",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "S2",
+        "P2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "cms:write",
+      "purpose": "Write access to CMS collections and items",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "S2",
+        "P2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "custom_code:read",
+      "purpose": "Read access to custom code configurations",
+      "tier": "sensitive",
+      "note": null,
+      "sourceIds": [
+        "S2",
+        "P2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "custom_code:write",
+      "purpose": "Write access to custom code configurations",
+      "tier": "sensitive",
+      "note": null,
+      "sourceIds": [
+        "S2",
+        "P2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "forms:read",
+      "purpose": "Read access to form submissions",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "S2",
+        "P2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "forms:write",
+      "purpose": "Write access to forms",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "S2",
+        "P2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "pages:read",
+      "purpose": "Read access to site pages",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "S2",
+        "P2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "pages:write",
+      "purpose": "Write access to site pages",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "S2",
+        "P2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "sites:read",
+      "purpose": "Read access to sites",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "S2",
+        "P2"
+      ],
+      "confidence": "official"
+    },
+    {
+      "scope": "sites:write",
+      "purpose": "Write access to sites",
+      "tier": "basic",
+      "note": null,
+      "sourceIds": [
+        "S2",
+        "P2"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "blockers": [
+    {
+      "title": "Client Secret Hidden",
+      "symptom": "Cannot view the Client Secret in the Webflow dashboard.",
+      "likelihood": "common",
+      "howToProceed": "Ensure you are logged into Webflow with Workspace Administrator permissions; non-admin users cannot view client secrets.",
+      "escalation": null,
+      "sourceIds": [
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Authorization Code Expiration",
+      "symptom": "Token exchange fails with an invalid or expired code error.",
+      "likelihood": "occasional",
+      "howToProceed": "Webflow authorization codes expire in 15 minutes and can only be used once. Restart the authorization flow to obtain a fresh code.",
+      "escalation": null,
+      "sourceIds": [
+        "S1"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "External User Access Restriction",
+      "symptom": "Users outside the developer workspace cannot install the unapproved app.",
+      "likelihood": "common",
+      "howToProceed": "Unapproved custom apps are restricted to the developer's workspace by default. Request up to 5 test user accounts via Webflow support or submit the app for review.",
+      "escalation": {
+        "label": "Webflow Support",
+        "url": "https://developers.webflow.com"
+      },
+      "sourceIds": [
+        "S9"
+      ],
+      "confidence": "official"
+    }
+  ],
+  "nuances": [
+    {
+      "title": "Token Revocation",
+      "detail": "Access tokens can be explicitly revoked by making a POST request to `https://webflow.com/oauth/revoke_authorization`.",
+      "sourceIds": [
+        "S11"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "Rate Limits by Plan",
+      "detail": "Webflow API rate limits vary depending on the site plan: Starter and Basic plans allow 60 RPM, CMS, eCommerce, and Business plans allow 120 RPM, while Enterprise has custom limits.",
+      "sourceIds": [
+        "S8"
+      ],
+      "confidence": "official"
+    },
+    {
+      "title": "PKCE Requirement",
+      "detail": "Webflow supports and utilizes PKCE during the authorization code grant flow as implemented by Composio.",
+      "sourceIds": [
+        "P2"
+      ],
+      "confidence": "tested"
+    }
+  ],
+  "composioSetup": {
+    "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
+    "steps": [
+      "Navigate to the Composio dashboard and open the Webflow toolkit configuration.",
+      "Select custom auth configuration and enter your Webflow Client ID and Client Secret.",
+      "Verify the redirect URI matches `https://backend.composio.dev/api/v1/auth-apps/add`.",
+      "Save the custom auth configuration and initialize a connection session."
+    ],
+    "tested": {
+      "probeId": "P2",
+      "testedAt": "2026-10-30",
+      "authorizeUrl": "https://webflow.com/oauth/authorize",
+      "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
+      "defaultScopes": [
+        "assets:read",
+        "assets:write",
+        "authorized_user:read",
+        "cms:read",
+        "cms:write",
+        "custom_code:read",
+        "custom_code:write",
+        "forms:read",
+        "forms:write",
+        "pages:read",
+        "pages:write",
+        "sites:read",
+        "sites:write"
+      ],
+      "extraParams": {
+        "response_type": "code"
+      }
+    }
+  },
+  "evidence": {
+    "sources": [
+      {
+        "id": "S1",
+        "url": "https://developers.webflow.com/data/reference/oauth-app",
+        "title": "OAuth | Webflow Developer Documentation",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Covers Webflow OAuth endpoints, client secret visibility constraints, and authorization code expiration rules.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S2",
+        "url": "https://developers.webflow.com/data/reference/scopes",
+        "title": "Scopes | Webflow Developer Documentation",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Defines available scopes for Webflow APIs.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S3",
+        "url": "https://developers.webflow.com/apps/data/docs/register-an-app.md",
+        "title": "Register an App",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Outlines app registration steps inside Webflow workspace settings.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S4",
+        "url": "https://docs.composio.dev/toolkits/webflow",
+        "title": "Composio docs: Webflow toolkit",
+        "kind": "composio",
+        "accessedAt": "2026-10-30",
+        "note": "Composio documentation for the Webflow toolkit.",
+        "retrieval": "fetched"
+      },
+      {
+        "id": "S5",
+        "url": "https://developers.webflow.com/data/v2.0.0-beta/docs/marketplace/submitting-your-app.md",
+        "title": "Submitting Your App to the Webflow Marketplace",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Submitting apps to the Webflow Marketplace.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S6",
+        "url": "https://developers.webflow.com/apps/docs/marketplace-guidelines.md",
+        "title": "Marketplace Guidelines",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Details marketplace guidelines for app publishing.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S7",
+        "url": "https://developers.webflow.com/apps/docs/private-apps",
+        "title": "Private Apps",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Covers private apps and review requirements.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S8",
+        "url": "https://developers.webflow.com/data/reference/rate-limits",
+        "title": "Rate Limits",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Describes Webflow API rate limits based on hosting plans.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S9",
+        "url": "https://developers.webflow.com/apps/docs/marketplace/overview",
+        "title": "Overview",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Explains user restrictions for unapproved apps and test account allowances.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S10",
+        "url": "https://developers.webflow.com/data/docs/developer-workspace.mdx",
+        "title": "Developer workspace plan",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "Mentions the free Developer Workspace plan for building and testing integrations.",
+        "retrieval": "search-result"
+      },
+      {
+        "id": "S11",
+        "url": "https://developers.webflow.com/data/v2.0.0-beta/docs/faqs-and-troubleshooting",
+        "title": "FAQs and Troubleshooting",
+        "kind": "official",
+        "accessedAt": "2026-10-30",
+        "note": "References token revocation endpoints and troubleshooting tips.",
+        "retrieval": "search-result"
+      }
+    ],
+    "probes": [
+      {
+        "id": "P1",
+        "kind": "composio-api",
+        "target": "GET https://backend.composio.dev/api/v3.1/toolkits/webflow",
+        "result": "pass",
+        "summary": "Auth schemes: OAUTH2, API_KEY. Connection fields: none. Default scopes: assets:read assets:write authorized_user:read cms:read cms:write custom_code:read custom_code:write forms:read forms:write pages:read pages:write sites:read.",
+        "detail": "[{\"scheme\":\"OAUTH2\",\"managed\":false,\"configFields\":[{\"name\":\"client_id\",\"displayName\":\"Client id\",\"required\":true,\"description\":\"Client id of the app\"},{\"name\":\"client_secret\",\"displayName\":\"Client secret\",\"required\":true,\"description\":\"Client secret of the app\"},{\"name\":\"oauth_redirect_uri\",\"displayName\":\"Redirect URI\",\"required\":false,\"description\":\"Add this Redirect URL to your app's OAuth allow list.\"},{\"name\":\"scopes\",\"displayName\":\"Scopes\",\"required\":false,\"description\":\"Scopes to request from the user, comma separated\"}],\"connectionFields\":[],\"defaultScopes\":[\"assets:read\",\"assets:write\",\"authorized_user:read\",\"cms:read\",\"cms:write\",\"custom_code:read\",\"custom_code:write\",\"forms:read\",\"forms:write\",\"pages:read\",\"pages:write\",\"sites:read\",\"sites:write\"]},{\"scheme\":\"API_KEY\",\"managed\":false,\"configFields\":[],\"connectionFields\":[{\"name\":\"generic_api_key\",\"displayName\":\"API Key\",\"required\":true,\"description\":\"An API token for one Webflow site. Create it in Site settings → Apps & integrations → API access with the scopes you need (CMS, pages, forms) — it is shown only once.\"}],\"defaultScopes\":[]}]",
+        "at": "2026-10-30T11:47:11.028Z"
+      },
+      {
+        "id": "P2",
+        "kind": "composio-api",
+        "target": "Composio API: create custom OAuth2 auth config for `webflow` with a dummy client → start a connection → follow the redirect (then delete both)",
+        "result": "pass",
+        "summary": "Composio sends users to https://webflow.com/oauth/authorize with redirect_uri=https://backend.composio.dev/api/v1/auth-apps/add; default scopes: assets:read assets:write authorized_user:read cms:read cms:write custom_code:read custom_code:write forms:read forms:write pages:read pages:write sites:read sites:write; PKCE on.",
+        "detail": "{\"authorizeUrl\":\"https://webflow.com/oauth/authorize\",\"redirectUri\":\"https://backend.composio.dev/api/v1/auth-apps/add\",\"scopes\":[\"assets:read\",\"assets:write\",\"authorized_user:read\",\"cms:read\",\"cms:write\",\"custom_code:read\",\"custom_code:write\",\"forms:read\",\"forms:write\",\"pages:read\",\"pages:write\",\"sites:read\",\"sites:write\"],\"extraParams\":{\"response_type\":\"code\"},\"pkce\":true,\"note\":\"extra params: response_type=code\"}",
+        "at": "2026-10-30T11:47:14.227Z"
+      },
+      {
+        "id": "P3",
+        "kind": "oauth-discovery",
+        "target": "GET https://api.webflow.com/.well-known/openid-configuration | https://api.webflow.com/.well-known/oauth-authorization-server",
+        "result": "info",
+        "summary": "No public OAuth/OIDC discovery document; endpoints must come from the provider docs.",
+        "detail": "404 https://api.webflow.com/.well-known/openid-configuration\n404 https://api.webflow.com/.well-known/oauth-authorization-server",
+        "at": "2026-10-30T11:47:20.873Z"
+      },
+      {
+        "id": "P4",
+        "kind": "authorize-endpoint",
+        "target": "GET https://webflow.com/oauth/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=sites%3Aread",
+        "result": "pass",
+        "summary": "Endpoint is live and rejects an unregistered client (200). Shows what a misconfigured app sees.",
+        "detail": "Chain: 302 webflow.com/oauth/authorize → 200 webflow.com/login\nFinal: https://webflow.com/login?r=https%3A%2F%2Fwebflow.com%2Foauth%2Fauthorize%3Fresponse_type%3Dcode%26client_id%3Doauth-runway-probe%26redirect_uri%3Dhttps%253A%252F%252Fbackend.composio.dev%252Fapi%252Fv3%252Ftoolkits%252Fauth%252Fcallback%26state%3Doauth-runway-probe%26scope%3Dsites%253Aread&m=WW91IG\nExcerpt: title=\"Login - Webflow\" | [Continue with SSO](/login?sso=true&r=https%3A%2F%2Fwebflow.com%2Foauth%2Fauthorize%3Fresponse_type%3Dcode%26client_id%3Doauth-runway-probe%26redirect_uri%3Dhttps%253A%252F%252Fbackend.composio.dev%252Fapi%252Fv3%252Ftoolkits%252Fauth%252Fcallback%26state%3Doauth-runway-probe%26scope%3Dsites%253Aread&entry_flow=oauth) | Don't have an account?[Sign up](/signup?r=https%3A%2F%2Fwebflow.com%2Foauth%2Fauthorize%3Fresponse_type%3Dcode%26client_id%3Doauth-runway-probe%26redirect_uri%3Dhttps%253A%252F%252Fbackend.composio.dev%252Fapi%252Fv3%252Ftoolkits%252Fauth%252Fcallback%26state%3Doauth-runway-probe%26scope%3Dsites%253Aread&entry_flow=oauth)",
+        "at": "2026-10-30T11:47:22.457Z"
+      },
+      {
+        "id": "P5",
+        "kind": "portal",
+        "target": "GET https://developers.webflow.com",
+        "result": "pass",
+        "summary": "Portal reachable (200, \"Webflow Developer Platform\"); no sign-in redirect seen on the landing page.",
+        "detail": "Chain: 200 developers.webflow.com/",
+        "at": "2026-10-30T11:47:22.854Z"
+      }
+    ],
+    "openQuestions": [
+      {
+        "question": "What is the exact review turnaround time for Webflow marketplace app submissions?",
+        "whyItMatters": "Helps in planning go-live schedules for production applications.",
+        "howToResolve": "Check current developer forum discussions or submit a sample private app to benchmark review speeds."
+      }
+    ],
+    "verification": {
+      "reviewedAt": "2026-10-30",
+      "method": "Automated verifier pass (gemini-3.6-flash): re-read the cited source text for the 8 rating factors, the production timeline and the cost.",
+      "items": [
+        {
+          "claim": "self_serve_registration = yes: Developers can self-serve register applications in Workspace settings under Apps & Integrations.",
+          "outcome": "confirmed",
+          "note": "Supported by finding that S7 explains registering an OAuth app via Workspace settings.",
+          "sourceIds": [
+            "S3"
+          ]
+        },
+        {
+          "claim": "review_required = yes: Apps must undergo review before being available to external workspaces or the marketplace.",
+          "outcome": "confirmed",
+          "note": "Supported by S12, S18, and S31 covering app review processes.",
+          "sourceIds": [
+            "S5",
+            "S7",
+            "S9"
+          ]
+        },
+        {
+          "claim": "business_verification = no: No explicit business verification documents or DUNS number required for standard developer registration.",
+          "outcome": "confirmed",
+          "note": "Standard app registration requires no explicit business docs in S7.",
+          "sourceIds": [
+            "S3"
+          ]
+        },
+        {
+          "claim": "security_assessment = no: No mandatory third-party security assessment or penetration test for basic data client integrations.",
+          "outcome": "confirmed",
+          "note": "Basic data client integration docs in S1 mention no mandatory third-party security assessment.",
+          "sourceIds": [
+            "S1"
+          ]
+        },
+        {
+          "claim": "paid_access = no: Developer workspace plan is free for building and testing integrations.",
+          "outcome": "confirmed",
+          "note": "Confirmed by S38 stating the Developer Workspace plan is free.",
+          "sourceIds": [
+            "S10"
+          ]
+        },
+        {
+          "claim": "partner_or_sales_gate = no: No partner program or sales contact required to register an app and develop.",
+          "outcome": "confirmed",
+          "note": "Self-serve registration per S7 does not require a sales contact.",
+          "sourceIds": [
+            "S3"
+          ]
+        },
+        {
+          "claim": "user_cap_before_review = yes: Unapproved apps are restricted to the developer's own workspace by default, with up to 5 test user accounts re",
+          "outcome": "confirmed",
+          "note": "Confirmed by finding citing S31 regarding restriction to the developer's workspace and 5 test users.",
+          "sourceIds": [
+            "S9"
+          ]
+        },
+        {
+          "claim": "per_customer_setup = no: Customers authorize the application via standard OAuth flow without custom manual onboarding.",
+          "outcome": "confirmed",
+          "note": "S1 details the standard OAuth flow without custom manual onboarding.",
+          "sourceIds": [
+            "S1"
+          ]
+        },
+        {
+          "claim": "Time until any user can connect: 1–2 weeks. App review and approval timeline for external workspace access.",
+          "outcome": "unverifiable",
+          "note": "Source texts lack explicit 1-2 weeks duration data.",
+          "sourceIds": []
+        },
+        {
+          "claim": "Cost: Free. Webflow offers a free Developer Workspace plan for building and testing integrations, while site hosting and specific plans are ",
+          "outcome": "confirmed",
+          "note": "Confirmed by S38 that the Developer Workspace plan is free.",
+          "sourceIds": [
+            "S10"
+          ]
+        }
+      ]
+    }
+  },
+  "meta": {
+    "generatedAt": "2026-10-30T11:48:16.945Z",
+    "generator": "live",
+    "model": "gemini-3.5-flash-lite (research) + gemini-3.6-flash (writing)",
+    "durationSec": 80
+  }
+}

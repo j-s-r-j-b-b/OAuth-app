@@ -5,30 +5,30 @@
       "type": "stage",
       "stage": "resolve",
       "message": "Identifying “Spotify”",
-      "t": 2
+      "t": 1
     },
     {
       "type": "search",
       "query": "Spotify API OAuth app developer documentation",
       "count": 8,
       "engine": "composio:exa",
-      "t": 2321
+      "t": 2812
     },
     {
       "type": "info",
       "message": "Identified Spotify — A digital music, podcast, and video streaming service that provides access to millions of songs and other content from creators worldwide.",
-      "t": 4191
+      "t": 6952
     },
     {
       "type": "stage",
       "stage": "composio",
       "message": "Checking Composio’s toolkit catalog",
-      "t": 4191
+      "t": 6952
     },
     {
       "type": "info",
       "message": "Setup attempt: creating a throwaway Composio auth config to see exactly what Composio sends to the provider",
-      "t": 5337
+      "t": 9080
     },
     {
       "type": "probe",
@@ -39,147 +39,48 @@
         "summary": "Composio sends users to https://accounts.spotify.com/authorize with redirect_uri=https://backend.composio.dev/api/v1/auth-apps/add; default scopes: user-read-private user-read-email app-remote-control streaming user-modify-playback-state user-read-playback-state user-read-currently-playing; PKCE on.",
         "detail": "{\"authorizeUrl\":\"https://accounts.spotify.com/authorize\",\"redirectUri\":\"https://backend.composio.dev/api/v1/auth-apps/add\",\"scopes\":[\"user-read-private\",\"user-read-email\",\"app-remote-control\",\"streaming\",\"user-modify-playback-state\",\"user-read-playback-state\",\"user-read-currently-playing\"],\"extraParams\":{\"response_type\":\"code\"},\"pkce\":true,\"note\":\"extra params: response_type=code\"}",
         "id": "P2",
-        "at": "2026-10-30T09:43:57.546Z"
+        "at": "2026-10-30T11:43:06.308Z"
       },
-      "t": 8245
+      "t": 12741
     },
     {
       "type": "info",
       "message": "Composio toolkit `spotify` has no managed OAuth app: you must register your own before anyone can connect.",
-      "t": 8245
+      "t": 12741
     },
     {
       "type": "stage",
       "stage": "research",
       "message": "Researching docs, policies and real-world reports",
-      "t": 8245
+      "t": 12741
     },
     {
       "type": "search",
       "query": "Spotify OAuth app review approval verification publish requirements",
       "count": 8,
       "engine": "composio:exa",
-      "t": 10155
-    },
-    {
-      "type": "search",
-      "query": "Spotify API pricing plans tiers limits for developers connections",
-      "count": 8,
-      "engine": "composio:exa",
-      "t": 10793
+      "t": 14842
     },
     {
       "type": "search",
       "query": "Spotify OAuth app approval how long experience reddit OR forum",
       "count": 8,
       "engine": "composio:exa",
-      "t": 11302
+      "t": 15036
     },
     {
-      "type": "read",
-      "url": "https://developer.spotify.com/blog/2025-04-15-updating-the-criteria-for-web-api-extended-access",
-      "title": "Updating the Criteria for Web API Extended Access | Spotify for Developers",
-      "ok": true,
-      "chars": 3458,
-      "via": "direct",
-      "sourceId": "S19",
-      "t": 14361
+      "type": "search",
+      "query": "Spotify API pricing plans tiers limits for developers connections",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 15141
     },
     {
-      "type": "read",
-      "url": "https://developer.spotify.com/blog/2026-02-06-update-on-developer-access-and-platform-security",
-      "title": "Update on Developer Access and Platform Security | Spotify for Developers",
-      "ok": true,
-      "chars": 3576,
-      "via": "direct",
-      "sourceId": "S16",
-      "t": 14455
-    },
-    {
-      "type": "read",
-      "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
-      "title": "Quota modes | Spotify for Developers",
-      "ok": true,
-      "chars": 4727,
-      "via": "direct",
-      "sourceId": "S10",
-      "t": 14555
-    },
-    {
-      "type": "probe",
-      "probe": {
-        "kind": "authorize-endpoint",
-        "target": "GET https://accounts.spotify.com/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=user-read-private+user-read-email",
-        "result": "pass",
-        "summary": "Endpoint is live and rejects an unregistered client (200). Shows what a misconfigured app sees.",
-        "detail": "Chain: 303 accounts.spotify.com/authorize → 200 accounts.spotify.com/en/login\nFinal: https://accounts.spotify.com/en/login?continue=https%3A%2F%2Faccounts.spotify.com%2Fauthorize%3Fscope%3Duser-read-private%2Buser-read-email%26response_type%3Dcode%26redirect_uri%3Dhttps%253A%252F%252Fbackend.composio.dev%252Fapi%252Fv3%252Ftoolkits%252Fauth%252Fcallback%26state%3Doauth-runway-probe%\nExcerpt: title=\"Spotify\" | [Continue with phone number](/en/v2/login/phone?continue=https%3A%2F%2Faccounts.spotify.com%2Fauthorize%3Fscope%3Duser-read-private%2Buser-read-email%26response_type%3Dcode%26redirect_uri%3Dhttps%253A%252F%252Fbackend.composio.dev%252Fapi%252Fv3%252Ftoolkits%252Fauth%252Fcallback%26state%3Doauth-runway-probe%26client_id%3Doauth-runway-probe%26flow_ctx%3D9d86fe5f-dbd2-4e7a-83b3-117dad47d03f%253A1793375042&client_id=oauth-runway-probe&flow_ctx=9d86fe5f-dbd2-4e7a-83b3-117dad47d03f%3A1793375042)[Continue with Google](/en/login/google?continue=https%3A%2F%2Faccounts.spotify.com%2Fauthorize%3Fscope%3Duser-read-private%2Buser-read-email%26response_type%3Dcode%26redirect_uri%3Dhttp",
-        "id": "P3",
-        "at": "2026-10-30T09:44:04.013Z"
-      },
-      "t": 14712
-    },
-    {
-      "type": "finding",
-      "fact": "Spotify developer apps are created in the Spotify Developer Dashboard at https://developer.spotify.com/dashboard.",
-      "sourceIds": [
-        "S9",
-        "P4"
-      ],
-      "t": 18208
-    },
-    {
-      "type": "finding",
-      "fact": "Newly created apps begin in Development Mode, which requires a Spotify Premium account for the app owner, limits developers to 1 Client ID, and caps usage at up to 5 authorized/allowlisted users.",
-      "sourceIds": [
-        "S10",
-        "P16"
-      ],
-      "t": 18208
-    },
-    {
-      "type": "finding",
-      "fact": "As of May 15, 2025, Extended Quota Mode (production access) is restricted to established business entities operating an active, launched service with a minimum of 250,000 monthly active users (MAUs), commercial viability, and availability in key Spotify markets. Applications are submitted via a Google Form link provided in the docs.",
-      "sourceIds": [
-        "S10",
-        "S19"
-      ],
-      "t": 18209
-    },
-    {
-      "type": "finding",
-      "fact": "Once a partner application form is approved, developers can request a quota extension from the Developer Dashboard (Settings -> Quota extension Request tab), which triggers a review taking up to 6 weeks.",
-      "sourceIds": [
-        "S10"
-      ],
-      "t": 18209
-    },
-    {
-      "type": "finding",
-      "fact": "The Spotify authorize endpoint is live at https://accounts.spotify.com/authorize and redirects to the Spotify login page.",
-      "sourceIds": [
-        "P3"
-      ],
-      "t": 18209
-    },
-    {
-      "type": "read",
-      "url": "https://developer.spotify.com/documentation/web-api/concepts/authorization",
-      "title": "Authorization | Spotify for Developers",
-      "ok": true,
-      "chars": 3438,
-      "via": "direct",
-      "sourceId": "S3",
-      "t": 18499
-    },
-    {
-      "type": "read",
-      "url": "https://developer.spotify.com/documentation/web-api/concepts/apps",
-      "title": "Apps | Spotify for Developers",
-      "ok": true,
-      "chars": 3153,
-      "via": "direct",
-      "sourceId": "S1",
-      "t": 18655
+      "type": "search",
+      "query": "site:developer.spotify.com \"2025-04-15-updating-the-criteria-for-web-api-extended-access\"",
+      "count": 1,
+      "engine": "composio:exa",
+      "t": 19988
     },
     {
       "type": "probe",
@@ -189,137 +90,318 @@
         "result": "pass",
         "summary": "Portal reachable (200, \"spotify-for-developers\"); no sign-in redirect seen on the landing page.",
         "detail": "Chain: 200 developer.spotify.com/dashboard",
-        "id": "P4",
-        "at": "2026-10-30T09:44:07.960Z"
+        "id": "P3",
+        "at": "2026-10-30T11:43:13.714Z"
       },
-      "t": 18659
+      "t": 20147
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "oauth-discovery",
+        "target": "GET https://accounts.spotify.com/.well-known/openid-configuration",
+        "result": "pass",
+        "summary": "Discovery document found. Authorize: https://accounts.spotify.com/oauth2/v2/auth; token: https://accounts.spotify.com/api/token. PKCE: S256.",
+        "detail": "{\"issuer\":\"https://accounts.spotify.com\",\"authorization_endpoint\":\"https://accounts.spotify.com/oauth2/v2/auth\",\"token_endpoint\":\"https://accounts.spotify.com/api/token\",\"registration_endpoint\":null,\"code_challenge_methods_supported\":[\"S256\"],\"grant_types_supported\":[\"authorization_code\",\"refresh_token\",\"urn:ietf:params:oauth:grant-type:device_code\",\"urn:ietf:params:oauth:grant-type:jwt-bearer\"],\"scopes_supported\":[\"email\",\"openid\",\"profile\"]}",
+        "id": "P4",
+        "at": "2026-10-30T11:43:13.821Z"
+      },
+      "t": 20254
+    },
+    {
+      "type": "search",
+      "query": "site:developer.spotify.com \"quota-modes\"",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 20295
+    },
+    {
+      "type": "search",
+      "query": "site:developer.spotify.com \"2026-02-06-update-on-developer-access-and-platform-security\"",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 20414
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "authorize-endpoint",
+        "target": "GET https://accounts.spotify.com/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=user-read-private+user-read-email",
+        "result": "pass",
+        "summary": "Endpoint is live and rejects an unregistered client (200). Shows what a misconfigured app sees.",
+        "detail": "Chain: 303 accounts.spotify.com/authorize → 200 accounts.spotify.com/en/login\nFinal: https://accounts.spotify.com/en/login?continue=https%3A%2F%2Faccounts.spotify.com%2Fauthorize%3Fscope%3Duser-read-private%2Buser-read-email%26response_type%3Dcode%26redirect_uri%3Dhttps%253A%252F%252Fbackend.composio.dev%252Fapi%252Fv3%252Ftoolkits%252Fauth%252Fcallback%26state%3Doauth-runway-probe%\nExcerpt: title=\"Spotify\" | [Continue with phone number](/en/v2/login/phone?continue=https%3A%2F%2Faccounts.spotify.com%2Fauthorize%3Fscope%3Duser-read-private%2Buser-read-email%26response_type%3Dcode%26redirect_uri%3Dhttps%253A%252F%252Fbackend.composio.dev%252Fapi%252Fv3%252Ftoolkits%252Fauth%252Fcallback%26state%3Doauth-runway-probe%26client_id%3Doauth-runway-probe%26flow_ctx%3D9636c7d2-b934-41c6-bf7c-a9f44ec5171d%253A1793382194&client_id=oauth-runway-probe&flow_ctx=9636c7d2-b934-41c6-bf7c-a9f44ec5171d%3A1793382194)[Continue with Google](/en/login/google?continue=https%3A%2F%2Faccounts.spotify.com%2Fauthorize%3Fscope%3Duser-read-private%2Buser-read-email%26response_type%3Dcode%26redirect_uri%3Dhttp",
+        "id": "P5",
+        "at": "2026-10-30T11:43:14.311Z"
+      },
+      "t": 20744
+    },
+    {
+      "type": "finding",
+      "fact": "Spotify OAuth authorize endpoint is https://accounts.spotify.com/authorize (or /oauth2/v2/auth), and token endpoint is https://accounts.spotify.com/api/token, supporting PKCE (S256).",
+      "sourceIds": [
+        "P4",
+        "P5"
+      ],
+      "t": 22668
+    },
+    {
+      "type": "finding",
+      "fact": "As of February 2026, Spotify Development Mode limits each developer to 1 Client ID and a maximum of 5 authorized test users, and requires the app owner to have a Spotify Premium subscription.",
+      "sourceIds": [
+        "S22",
+        "S27"
+      ],
+      "t": 22668
+    },
+    {
+      "type": "finding",
+      "fact": "Extended Quota Mode requires formal application and approval through the Spotify Developer Dashboard, restricted as of May 15, 2025 to established business entities with active, launched services (e.g. 250k+ monthly active users).",
+      "sourceIds": [
+        "S10",
+        "S25"
+      ],
+      "t": 22668
+    },
+    {
+      "type": "search",
+      "query": "site:developer.spotify.com \"token expiration\" refresh token",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 24749
+    },
+    {
+      "type": "search",
+      "query": "site:developer.spotify.com \"authorization code flow\" scopes",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 24750
+    },
+    {
+      "type": "search",
+      "query": "site:developer.spotify.com \"scopes\" list web api",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 26664
+    },
+    {
+      "type": "finding",
+      "fact": "Spotify access tokens expire in 1 hour, and refresh tokens expire after 6 months from initial authorization (with automatic expiration if unused or revoked).",
+      "sourceIds": [
+        "S34",
+        "S36"
+      ],
+      "t": 28598
+    },
+    {
+      "type": "finding",
+      "fact": "Spotify Developer Terms and Guidelines prohibit using API data to train machine learning models or AI generative models.",
+      "sourceIds": [
+        "S12",
+        "S39"
+      ],
+      "t": 28598
+    },
+    {
+      "type": "search",
+      "query": "site:developer.spotify.com \"refresh token\" expiration 2026",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 30329
+    },
+    {
+      "type": "search",
+      "query": "site:developer.spotify.com \"AI\" restrictions terms",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 30489
     },
     {
       "type": "read",
-      "url": "https://developer.spotify.com/documentation/web-api/concepts/scopes",
-      "title": "Scopes | Spotify for Developers",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+      "title": "Quota modes | Spotify for Developers",
       "ok": true,
-      "chars": 14000,
+      "chars": 4727,
       "via": "direct",
-      "sourceId": "S27",
-      "t": 22057
+      "sourceId": "S10",
+      "t": 34967
+    },
+    {
+      "type": "search",
+      "query": "site:developer.spotify.com \"Rate Limits\"",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 36342
+    },
+    {
+      "type": "search",
+      "query": "site:community.spotify.com \"App review\" \"waiting\"",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 36375
+    },
+    {
+      "type": "search",
+      "query": "site:developer.spotify.com \"Quota modes\"",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 36503
+    },
+    {
+      "type": "finding",
+      "fact": "Development mode apps are capped at 5 authenticated users, requiring each user to be explicitly added to the app's allowlist in the Spotify Developer Dashboard.",
+      "sourceIds": [
+        "S10"
+      ],
+      "t": 37906
+    },
+    {
+      "type": "finding",
+      "fact": "Extended Quota Mode applications require an established business entity with a launched service and at least 250k MAUs, submitted via corporate form and review process taking up to 6 weeks.",
+      "sourceIds": [
+        "S10",
+        "S25"
+      ],
+      "t": 37907
     },
     {
       "type": "info",
-      "message": "Research done: 5 findings, 7 pages read, 4 probes.",
-      "t": 22058
+      "message": "Research done: 7 findings, 2 pages read, 5 probes.",
+      "t": 42963
     },
     {
       "type": "stage",
       "stage": "write",
       "message": "Writing the guide",
-      "t": 22058
+      "t": 42963
     },
     {
       "type": "warn",
-      "message": "gemini-3.6-flash unavailable (503); falling back to gemini-3.5-flash-lite",
-      "t": 25623
+      "message": "gemini-3.6-flash unavailable (429); falling back to gemini-3.5-flash-lite",
+      "t": 43558
+    },
+    {
+      "type": "warn",
+      "message": "Draft failed validation; repairing (requirements.0.neededFor: Invalid option: expected one of \"registration\"|\"testing\"|\"review\"|\"production\")",
+      "t": 49217
+    },
+    {
+      "type": "warn",
+      "message": "gemini-3.6-flash unavailable (429); falling back to gemini-3.5-flash-lite",
+      "t": 49563
     },
     {
       "type": "info",
-      "message": "Verdict drafted: Spotify requires a strict partner review and an established service with 250k+ MAUs for production scale.",
-      "t": 32118
+      "message": "Verdict drafted: Spotify requires an explicit business entity with 250k+ MAUs for production app review, and limits development apps to 5 test users.",
+      "t": 71125
     },
     {
       "type": "warn",
-      "message": "gemini-3.6-flash unavailable (503); falling back to gemini-3.5-flash-lite",
-      "t": 52260
+      "message": "gemini-3.6-flash unavailable (429); falling back to gemini-3.5-flash-lite",
+      "t": 76094
     },
     {
       "type": "stage",
       "stage": "check",
       "message": "Checking citations, confidence labels and ratings",
-      "t": 61079
+      "t": 90051
+    },
+    {
+      "type": "info",
+      "message": "Verifier: re-reading the cited sources for the rating factors, timeline and cost",
+      "t": 90052
+    },
+    {
+      "type": "warn",
+      "message": "gemini-3.6-flash unavailable (429); falling back to gemini-3.5-flash-lite",
+      "t": 91496
+    },
+    {
+      "type": "info",
+      "message": "Verifier: 10 confirmed, 0 corrected, 0 unverifiable",
+      "t": 94418
     },
     {
       "type": "quality",
       "report": {
         "claims": {
-          "tested": 7,
-          "official": 27,
+          "tested": 2,
+          "official": 32,
           "reported": 0,
           "inferred": 0
         },
         "sources": {
-          "total": 9,
-          "fetched": 6,
-          "snippetOnly": 3,
-          "official": 7,
+          "total": 16,
+          "fetched": 2,
+          "snippetOnly": 14,
+          "official": 14,
           "community": 1,
           "composio": 1
         },
         "probes": {
-          "total": 4,
-          "pass": 4,
+          "total": 5,
+          "pass": 5,
           "info": 0,
           "fail": 0
         },
         "fixes": [
-          "step Create a Spotify Developer Account and A: \"tested\" on a claim no probe can confirm → official",
-          "step Add Test Users: dropped citation(s) to unknown ids P16",
-          "step Create Custom OAuth2 Auth Config in Comp: \"tested\" on a claim no probe can confirm → official",
-          "requirement 2: \"tested\" on a claim no probe can confirm → official",
+          "step Execute test OAuth flow: \"tested\" on a claim no probe can confirm → official",
+          "step Create custom OAuth app in Composio: \"tested\" on a claim no probe can confirm → official",
+          "no provider wait step although review_required = yes",
           "scope user-read-private: \"tested\" on a claim no probe can confirm → official",
           "scope user-read-email: \"tested\" on a claim no probe can confirm → official",
+          "scope app-remote-control: \"tested\" on a claim no probe can confirm → official",
           "scope streaming: \"tested\" on a claim no probe can confirm → official",
           "scope user-modify-playback-state: \"tested\" on a claim no probe can confirm → official",
           "scope user-read-playback-state: \"tested\" on a claim no probe can confirm → official",
-          "scope user-read-currently-playing: \"tested\" on a claim no probe can confirm → official",
-          "blocker 1: dropped citation(s) to unknown ids P16"
+          "scope user-read-currently-playing: \"tested\" on a claim no probe can confirm → official"
         ],
         "llm": {
-          "calls": 6,
-          "inputTokens": 29891,
-          "outputTokens": 7026,
+          "calls": 13,
+          "inputTokens": 91353,
+          "outputTokens": 11467,
           "model": "gemini-3.5-flash-lite"
         }
       },
-      "t": 61085
+      "t": 94420
     }
   ],
   "quality": {
     "claims": {
-      "tested": 7,
-      "official": 27,
+      "tested": 2,
+      "official": 32,
       "reported": 0,
       "inferred": 0
     },
     "sources": {
-      "total": 9,
-      "fetched": 6,
-      "snippetOnly": 3,
-      "official": 7,
+      "total": 16,
+      "fetched": 2,
+      "snippetOnly": 14,
+      "official": 14,
       "community": 1,
       "composio": 1
     },
     "probes": {
-      "total": 4,
-      "pass": 4,
+      "total": 5,
+      "pass": 5,
       "info": 0,
       "fail": 0
     },
     "fixes": [
-      "step Create a Spotify Developer Account and A: \"tested\" on a claim no probe can confirm → official",
-      "step Add Test Users: dropped citation(s) to unknown ids P16",
-      "step Create Custom OAuth2 Auth Config in Comp: \"tested\" on a claim no probe can confirm → official",
-      "requirement 2: \"tested\" on a claim no probe can confirm → official",
+      "step Execute test OAuth flow: \"tested\" on a claim no probe can confirm → official",
+      "step Create custom OAuth app in Composio: \"tested\" on a claim no probe can confirm → official",
+      "no provider wait step although review_required = yes",
       "scope user-read-private: \"tested\" on a claim no probe can confirm → official",
       "scope user-read-email: \"tested\" on a claim no probe can confirm → official",
+      "scope app-remote-control: \"tested\" on a claim no probe can confirm → official",
       "scope streaming: \"tested\" on a claim no probe can confirm → official",
       "scope user-modify-playback-state: \"tested\" on a claim no probe can confirm → official",
       "scope user-read-playback-state: \"tested\" on a claim no probe can confirm → official",
-      "scope user-read-currently-playing: \"tested\" on a claim no probe can confirm → official",
-      "blocker 1: dropped citation(s) to unknown ids P16"
+      "scope user-read-currently-playing: \"tested\" on a claim no probe can confirm → official"
     ],
     "llm": {
-      "calls": 6,
-      "inputTokens": 29891,
-      "outputTokens": 7026,
+      "calls": 13,
+      "inputTokens": 91353,
+      "outputTokens": 11467,
       "model": "gemini-3.5-flash-lite"
     }
   }

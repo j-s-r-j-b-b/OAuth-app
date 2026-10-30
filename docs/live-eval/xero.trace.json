@@ -5,30 +5,30 @@
       "type": "stage",
       "stage": "resolve",
       "message": "Identifying “Xero”",
-      "t": 2
+      "t": 1
     },
     {
       "type": "search",
       "query": "Xero API OAuth app developer documentation",
       "count": 8,
       "engine": "composio:exa",
-      "t": 2506
+      "t": 2512
     },
     {
       "type": "info",
-      "message": "Identified Xero — Cloud-based accounting software platform for small and medium-sized businesses.",
-      "t": 3700
+      "message": "Identified Xero — Xero is cloud-based accounting software designed for small and medium-sized businesses.",
+      "t": 3797
     },
     {
       "type": "stage",
       "stage": "composio",
       "message": "Checking Composio’s toolkit catalog",
-      "t": 3700
+      "t": 3798
     },
     {
       "type": "info",
       "message": "Setup attempt: creating a throwaway Composio auth config to see exactly what Composio sends to the provider",
-      "t": 5122
+      "t": 4998
     },
     {
       "type": "probe",
@@ -39,101 +39,41 @@
         "summary": "Composio sends users to https://login.xero.com/identity/connect/authorize with redirect_uri=https://backend.composio.dev/api/v1/auth-apps/add; default scopes: offline_access email profile openid files files.read projects projects.read accounting.manualjournals.read accounting.manualjournals accounting.banktransactions.read accounting.banktransactions accounting.payments.read accounting.payments accounting.invoices.read accounting.invoices accounting.reports.tenninetynine.read accounting.budgets.read accounting.attachments.read accounting.attachments accounting.contacts.read accounting.contacts accounting.settings.read accounting.settings accounting.reports.taxreports.read accounting.reports.trialbalance.read accounting.reports.profitandloss.read accounting.reports.executivesummary.read accounting.reports.budgetsummary.read accounting.reports.banksummary.read accounting.reports.aged.read; PKCE on.",
         "detail": "{\"authorizeUrl\":\"https://login.xero.com/identity/connect/authorize\",\"redirectUri\":\"https://backend.composio.dev/api/v1/auth-apps/add\",\"scopes\":[\"offline_access\",\"email\",\"profile\",\"openid\",\"files\",\"files.read\",\"projects\",\"projects.read\",\"accounting.manualjournals.read\",\"accounting.manualjournals\",\"accounting.banktransactions.read\",\"accounting.banktransactions\",\"accounting.payments.read\",\"accounting.payments\",\"accounting.invoices.read\",\"accounting.invoices\",\"accounting.reports.tenninetynine.read\",\"accounting.budgets.read\",\"accounting.attachments.read\",\"accounting.attachments\",\"accounting.contacts.read\",\"accounting.contacts\",\"accounting.settings.read\",\"accounting.settings\",\"accounting.reports.taxreports.read\",\"accounting.reports.trialbalance.read\",\"accounting.reports.profitandloss.read\",\"accounting.reports.executivesummary.read\",\"accounting.reports.budgetsummary.read\",\"accounting.reports.banksummary.read\",\"accounting.reports.aged.read\"],\"extraParams\":{\"response_type\":\"code\"},\"pkce\":true,\"note\":\"extra params: response_type=code\"}",
         "id": "P2",
-        "at": "2026-10-30T09:46:32.403Z"
+        "at": "2026-10-30T11:41:42.526Z"
       },
-      "t": 8234
+      "t": 8257
     },
     {
       "type": "info",
       "message": "Composio toolkit `xero` has no managed OAuth app: you must register your own before anyone can connect.",
-      "t": 8234
+      "t": 8257
     },
     {
       "type": "stage",
       "stage": "research",
       "message": "Researching docs, policies and real-world reports",
-      "t": 8234
+      "t": 8257
     },
     {
       "type": "search",
       "query": "Xero OAuth app approval how long experience reddit OR forum",
       "count": 8,
       "engine": "composio:exa",
-      "t": 10166
-    },
-    {
-      "type": "search",
-      "query": "Xero API pricing plans tiers limits for developers connections",
-      "count": 8,
-      "engine": "composio:exa",
-      "t": 11184
+      "t": 10408
     },
     {
       "type": "search",
       "query": "Xero OAuth app review approval verification publish requirements",
       "count": 8,
       "engine": "composio:exa",
-      "t": 11527
-    },
-    {
-      "type": "probe",
-      "probe": {
-        "kind": "oauth-discovery",
-        "target": "GET https://identity.xero.com/.well-known/openid-configuration",
-        "result": "pass",
-        "summary": "Discovery document found. Authorize: https://login.xero.com/identity/connect/authorize; token: https://identity.xero.com/connect/token. PKCE: S256.",
-        "detail": "{\"issuer\":\"https://identity.xero.com\",\"authorization_endpoint\":\"https://login.xero.com/identity/connect/authorize\",\"token_endpoint\":\"https://identity.xero.com/connect/token\",\"registration_endpoint\":null,\"code_challenge_methods_supported\":[\"S256\"],\"grant_types_supported\":[\"authorization_code\",\"client_credentials\",\"refresh_token\"],\"scopes_supported\":null}",
-        "id": "P3",
-        "at": "2026-10-30T09:46:38.110Z"
-      },
-      "t": 13941
-    },
-    {
-      "type": "probe",
-      "probe": {
-        "kind": "authorize-endpoint",
-        "target": "GET https://login.xero.com/identity/connect/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=openid+profile+email+accounting.transactions",
-        "result": "pass",
-        "summary": "Endpoint is live and rejects an unregistered client (200). Shows what a misconfigured app sees.",
-        "detail": "Chain: 302 login.xero.com/identity/connect/authorize → 200 login.xero.com/identity/error\nFinal: https://login.xero.com/identity/error?errorId=CfDJ8MOMn5AHNxVIkNNdLD-L7IFP6gFmDsG8o0FqJJKZdxXX5LyJpLWohekXJsRjwa_h47PoNTIhSR7khbtrfQnuZU1WwAKo7wI_KProPyeJxpjx2aatG-ie6lgf5Z624EGE1gbT5eKhy_OWYKT8YX4vGhTC6SvVmuXKGrNgsUyTd8QMQHjOmMsvV4PA9Aqo_1P-F2xkdWq2zWZAa4kUqEqjcZ3-vZFjHwvsOusNSxnaAZZdntlcEE32VgONef\nExcerpt: title=\"Xero | Error 500\" | Error: unauthorized\\_client | Error code: 500 | error tokens in page: unauthorized_client | errorId=CfDJ8MOMn5AHNxVIkNNdLD-L7IFP6gFmDsG8o0FqJJKZdxXX5LyJpLWohekXJsRjwa_h47PoNTIhSR7khbtrfQnuZU1WwAKo7wI_KProPyeJxpjx2aatG-ie | errorId=CfDJ8MOMn5AHNxVIkNNdLD-L7IFP6gFmDsG8o0FqJJKZdxXX5LyJpLWohekXJsRjwa_h47PoNTIhSR7khbtrfQnuZU1WwAKo7wI_KProPyeJxpjx2aatG-ie",
-        "id": "P4",
-        "at": "2026-10-30T09:46:38.695Z"
-      },
-      "t": 14526
-    },
-    {
-      "type": "read",
-      "url": "https://developer.xero.com/pricing",
-      "title": "Pricing — Xero Developer",
-      "ok": true,
-      "chars": 12449,
-      "via": "direct",
-      "sourceId": "S18",
-      "t": 14848
-    },
-    {
-      "type": "read",
-      "url": "https://developer.xero.com/faq/getting-started",
-      "title": "Getting started FAQs — Xero Developer",
-      "ok": true,
-      "chars": 3030,
-      "via": "direct",
-      "sourceId": "S1",
-      "t": 14895
+      "t": 10649
     },
     {
       "type": "search",
-      "query": "\"Xero\" developer portal create app callback uri developer.xero.com",
+      "query": "Xero API pricing plans tiers limits for developers connections",
       "count": 8,
       "engine": "composio:exa",
-      "t": 15156
-    },
-    {
-      "type": "search",
-      "query": "site:developer.xero.com \"pricing\" plans connections limits",
-      "count": 8,
-      "engine": "composio:exa",
-      "t": 15602
+      "t": 10830
     },
     {
       "type": "probe",
@@ -143,10 +83,158 @@
         "result": "pass",
         "summary": "Portal reachable (200, \"Xero\"); no sign-in redirect seen on the landing page.",
         "detail": "Chain: 200 developer.xero.com/app/manage",
-        "id": "P5",
-        "at": "2026-10-30T09:46:41.570Z"
+        "id": "P3",
+        "at": "2026-10-30T11:41:47.259Z"
       },
-      "t": 17401
+      "t": 12990
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "authorize-endpoint",
+        "target": "GET https://login.xero.com/identity/connect/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=openid+profile+email+accounting.transactions+offline_access",
+        "result": "pass",
+        "summary": "Endpoint is live and rejects an unregistered client (200). Shows what a misconfigured app sees.",
+        "detail": "Chain: 302 login.xero.com/identity/connect/authorize → 200 login.xero.com/identity/error\nFinal: https://login.xero.com/identity/error?errorId=CfDJ8MOMn5AHNxVIkNNdLD-L7IHHM6zT_IG_lRMAM-ZVNMfbF46e95r4AOpJXlKWQKRrmbHS-U1EdylYDiIfctPvWpF4aN0E4XMS7SPQ1czU8O6K2ABrqxoC_YfyoPwK5B_kj7hmkIrTPftKlTnKR7wNXkesjfGeLCKJcRklnSHnHmKjzm376oxT27OYriqrCaMlWLxUEZBpTFTbfOXNwJIqijas9olqmlc6GrC797rfGUtRpWTp7E_LLP7S2A\nExcerpt: title=\"Xero | Error 500\" | Error: unauthorized\\_client | Error code: 500 | error tokens in page: unauthorized_client | errorId=CfDJ8MOMn5AHNxVIkNNdLD-L7IHHM6zT_IG_lRMAM-ZVNMfbF46e95r4AOpJXlKWQKRrmbHS-U1EdylYDiIfctPvWpF4aN0E4XMS7SPQ1czU8O6K2ABrqxoC | errorId=CfDJ8MOMn5AHNxVIkNNdLD-L7IHHM6zT_IG_lRMAM-ZVNMfbF46e95r4AOpJXlKWQKRrmbHS-U1EdylYDiIfctPvWpF4aN0E4XMS7SPQ1czU8O6K2ABrqxoC",
+        "id": "P4",
+        "at": "2026-10-30T11:41:47.858Z"
+      },
+      "t": 13589
+    },
+    {
+      "type": "read",
+      "url": "https://developer.xero.com/faq/limits",
+      "title": "Limits FAQs — Xero Developer",
+      "ok": true,
+      "chars": 3723,
+      "via": "direct",
+      "sourceId": "S26",
+      "t": 14003
+    },
+    {
+      "type": "read",
+      "url": "https://developer.xero.com/pricing",
+      "title": "Pricing — Xero Developer",
+      "ok": true,
+      "chars": 12449,
+      "via": "direct",
+      "sourceId": "S25",
+      "t": 14396
+    },
+    {
+      "type": "search",
+      "query": "site:developer.xero.com \"create an app\" oauth 2.0 redirect uri",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 14498
+    },
+    {
+      "type": "search",
+      "query": "site:developer.xero.com \"scopes\" accounting identity offline_access",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 14708
+    },
+    {
+      "type": "finding",
+      "fact": "Xero provides five pricing tiers for developers based on connection count and monthly data egress: Starter (5 connections, free, no security assessment required initially, 1,000 calls/day/org limit), Core (50 connections, $35 AUD/mo, 10 GB egress), Plus (1,000 connections, $245 AUD/mo, 50 GB egress), Advanced (10,000 connections, $1,445 AUD/mo, 250 GB egress, unlocks journals/XPM/bulk connections), and Enterprise (Unlimited connections, pricing on application). Overage egress is $2.40 AUD per GB.",
+      "sourceIds": [
+        "S25"
+      ],
+      "t": 18339
+    },
+    {
+      "type": "finding",
+      "fact": "Xero API rate limits per organization/tenant connection are: 5 concurrent calls, 60 calls per minute, and 5,000 calls per day (Starter plan has 1,000 calls per day). App-wide minute limit is 10,000 calls per minute across all tenants.",
+      "sourceIds": [
+        "S26"
+      ],
+      "t": 18339
+    },
+    {
+      "type": "finding",
+      "fact": "Xero updated its Developer Terms and Conditions (effective March 2, 2026 for existing developers) to explicitly prohibit using API data to train AI/ML models.",
+      "sourceIds": [
+        "S25"
+      ],
+      "t": 18339
+    },
+    {
+      "type": "finding",
+      "fact": "Xero introduced granular scopes starting March 2, 2026. Apps created on/after that date use granular scopes automatically, while existing apps have until September 2027 to migrate. Calling an endpoint without the required granular scope returns a 401 with WWW-Authenticate: insufficient_scope.",
+      "sourceIds": [
+        "S35"
+      ],
+      "t": 18339
+    },
+    {
+      "type": "finding",
+      "fact": "Xero requires absolute URIs for OAuth 2.0 redirect URIs (no wildcards) and allows registering up to 50 unique redirect URIs per app.",
+      "sourceIds": [
+        "S1"
+      ],
+      "t": 18339
+    },
+    {
+      "type": "finding",
+      "fact": "Xero app certification requires onboarding 10 beta customers actively using the integration (API calls in the last 30 days) and completing an initial security assessment.",
+      "sourceIds": [
+        "S19",
+        "S25"
+      ],
+      "t": 18339
+    },
+    {
+      "type": "finding",
+      "fact": "The authorize endpoint is https://login.xero.com/identity/connect/authorize and returns unauthorized_client when called with an unverified or fake client ID.",
+      "sourceIds": [
+        "P4"
+      ],
+      "t": 18339
+    },
+    {
+      "type": "search",
+      "query": "site:developer.xero.com \"token lifetime\" refresh token expiry 60 days",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 20050
+    },
+    {
+      "type": "search",
+      "query": "site:developer.xero.com \"app certification\" 10 beta customers",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 20214
+    },
+    {
+      "type": "search",
+      "query": "site:developer.xero.com \"security assessment\" process timeline days",
+      "count": 1,
+      "engine": "composio:exa",
+      "t": 20289
+    },
+    {
+      "type": "search",
+      "query": "site:developer.xero.com \"how to create an app\" client id redirect uri",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 20464
+    },
+    {
+      "type": "finding",
+      "fact": "Xero access tokens expire after 30 minutes, and refresh tokens expire after 60 days of non-use. Each refresh returns a new refresh token that must be stored.",
+      "sourceIds": [
+        "S1"
+      ],
+      "t": 25631
+    },
+    {
+      "type": "finding",
+      "fact": "Xero supports PKCE for applications that cannot securely store a client secret.",
+      "sourceIds": [
+        "S1"
+      ],
+      "t": 25631
     },
     {
       "type": "read",
@@ -155,30 +243,8 @@
       "ok": true,
       "chars": 2097,
       "via": "direct",
-      "sourceId": "S3",
-      "t": 17581
-    },
-    {
-      "type": "search",
-      "query": "site:developer.xero.com scopes accounting.transactions offline_access openid profile email",
-      "count": 8,
-      "engine": "composio:exa",
-      "t": 19599
-    },
-    {
-      "type": "search",
-      "query": "site:developer.xero.com \"certification\" requirements beta customers 10",
-      "count": 8,
-      "engine": "composio:exa",
-      "t": 20014
-    },
-    {
-      "type": "read",
-      "url": "https://developer.xero.com/documentation/getting-started/oauth2-scopes",
-      "title": "https://developer.xero.com/documentation/getting-started/oauth2-scopes",
-      "ok": false,
-      "error": "Could not read https://developer.xero.com/documentation/getting-started/oauth2-scopes: HTTP 200 ",
-      "t": 21026
+      "sourceId": "S1",
+      "t": 26929
     },
     {
       "type": "read",
@@ -187,210 +253,135 @@
       "ok": true,
       "chars": 4977,
       "via": "direct",
-      "sourceId": "S41",
-      "t": 23381
-    },
-    {
-      "type": "search",
-      "query": "site:developer.xero.com/faq/granular-scopes",
-      "count": 1,
-      "engine": "composio:exa",
-      "t": 24020
-    },
-    {
-      "type": "search",
-      "query": "site:developer.xero.com \"granular scopes\" list accounting.invoices",
-      "count": 4,
-      "engine": "composio:exa",
-      "t": 24192
-    },
-    {
-      "type": "finding",
-      "fact": "Xero OAuth app creation path: Log in to the Xero Developer Portal (developer.xero.com), navigate to My Apps, and click New App. Enter name, company URL, privacy policy URL, and redirect URI(s).",
-      "sourceIds": [
-        "S31",
-        "P5"
-      ],
-      "t": 27342
-    },
-    {
-      "type": "finding",
-      "fact": "Xero permits up to 50 redirect URIs per app and requires absolute URIs (no wildcards). http://localhost is allowed for local development, while HTTPS is required for production.",
-      "sourceIds": [
-        "S31",
-        "S3"
-      ],
-      "t": 27342
-    },
-    {
-      "type": "finding",
-      "fact": "Xero OAuth 2.0 endpoints confirmed via discovery: Authorization endpoint is https://login.xero.com/identity/connect/authorize, token endpoint is https://identity.xero.com/identity/connect/token, and PKCE (S256) is supported.",
-      "sourceIds": [
-        "P3"
-      ],
-      "t": 27342
-    },
-    {
-      "type": "finding",
-      "fact": "Xero access tokens expire in 30 minutes. Refresh tokens expire after 60 days of inactivity (or a 30-minute grace period if a refresh request times out/fails).",
-      "sourceIds": [
-        "S3"
-      ],
-      "t": 27343
-    },
-    {
-      "type": "finding",
-      "fact": "Xero developer pricing (effective March 2, 2026) uses a tiered model based on active connection limits and data egress: Starter (5 connections, free), Core (50 connections), Plus (1,000 connections), Advanced (10,000 connections), and Enterprise.",
-      "sourceIds": [
-        "S18",
-        "S38"
-      ],
-      "t": 27343
-    },
-    {
-      "type": "finding",
-      "fact": "Xero AI data use policy: Data obtained from Xero's APIs may NOT be used to train AI/ML models.",
-      "sourceIds": [
-        "S18"
-      ],
-      "t": 27343
-    },
-    {
-      "type": "finding",
-      "fact": "Xero scope transition (March 2026): Xero transitioned from broad scopes (such as accounting.transactions) to granular scopes (such as accounting.invoices, accounting.payments). Apps created on or after March 2, 2026 use granular scopes immediately; older apps have until September 2027 to migrate.",
-      "sourceIds": [
-        "S41"
-      ],
-      "t": 27343
-    },
-    {
-      "type": "finding",
-      "fact": "Xero app certification and App Store listing require onboarding at least 10 active customer connections (using the integration within the last 30 days) and holding a paid developer plan, plus passing security assessments.",
-      "sourceIds": [
-        "S21",
-        "S27",
-        "S28"
-      ],
-      "t": 27343
+      "sourceId": "S35",
+      "t": 26992
     },
     {
       "type": "info",
-      "message": "Research done: 8 findings, 5 pages read, 5 probes.",
-      "t": 28784
+      "message": "Research done: 9 findings, 5 pages read, 4 probes.",
+      "t": 29344
     },
     {
       "type": "stage",
       "stage": "write",
       "message": "Writing the guide",
-      "t": 28784
-    },
-    {
-      "type": "warn",
-      "message": "gemini-3.6-flash unavailable (503); falling back to gemini-3.5-flash-lite",
-      "t": 30928
+      "t": 29345
     },
     {
       "type": "info",
-      "message": "Verdict drafted: Xero requires self-serve app registration for development, but full certification and high-volume limits depend on active connections and tiered paid plans.",
-      "t": 36886
+      "message": "Verdict drafted: Self-serve OAuth setup allows testing up to 5 connections for free, but scaling requires a paid developer tier and security assessment.",
+      "t": 50227
     },
     {
       "type": "warn",
       "message": "gemini-3.6-flash unavailable (503); falling back to gemini-3.5-flash-lite",
-      "t": 39106
+      "t": 62651
     },
     {
       "type": "stage",
       "stage": "check",
       "message": "Checking citations, confidence labels and ratings",
-      "t": 50088
+      "t": 72479
+    },
+    {
+      "type": "info",
+      "message": "Verifier: re-reading the cited sources for the rating factors, timeline and cost",
+      "t": 72480
+    },
+    {
+      "type": "warn",
+      "message": "gemini-3.6-flash unavailable (429); falling back to gemini-3.5-flash-lite",
+      "t": 73814
+    },
+    {
+      "type": "info",
+      "message": "Verifier: 9 confirmed, 0 corrected, 1 unverifiable",
+      "t": 77397
     },
     {
       "type": "quality",
       "report": {
         "claims": {
-          "tested": 7,
-          "official": 25,
-          "reported": 0,
-          "inferred": 1
+          "tested": 5,
+          "official": 29,
+          "reported": 1,
+          "inferred": 0
         },
         "sources": {
-          "total": 13,
+          "total": 8,
           "fetched": 5,
-          "snippetOnly": 8,
-          "official": 10,
-          "community": 1,
-          "composio": 2
+          "snippetOnly": 3,
+          "official": 7,
+          "community": 0,
+          "composio": 1
         },
         "probes": {
-          "total": 5,
-          "pass": 5,
+          "total": 4,
+          "pass": 4,
           "info": 0,
           "fail": 0
         },
         "fixes": [
-          "step Create a Xero developer account: \"tested\" on a claim no probe can confirm → official",
-          "step Provision a new OAuth application: \"tested\" on a claim no probe can confirm → official",
-          "step Exchange the code for access and refresh: \"tested\" on a claim no probe can confirm → official",
-          "step Create custom auth config in Composio: \"tested\" on a claim no probe can confirm → inferred",
-          "step Initiate connection in Composio: \"tested\" on a claim no probe can confirm → official",
-          "no provider wait step although review_required = yes",
+          "step Create a Xero Developer Account: \"tested\" on a claim no probe can confirm → official",
+          "step Register a New App: \"tested\" on a claim no probe can confirm → official",
+          "step Connect Test Organizations: \"tested\" on a claim no probe can confirm → official",
+          "step Create Custom Auth Config in Composio: \"tested\" on a claim no probe can confirm → official",
+          "step Initiate Connection Session: \"tested\" on a claim no probe can confirm → official",
           "requirement 1: \"tested\" on a claim no probe can confirm → official",
           "scope offline_access: \"tested\" on a claim no probe can confirm → official",
           "scope accounting.invoices: \"tested\" on a claim no probe can confirm → official",
           "scope accounting.contacts: \"tested\" on a claim no probe can confirm → official",
           "scope accounting.banktransactions: \"tested\" on a claim no probe can confirm → official",
-          "blocker 3: \"tested\" on a claim no probe can confirm → official"
+          "verifier: business_verification unsupported by its sources → reported"
         ],
         "llm": {
-          "calls": 8,
-          "inputTokens": 56258,
-          "outputTokens": 7558,
+          "calls": 9,
+          "inputTokens": 61269,
+          "outputTokens": 8187,
           "model": "gemini-3.5-flash-lite"
         }
       },
-      "t": 50095
+      "t": 77398
     }
   ],
   "quality": {
     "claims": {
-      "tested": 7,
-      "official": 25,
-      "reported": 0,
-      "inferred": 1
+      "tested": 5,
+      "official": 29,
+      "reported": 1,
+      "inferred": 0
     },
     "sources": {
-      "total": 13,
+      "total": 8,
       "fetched": 5,
-      "snippetOnly": 8,
-      "official": 10,
-      "community": 1,
-      "composio": 2
+      "snippetOnly": 3,
+      "official": 7,
+      "community": 0,
+      "composio": 1
     },
     "probes": {
-      "total": 5,
-      "pass": 5,
+      "total": 4,
+      "pass": 4,
       "info": 0,
       "fail": 0
     },
     "fixes": [
-      "step Create a Xero developer account: \"tested\" on a claim no probe can confirm → official",
-      "step Provision a new OAuth application: \"tested\" on a claim no probe can confirm → official",
-      "step Exchange the code for access and refresh: \"tested\" on a claim no probe can confirm → official",
-      "step Create custom auth config in Composio: \"tested\" on a claim no probe can confirm → inferred",
-      "step Initiate connection in Composio: \"tested\" on a claim no probe can confirm → official",
-      "no provider wait step although review_required = yes",
+      "step Create a Xero Developer Account: \"tested\" on a claim no probe can confirm → official",
+      "step Register a New App: \"tested\" on a claim no probe can confirm → official",
+      "step Connect Test Organizations: \"tested\" on a claim no probe can confirm → official",
+      "step Create Custom Auth Config in Composio: \"tested\" on a claim no probe can confirm → official",
+      "step Initiate Connection Session: \"tested\" on a claim no probe can confirm → official",
       "requirement 1: \"tested\" on a claim no probe can confirm → official",
       "scope offline_access: \"tested\" on a claim no probe can confirm → official",
       "scope accounting.invoices: \"tested\" on a claim no probe can confirm → official",
       "scope accounting.contacts: \"tested\" on a claim no probe can confirm → official",
       "scope accounting.banktransactions: \"tested\" on a claim no probe can confirm → official",
-      "blocker 3: \"tested\" on a claim no probe can confirm → official"
+      "verifier: business_verification unsupported by its sources → reported"
     ],
     "llm": {
-      "calls": 8,
-      "inputTokens": 56258,
-      "outputTokens": 7558,
+      "calls": 9,
+      "inputTokens": 61269,
+      "outputTokens": 8187,
       "model": "gemini-3.5-flash-lite"
     }
   }

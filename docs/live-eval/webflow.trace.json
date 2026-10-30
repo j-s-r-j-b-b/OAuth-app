@@ -1,0 +1,402 @@
+{
+  "query": "Webflow",
+  "events": [
+    {
+      "type": "stage",
+      "stage": "resolve",
+      "message": "Identifying “Webflow”",
+      "t": 1
+    },
+    {
+      "type": "search",
+      "query": "Webflow API OAuth app developer documentation",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 2260
+    },
+    {
+      "type": "info",
+      "message": "Identified Webflow — Webflow is a SaaS application that allows builders to design, build, and launch websites visually while translating code behind the scenes.",
+      "t": 3675
+    },
+    {
+      "type": "stage",
+      "stage": "composio",
+      "message": "Checking Composio’s toolkit catalog",
+      "t": 3675
+    },
+    {
+      "type": "info",
+      "message": "Setup attempt: creating a throwaway Composio auth config to see exactly what Composio sends to the provider",
+      "t": 4792
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "composio-api",
+        "target": "Composio API: create custom OAuth2 auth config for `webflow` with a dummy client → start a connection → follow the redirect (then delete both)",
+        "result": "pass",
+        "summary": "Composio sends users to https://webflow.com/oauth/authorize with redirect_uri=https://backend.composio.dev/api/v1/auth-apps/add; default scopes: assets:read assets:write authorized_user:read cms:read cms:write custom_code:read custom_code:write forms:read forms:write pages:read pages:write sites:read sites:write; PKCE on.",
+        "detail": "{\"authorizeUrl\":\"https://webflow.com/oauth/authorize\",\"redirectUri\":\"https://backend.composio.dev/api/v1/auth-apps/add\",\"scopes\":[\"assets:read\",\"assets:write\",\"authorized_user:read\",\"cms:read\",\"cms:write\",\"custom_code:read\",\"custom_code:write\",\"forms:read\",\"forms:write\",\"pages:read\",\"pages:write\",\"sites:read\",\"sites:write\"],\"extraParams\":{\"response_type\":\"code\"},\"pkce\":true,\"note\":\"extra params: response_type=code\"}",
+        "id": "P2",
+        "at": "2026-10-30T11:47:14.227Z"
+      },
+      "t": 7991
+    },
+    {
+      "type": "info",
+      "message": "Composio toolkit `webflow` has no managed OAuth app: you must register your own before anyone can connect.",
+      "t": 7991
+    },
+    {
+      "type": "stage",
+      "stage": "research",
+      "message": "Researching docs, policies and real-world reports",
+      "t": 7991
+    },
+    {
+      "type": "search",
+      "query": "Webflow OAuth app approval how long experience reddit OR forum",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 10036
+    },
+    {
+      "type": "search",
+      "query": "Webflow OAuth app review approval verification publish requirements",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 10956
+    },
+    {
+      "type": "search",
+      "query": "Webflow API pricing plans tiers limits for developers connections",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 11353
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "oauth-discovery",
+        "target": "GET https://api.webflow.com/.well-known/openid-configuration | https://api.webflow.com/.well-known/oauth-authorization-server",
+        "result": "info",
+        "summary": "No public OAuth/OIDC discovery document; endpoints must come from the provider docs.",
+        "detail": "404 https://api.webflow.com/.well-known/openid-configuration\n404 https://api.webflow.com/.well-known/oauth-authorization-server",
+        "id": "P3",
+        "at": "2026-10-30T11:47:20.873Z"
+      },
+      "t": 14637
+    },
+    {
+      "type": "search",
+      "query": "site:developers.webflow.com \"private apps\" OR \"register an app\" OR \"oauth\"",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 15602
+    },
+    {
+      "type": "read",
+      "url": "https://developers.webflow.com/data/reference/scopes",
+      "title": "Scopes | Webflow Developer Documentation",
+      "ok": true,
+      "chars": 4264,
+      "via": "direct",
+      "sourceId": "S5",
+      "t": 16160
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "authorize-endpoint",
+        "target": "GET https://webflow.com/oauth/authorize?response_type=code&client_id=oauth-runway-probe&redirect_uri=https%3A%2F%2Fbackend.composio.dev%2Fapi%2Fv3%2Ftoolkits%2Fauth%2Fcallback&state=oauth-runway-probe&scope=sites%3Aread",
+        "result": "pass",
+        "summary": "Endpoint is live and rejects an unregistered client (200). Shows what a misconfigured app sees.",
+        "detail": "Chain: 302 webflow.com/oauth/authorize → 200 webflow.com/login\nFinal: https://webflow.com/login?r=https%3A%2F%2Fwebflow.com%2Foauth%2Fauthorize%3Fresponse_type%3Dcode%26client_id%3Doauth-runway-probe%26redirect_uri%3Dhttps%253A%252F%252Fbackend.composio.dev%252Fapi%252Fv3%252Ftoolkits%252Fauth%252Fcallback%26state%3Doauth-runway-probe%26scope%3Dsites%253Aread&m=WW91IG\nExcerpt: title=\"Login - Webflow\" | [Continue with SSO](/login?sso=true&r=https%3A%2F%2Fwebflow.com%2Foauth%2Fauthorize%3Fresponse_type%3Dcode%26client_id%3Doauth-runway-probe%26redirect_uri%3Dhttps%253A%252F%252Fbackend.composio.dev%252Fapi%252Fv3%252Ftoolkits%252Fauth%252Fcallback%26state%3Doauth-runway-probe%26scope%3Dsites%253Aread&entry_flow=oauth) | Don't have an account?[Sign up](/signup?r=https%3A%2F%2Fwebflow.com%2Foauth%2Fauthorize%3Fresponse_type%3Dcode%26client_id%3Doauth-runway-probe%26redirect_uri%3Dhttps%253A%252F%252Fbackend.composio.dev%252Fapi%252Fv3%252Ftoolkits%252Fauth%252Fcallback%26state%3Doauth-runway-probe%26scope%3Dsites%253Aread&entry_flow=oauth)",
+        "id": "P4",
+        "at": "2026-10-30T11:47:22.457Z"
+      },
+      "t": 16221
+    },
+    {
+      "type": "read",
+      "url": "https://developers.webflow.com/data/reference/oauth-app",
+      "title": "OAuth | Webflow Developer Documentation",
+      "ok": true,
+      "chars": 14000,
+      "via": "direct",
+      "sourceId": "S1",
+      "t": 16325
+    },
+    {
+      "type": "probe",
+      "probe": {
+        "kind": "portal",
+        "target": "GET https://developers.webflow.com",
+        "result": "pass",
+        "summary": "Portal reachable (200, \"Webflow Developer Platform\"); no sign-in redirect seen on the landing page.",
+        "detail": "Chain: 200 developers.webflow.com/",
+        "id": "P5",
+        "at": "2026-10-30T11:47:22.854Z"
+      },
+      "t": 16618
+    },
+    {
+      "type": "finding",
+      "fact": "Webflow OAuth authorization endpoint is https://webflow.com/oauth/authorize and token exchange endpoint is POST https://api.webflow.com/oauth/access_token.",
+      "sourceIds": [
+        "S1",
+        "P4"
+      ],
+      "t": 18483
+    },
+    {
+      "type": "finding",
+      "fact": "To register an OAuth app in Webflow, navigate to Workspace settings, select Apps & Integrations, create a new app under the App Development section, and choose the 'Data Client' building block.",
+      "sourceIds": [
+        "S7"
+      ],
+      "t": 18483
+    },
+    {
+      "type": "finding",
+      "fact": "Only workspace administrators are authorized to view a client secret in Webflow.",
+      "sourceIds": [
+        "S1"
+      ],
+      "t": 18483
+    },
+    {
+      "type": "finding",
+      "fact": "Webflow authorization codes expire in 15 minutes and can only be used once.",
+      "sourceIds": [
+        "S1"
+      ],
+      "t": 18483
+    },
+    {
+      "type": "finding",
+      "fact": "Webflow API rate limits depend on plan: Starter and Basic plans get 60 RPM, CMS, eCommerce, and Business plans get 120 RPM, and Enterprise has custom limits.",
+      "sourceIds": [
+        "S22"
+      ],
+      "t": 18483
+    },
+    {
+      "type": "search",
+      "query": "site:developers.webflow.com \"private apps\" OR \"app review\" OR \"publishing your app\" OR \"marketplace\"",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 20521
+    },
+    {
+      "type": "search",
+      "query": "site:developers.webflow.com \"rate limits\" OR \"rate-limits\"",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 20577
+    },
+    {
+      "type": "search",
+      "query": "site:developers.webflow.com \"refresh token\" OR \"token expiration\" OR \"revocation\"",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 24662
+    },
+    {
+      "type": "search",
+      "query": "site:developers.webflow.com \"developer workspace\" OR \"sandbox\" OR \"test users\"",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 24680
+    },
+    {
+      "type": "finding",
+      "fact": "Webflow OAuth authorization codes expire in 15 minutes, and access tokens can be revoked via POST to https://webflow.com/oauth/revoke_authorization.",
+      "sourceIds": [
+        "S1",
+        "S41"
+      ],
+      "t": 26532
+    },
+    {
+      "type": "finding",
+      "fact": "Before marketplace publication, Webflow restricts custom apps to the developer's own workspace by default, with an option to request up to 5 test user accounts via Webflow support.",
+      "sourceIds": [
+        "S31"
+      ],
+      "t": 26532
+    },
+    {
+      "type": "finding",
+      "fact": "Private apps in Webflow are intended for specific workspaces or custom implementations without public marketplace listing, but they still require submitting through the standard review process.",
+      "sourceIds": [
+        "S18"
+      ],
+      "t": 26532
+    },
+    {
+      "type": "search",
+      "query": "site:forum.webflow.com \"app review\" OR \"marketplace\" OR \"api\"",
+      "count": 1,
+      "engine": "composio:exa",
+      "t": 31473
+    },
+    {
+      "type": "search",
+      "query": "site:developers.webflow.com \"pricing\" OR \"plans\" OR \"costs\"",
+      "count": 8,
+      "engine": "composio:exa",
+      "t": 31480
+    },
+    {
+      "type": "finding",
+      "fact": "Webflow offers a free Developer Workspace plan for building and testing integrations, while site hosting plans are billed separately.",
+      "sourceIds": [
+        "S38"
+      ],
+      "t": 32806
+    },
+    {
+      "type": "info",
+      "message": "Research done: 9 findings, 3 pages read, 5 probes.",
+      "t": 33969
+    },
+    {
+      "type": "stage",
+      "stage": "write",
+      "message": "Writing the guide",
+      "t": 33969
+    },
+    {
+      "type": "warn",
+      "message": "gemini-3.6-flash unavailable (429); falling back to gemini-3.5-flash-lite",
+      "t": 34365
+    },
+    {
+      "type": "info",
+      "message": "Verdict drafted: Webflow requires app registration via the Workspace settings and mandates a formal review process before public marketplace launch.",
+      "t": 42192
+    },
+    {
+      "type": "warn",
+      "message": "gemini-3.6-flash unavailable (429); falling back to gemini-3.5-flash-lite",
+      "t": 42805
+    },
+    {
+      "type": "stage",
+      "stage": "check",
+      "message": "Checking citations, confidence labels and ratings",
+      "t": 70707
+    },
+    {
+      "type": "info",
+      "message": "Verifier: re-reading the cited sources for the rating factors, timeline and cost",
+      "t": 70709
+    },
+    {
+      "type": "warn",
+      "message": "gemini-3.6-flash unavailable (429); falling back to gemini-3.5-flash-lite",
+      "t": 72188
+    },
+    {
+      "type": "info",
+      "message": "Verifier: 9 confirmed, 0 corrected, 1 unverifiable",
+      "t": 79518
+    },
+    {
+      "type": "quality",
+      "report": {
+        "claims": {
+          "tested": 5,
+          "official": 32,
+          "reported": 0,
+          "inferred": 0
+        },
+        "sources": {
+          "total": 11,
+          "fetched": 3,
+          "snippetOnly": 8,
+          "official": 10,
+          "community": 0,
+          "composio": 1
+        },
+        "probes": {
+          "total": 5,
+          "pass": 4,
+          "info": 1,
+          "fail": 0
+        },
+        "fixes": [
+          "step \"Create Custom Auth Config in Composio\": Composio auth-config creation is agent-doable via API → agent",
+          "step Create Custom Auth Config in Composio: \"tested\" on a claim no probe can confirm → official",
+          "no provider wait step although review_required = yes",
+          "scope assets:read: \"tested\" on a claim no probe can confirm → official",
+          "scope assets:write: \"tested\" on a claim no probe can confirm → official",
+          "scope cms:read: \"tested\" on a claim no probe can confirm → official",
+          "scope cms:write: \"tested\" on a claim no probe can confirm → official",
+          "scope custom_code:read: \"tested\" on a claim no probe can confirm → official",
+          "scope custom_code:write: \"tested\" on a claim no probe can confirm → official",
+          "scope forms:read: \"tested\" on a claim no probe can confirm → official",
+          "scope forms:write: \"tested\" on a claim no probe can confirm → official",
+          "scope pages:read: \"tested\" on a claim no probe can confirm → official",
+          "scope pages:write: \"tested\" on a claim no probe can confirm → official",
+          "scope sites:read: \"tested\" on a claim no probe can confirm → official",
+          "scope sites:write: \"tested\" on a claim no probe can confirm → official"
+        ],
+        "llm": {
+          "calls": 12,
+          "inputTokens": 76644,
+          "outputTokens": 7385,
+          "model": "gemini-3.5-flash-lite"
+        }
+      },
+      "t": 79520
+    }
+  ],
+  "quality": {
+    "claims": {
+      "tested": 5,
+      "official": 32,
+      "reported": 0,
+      "inferred": 0
+    },
+    "sources": {
+      "total": 11,
+      "fetched": 3,
+      "snippetOnly": 8,
+      "official": 10,
+      "community": 0,
+      "composio": 1
+    },
+    "probes": {
+      "total": 5,
+      "pass": 4,
+      "info": 1,
+      "fail": 0
+    },
+    "fixes": [
+      "step \"Create Custom Auth Config in Composio\": Composio auth-config creation is agent-doable via API → agent",
+      "step Create Custom Auth Config in Composio: \"tested\" on a claim no probe can confirm → official",
+      "no provider wait step although review_required = yes",
+      "scope assets:read: \"tested\" on a claim no probe can confirm → official",
+      "scope assets:write: \"tested\" on a claim no probe can confirm → official",
+      "scope cms:read: \"tested\" on a claim no probe can confirm → official",
+      "scope cms:write: \"tested\" on a claim no probe can confirm → official",
+      "scope custom_code:read: \"tested\" on a claim no probe can confirm → official",
+      "scope custom_code:write: \"tested\" on a claim no probe can confirm → official",
+      "scope forms:read: \"tested\" on a claim no probe can confirm → official",
+      "scope forms:write: \"tested\" on a claim no probe can confirm → official",
+      "scope pages:read: \"tested\" on a claim no probe can confirm → official",
+      "scope pages:write: \"tested\" on a claim no probe can confirm → official",
+      "scope sites:read: \"tested\" on a claim no probe can confirm → official",
+      "scope sites:write: \"tested\" on a claim no probe can confirm → official"
+    ],
+    "llm": {
+      "calls": 12,
+      "inputTokens": 76644,
+      "outputTokens": 7385,
+      "model": "gemini-3.5-flash-lite"
+    }
+  }
+}
