@@ -90,7 +90,7 @@ export default function About() {
             ))}
           </ul>
           <p className="mt-3 text-sm">
-            <strong>Setup probes</strong> are real read-only requests: the provider's OAuth discovery document, an authorize request with a fake client ID and
+            <strong>Setup probes</strong> are real requests, almost all GETs: the provider's OAuth discovery document, an authorize request with a fake client ID and
             Composio's redirect URI (does the endpoint exist, how does it reject a bad client?), and the developer portal's sign-in wall. They never create
             accounts, log in, or submit forms. That boundary is also where a human takes over.
           </p>
@@ -115,7 +115,7 @@ export default function About() {
               verification report
             </a>
             .{' '}
-            <strong>Live guides</strong> are produced on demand in a few minutes by a smaller agent built on Composio's own search tools and a free-tier model.
+            <strong>Live guides</strong> are produced on demand in about 1–3 minutes by a smaller agent built on Composio's own search tools and a free-tier model.
             Before a live guide is published, every citation is checked automatically: citations to pages the agent never retrieved are removed, a “tested”
             label without a probe is downgraded, an automated verifier re-reads the cited source text for the rating factors, timeline and cost (unsupported claims are downgraded, contradicted ones corrected), and the rating is recomputed. Live guides are a fast first answer; check the evidence before committing.
           </p>

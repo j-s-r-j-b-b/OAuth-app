@@ -478,7 +478,7 @@
           "id": "wait-review",
           "title": "Wait for reviewer assignment and review",
           "actor": "provider",
-          "effort": "—",
+          "effort": "None (waiting)",
           "wait": "No official SLA; reports range from 1–3 weeks (Aug 2026) to 2+ months (spring 2026)",
           "details": "Status runs **Submitted**, then **Reviewed** or **Paused** with required fixes, then **Published**. Shopify publishes no timeline. In spring 2026, developers reported 4–8+ weeks at \"We're assigning a reviewer\". Shopify staff said in June 2026 that assignment should be much faster, and one developer said in August that reviews usually took 1–3 weeks. Don't resubmit while waiting, because that moves you to the back of the queue. Reply to reviewer notes quickly.",
           "agentAssist": "Agent can watch the review email/status and prepare fixes for any flagged requirement.",

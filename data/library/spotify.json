@@ -674,7 +674,7 @@
     {
       "title": "Redirect URI rejected",
       "symptom": "After login, Spotify shows `INVALID_CLIENT: Invalid redirect URI` or `INVALID_CLIENT: Insecure redirect URI`. The dashboard flags non-HTTPS entries with *This redirect URI is not secure*.",
-      "likelihood": "common",
+      "likelihood": "occasional",
       "howToProceed": "Register exactly the URI Composio sends: `https://backend.composio.dev/api/v1/auth-apps/add` by default, `https://backend.composio.dev/api/v3/toolkits/auth/callback` only if the auth config sets `oauth_redirect_uri`, or your own HTTPS proxy URL if you white-label. `http://` is allowed only for loopback IP literals, and `localhost` is never accepted. Decode the `redirect_uri` in the failing URL and compare it character by character.",
       "escalation": {
         "label": "Spotify for Developers community",
@@ -688,7 +688,7 @@
         "P4",
         "P7"
       ],
-      "confidence": "tested"
+      "confidence": "official"
     },
     {
       "title": "Composio tools hit endpoints removed for new apps",

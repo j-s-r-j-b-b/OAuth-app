@@ -25,15 +25,16 @@ State the **assumption** the ratings are based on. Pick a typical agent use case
 
 ## 3. Setup attempts (probes)
 
-Probes are real, read-only HTTP requests that test parts of the setup without an account. Record each one in `evidence.probes` with the exact request and what came back.
+Probes are real HTTP requests, GET unless noted, that test parts of the setup without an account. Record each one in `evidence.probes` with the exact request and what came back.
 
 | Probe | Request | What it establishes |
 |---|---|---|
 | `oauth-discovery` | `GET <issuer>/.well-known/openid-configuration` or `/.well-known/oauth-authorization-server` | Real authorize and token endpoints, PKCE support, published scopes, and whether dynamic client registration is offered |
 | `authorize-endpoint` | `GET <authorize_url>?response_type=code&client_id=oauth-runway-probe&redirect_uri=<Composio callback>&scope=<typical>&state=probe` | The endpoint is live, and what error an unregistered or misconfigured app gets (and so what a correct setup must avoid) |
+| `token-endpoint` | `GET`, or `POST` with a bogus client, secret and code, to the token URL | The endpoint is live and how it rejects an unknown client |
 | `portal` | `GET` the developer portal's "create app" URL | Whether it bounces to a login or sign-up wall, which is where a human has to take over |
 | `url-check` | `GET` key documentation URLs | The cited pages exist (HTTP status) |
-| `composio-api` | Composio toolkit API (live agent only, with an API key) | Exact auth fields and default scopes |
+| `composio-api` | Composio toolkit API with an API key (the live agent, and `npm run connect-probe` for library guides) | Exact auth fields and default scopes |
 
 Never create accounts, log in, submit forms, use real credentials, or POST to a registration endpoint. If a probe is blocked (bot protection, 403), record that as the result. It is still information.
 

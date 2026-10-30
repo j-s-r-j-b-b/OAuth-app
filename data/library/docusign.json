@@ -117,7 +117,7 @@
     {
       "key": "paid_access",
       "value": "depends",
-      "detail": "Approved ISV partners get a complimentary production management account. Without a partnership, the key must be managed by a paid production account (enterprise or API plan; Business Pro is reportedly accepted only case by case).",
+      "detail": "Approved ISV partners get a complimentary production management account. Without a partnership, the key must be managed by a paid production account (enterprise or API plan; forum reports say Business Pro is accepted only case by case).",
       "sourceIds": [
         "S5",
         "S15",
@@ -130,7 +130,7 @@
     {
       "key": "partner_or_sales_gate",
       "value": "yes",
-      "detail": "DocuSign's Go-Live docs say a Public integration (one key, many customer accounts) requires Docusign Partner Program membership. A Docusign employee confirmed this for a multi-tenant SaaS in Aug 2026. Partner eligibility reportedly requires at least 20 employees and at least 1 year in business.",
+      "detail": "DocuSign's Go-Live docs say a Public integration (one key, many customer accounts) requires Docusign Partner Program membership. A Docusign employee confirmed this for a multi-tenant SaaS in Aug 2026. Forum posts (not DocuSign documentation) report that partner eligibility requires at least 20 employees and at least 1 year in business.",
       "sourceIds": [
         "S4",
         "S5",
@@ -496,7 +496,7 @@
     {
       "item": "Docusign Partner Program membership (ISV)",
       "neededFor": "review",
-      "detail": "Mandatory for the Public integration classification. Involves an operations/business review and contracts. Eligibility reportedly requires at least 20 employees and at least 1 year in business.",
+      "detail": "Mandatory for the Public integration classification. Involves an operations/business review and contracts. Forum posts (not DocuSign documentation) report that eligibility requires at least 20 employees and at least 1 year in business.",
       "sourceIds": [
         "S4",
         "S20",

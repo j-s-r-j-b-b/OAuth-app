@@ -133,7 +133,7 @@ export default function SearchBox({ catalog, guides, liveEnabled }: { catalog: C
       )}
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
         {liveEnabled
-          ? 'Library apps open instantly. For anything else, a research agent investigates live (about 2–4 minutes) and publishes a shareable guide.'
+          ? 'Library apps open instantly. For anything else, a research agent investigates live (about 1–3 minutes) and publishes a shareable guide.'
           : 'Live generation is switched off on this server; library guides still work.'}
       </p>
       {error && <p className="mt-2 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-800 dark:bg-rose-500/10 dark:text-rose-300">{error}</p>}

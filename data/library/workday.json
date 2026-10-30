@@ -44,8 +44,8 @@
   },
   "assumption": "An agent product sold to enterprises that reads worker profiles, time off and org data from each customer's own Workday tenant, with each employee connecting through Workday OAuth (Authorization Code Grant) via Composio.",
   "verdict": {
-    "headline": "Gated: each customer's Workday admin has to register your API client inside their own tenant. A personal dev tenant (open beta) now covers build and test.",
-    "summary": "Workday doesn't review OAuth apps. Instead, each customer's Workday admin runs **Register API Client** in their own tenant. That produces a client ID, secret and tenant-specific endpoints. For your own build and test tenant, Workday's Developer Program (open-access beta, announced Oct 2026) lets an individual request one personal development tenant with sample data. Whether you can register a Composio-compatible API client there is unverified, and it is no substitute for a customer's tenant. Your first real-data connection still comes from a design-partner customer's Sandbox or Implementation tenant. After that, every customer is its own rollout: their security review, their admin, their client, and one Composio auth config per tenant.",
+    "headline": "Gated: each customer's Workday admin has to register your API client inside their own tenant. A personal dev tenant (open beta) may cover build and test (whether Register API Client works there is unverified).",
+    "summary": "Workday doesn't review OAuth apps. Instead, each customer's Workday admin runs **Register API Client** in their own tenant. That produces a client ID, secret and tenant-specific endpoints. For your own build and test tenant, Workday's Developer Program (open-access beta, announced Oct 2026) lets an individual request one personal development tenant with sample data, which is no substitute for a customer's tenant. Your first real-data connection still comes from a design-partner customer's Sandbox or Implementation tenant. After that, every customer is its own rollout: their security review, their admin, their client, and one Composio auth config per tenant.",
     "difficulty": "gated",
     "handsOnEffort": {
       "label": "3–8 hours",
@@ -57,7 +57,7 @@
       "label": "Same day – 4 weeks",
       "minHours": 4,
       "maxHours": 672,
-      "basis": "Same day if a personal dev tenant (beta; Workday says ready in about 15 min once requested, approval time unpublished) supports Register API Client; up to ~4 weeks to line up a customer sandbox admin"
+      "basis": "Spans two paths. Personal dev tenant (beta): same day, if it supports Register API Client (Workday says ready in about 15 min once requested; approval time unpublished). Customer sandbox: up to ~4 weeks to line up a customer's admin."
     },
     "timeToProduction": {
       "label": "1–8 weeks per customer",
@@ -189,7 +189,7 @@
           "actor": "you",
           "effort": "15–30 min",
           "wait": "Workday emails when ready (usually ~15 min after the request); approval time unpublished",
-          "details": "Join the Workday Developer Program at **developer.workday.com** with a personal email. Then go to **Console → Tenants**, and under **Development Tenants** click **+** to request a tenant. Workday emails the sign-in details (not shown on the Developer Site); sign in and change the password within 72 hours. Limits: 1 active tenant, it expires after 7 consecutive days without login, it holds GMS sample data only (no PII), and the program is a beta. Unverified: whether **Register API Client** (Authorization Code, with Composio's redirect URI) is available to the admin of that tenant. If it is, you can run the register and connect phases below on sample data yourself.",
+          "details": "Join the Workday Developer Program at **developer.workday.com** with a personal email. Then go to **Console → Tenants**, and under **Development Tenants** click **+** to request a tenant. Workday emails the sign-in details (not shown on the Developer Site); sign in and change the password within 72 hours. Limits: 1 active tenant, it expires after 7 consecutive days without login, it holds GMS sample data only (no PII), and the program is a beta. After signing in, search the tenant for **Register API Client** (Authorization Code, with Composio's redirect URI). If its admin can run it, you can do the register and connect phases below on sample data yourself.",
           "agentAssist": "After first sign-in, search for the Register API Client task and report whether it appears. Set a login reminder inside the 7-day expiry.",
           "links": [
             {
@@ -395,13 +395,13 @@
           "actor": "you",
           "effort": "2–6 h per customer",
           "wait": "~1–8 weeks per customer (inferred; no public data)",
-          "details": "Submit the security packet, answer the questionnaire, and agree on the scope list and any constrained security groups. Production registration usually waits on this.",
+          "details": "Answer the customer's security questionnaire and provide whatever documentation their team asks for (requirements not public; reports mention SOC 2 reports), and agree on the scope list and any constrained security groups. Production registration usually waits on this.",
           "agentAssist": "Draft questionnaire answers and the scope justifications.",
           "links": [],
           "sourceIds": [
             "S20"
           ],
-          "confidence": "reported"
+          "confidence": "inferred"
         },
         {
           "id": "rollout-2",
@@ -657,7 +657,7 @@
     {
       "title": "Redirect URI mismatch",
       "symptom": "The connection fails with `redirect_uri_mismatch` after Workday sign-in.",
-      "likelihood": "common",
+      "likelihood": "occasional",
       "howToProceed": "Edit the API client's Redirection URI to match what Composio sends, character for character: `https://backend.composio.dev/api/v1/auth-apps/add` by default, or `https://backend.composio.dev/api/v3/toolkits/auth/callback` if the auth config sets `oauth_redirect_uri`. Compare with the `redirect_uri` in the failing authorize URL.",
       "escalation": {
         "label": "Composio programmatic auth configs",
@@ -668,7 +668,7 @@
         "S3",
         "P7"
       ],
-      "confidence": "tested"
+      "confidence": "inferred"
     },
     {
       "title": "Wrong authorize host or tenant name",

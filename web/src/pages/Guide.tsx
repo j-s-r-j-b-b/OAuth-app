@@ -640,8 +640,8 @@ function AgentBrief({ g, url }: { g: Guide; url: string }) {
         <div>
           <div className="font-semibold text-violet-950 dark:text-violet-100">🤖 Hand this to your coding agent</div>
           <p className="text-sm text-violet-900/80 dark:text-violet-200/80">
-            A ready brief for Claude Code, Cursor or similar. It covers the agent's steps, drafts of the review materials and scope justifications, the
-            exact Composio wiring with the tested redirect URI, and what to hand back to you.
+            A ready brief for Claude Code, Cursor or similar. It lists the agent's steps, the review materials and scope justifications to draft, the
+            Composio wiring with the tested redirect URI, and what to hand back to you.
           </p>
         </div>
         <div className="flex gap-2">
@@ -730,7 +730,7 @@ function TestedSetup({ g }: { g: Guide }) {
       </div>
       <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
         We created a throwaway custom auth config for <code>{g.composio.toolkitSlug}</code> with a dummy client, started a connection, and followed
-        Composio's redirect to {g.app.name}. Then we deleted both. This is exactly what your users' browsers will be sent:
+        Composio's redirect to {g.app.name}. Then we deleted both. This is what your users' browsers are sent by default:
       </p>
       <dl className="mt-3 grid gap-2 text-sm">
         <div>
@@ -819,7 +819,7 @@ function EvidenceSection({ g, trace }: { g: Guide; trace: Trace | null }) {
       {ev.probes.length > 0 && (
         <div>
           <h3 className="font-semibold text-slate-900 dark:text-white">Setup attempts we ran ({ev.probes.length})</h3>
-          <p className="text-sm text-slate-500">Real read-only requests against the provider. They show what an agent can check without an account, and where a human has to take over.</p>
+          <p className="text-sm text-slate-500">Real requests made without a provider account. They show what an agent can check, and where a human has to take over.</p>
           <ul className="mt-2 space-y-2">
             {ev.probes.map((p) => (
               <li key={p.id} id={`ev-${p.id}`} className="card p-3 text-sm">

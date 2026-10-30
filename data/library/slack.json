@@ -62,7 +62,7 @@
       "basis": "~1–5 months (10 active installs, then up to 10 business days + up to 10 weeks of review)"
     },
     "longestPole": "Slack Marketplace review: getting to 10+ active workspaces first, then up to 10 weeks of functional review. Resubmits during the preliminary stage reset your queue position.",
-    "cost": "Free",
+    "cost": "No fee found",
     "costDetail": "Free as far as Slack's docs show: they list no fee for the API or a Marketplace listing, though no page says so outright. Some AI search features (assistant.search.context) need the customer's workspace on Business+.",
     "easierPaths": [
       {
@@ -402,7 +402,7 @@
           "id": "preliminary-review",
           "title": "Preliminary review",
           "actor": "provider",
-          "effort": "—",
+          "effort": "None (waiting)",
           "wait": "Up to 10 business days per round",
           "details": "Slack checks the listing, docs and scope reasons, and may test OAuth. Each resubmission at this stage **resets your queue position**.",
           "agentAssist": "Triage feedback into a fix list and draft responses.",
@@ -416,7 +416,7 @@
           "id": "functional-review",
           "title": "Functional review",
           "actor": "provider",
-          "effort": "—",
+          "effort": "None (waiting)",
           "wait": "Up to 10 weeks (new apps); one unverified report says ~4 months end to end",
           "details": "A reviewer installs and tests the app. Expect an enhanced review for `*:history` scopes. Queue position is kept on resubmits. Keep 10+ active installs throughout.",
           "agentAssist": "Monitor the active-install count and prepare a staging app copy if Slack asks for one.",
@@ -640,7 +640,7 @@
     {
       "title": "Redirect URI mismatch",
       "symptom": "`bad_redirect_uri` or a redirect mismatch error after approving",
-      "likelihood": "common",
+      "likelihood": "occasional",
       "howToProceed": "Add the URI Composio sends under **OAuth & Permissions → Redirect URLs**: `https://backend.composio.dev/api/v1/auth-apps/add` by default, or the v3 callback if the auth config sets `oauth_redirect_uri`. Don't register the short connect link.",
       "escalation": {
         "label": "Composio Slack KB",
@@ -652,7 +652,7 @@
         "S3",
         "P6"
       ],
-      "confidence": "tested"
+      "confidence": "official"
     },
     {
       "title": "History reads crawl on new installs",

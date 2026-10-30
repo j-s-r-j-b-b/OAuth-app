@@ -28,7 +28,7 @@
   },
   "assumption": "An agent product that reads, drafts and sends Gmail on behalf of any Google user (consumer or Workspace), using your own Google OAuth client in a Composio auth config.",
   "verdict": {
-    "headline": "Formal review: restricted Gmail scopes mean Google verification plus a paid, annual CASA security assessment. Plan for 1–3 months.",
+    "headline": "Formal review: restricted Gmail scopes mean Google verification plus a paid, annual CASA security assessment. Plan for 3–12 weeks.",
     "summary": "Creating the project and client takes under an hour, and you can connect your own account in Testing mode the same day. Reading or drafting mail needs restricted scopes (gmail.readonly, gmail.compose, gmail.modify). So before any Google user can connect you need brand verification, restricted-scope verification (demo video and justifications) and a CASA assessment from an authorized lab, repeated every year. Until then you are limited to 100 test users with 7-day tokens, or 100 lifetime users behind an unverified-app warning.",
     "difficulty": "formal-review",
     "handsOnEffort": {
@@ -50,7 +50,7 @@
       "basis": "3–12 weeks. Google's FAQ lists about 6 weeks for restricted-scope verification and says a security assessment is also required, without saying whether assessment time is extra. Nango says prepared teams finish in 5–20 days; forum reports show stalls of 2+ months."
     },
     "longestPole": "Restricted-scope review by Google's Trust & Safety team, then the CASA assessment (lab scan, fixing findings, Letter of Validation). Much of the delay is waiting for Google's emails.",
-    "cost": "$540–$3,000+/yr security assessment",
+    "cost": "~$540–$3k+/yr CASA lab fee (reported)",
     "costDetail": "Google charges no verification fee. You pay the CASA lab every year; reported prices are $540–$720 (TAC Security) to $3,000+ (Prescient Security), as of Aug 2025. The Gmail API is free within quota, but Google plans to charge projects that exceed 80M quota units/day. It will publish billing details later in 2026, with at least 90 days' notice before charges take effect. You also need a domain and hosting for the homepage and privacy policy.",
     "easierPaths": [
       {
@@ -110,7 +110,7 @@
     {
       "key": "security_assessment",
       "value": "yes",
-      "detail": "An annual CASA assessment by an authorized lab is required when restricted data is stored on, or passes through, servers. An agent backend (and Composio) always does this.",
+      "detail": "An annual CASA assessment by an authorized lab is required when restricted data is stored on, or passes through, servers. An agent backend (and Composio) does this when it stores or relays restricted data.",
       "sourceIds": [
         "S6",
         "S11",
@@ -371,11 +371,11 @@
       "steps": [
         {
           "id": "privacy-policy",
-          "title": "Draft and publish the homepage and privacy policy",
+          "title": "Draft the homepage and privacy policy",
           "actor": "agent",
           "effort": "2–4 h",
           "wait": null,
-          "details": "The homepage must be public and show the exact app name. The privacy policy, on the same domain, must say how Google user data is accessed, used, stored and shared. It must also include the affirmative statement that use of information from Google Workspace APIs adheres to the Google API Services User Data Policy, including the Limited Use requirements. Say that Gmail data is not used to train generalized AI models, sold or used for ads, and that users confirm agent actions such as sending. You review and publish.",
+          "details": "The homepage must be public and show the exact app name. The privacy policy, on the same domain, must say how Google user data is accessed, used, stored and shared. It must also include the affirmative statement that use of information from Google Workspace APIs adheres to the Google API Services User Data Policy, including the Limited Use requirements. Say that Gmail data is not used to train generalized AI models, sold or used for ads, and that users confirm agent actions such as sending. You review both pages and publish them on your domain.",
           "agentAssist": "Draft both pages from your actual data flows: Composio, your backend, the LLM provider and retention.",
           "links": [
             {
@@ -799,7 +799,7 @@
     {
       "title": "Redirect URI mismatch",
       "symptom": "\"Error 400: redirect_uri_mismatch\" on Google's screen when a connection starts.",
-      "likelihood": "common",
+      "likelihood": "occasional",
       "howToProceed": "Register the URI Composio actually sends: `https://backend.composio.dev/api/v1/auth-apps/add` by default, the v3 callback only if the auth config sets `oauth_redirect_uri` to it, or your own proxy URL. Compare the `redirect_uri` in the failing authorize URL with the Google client character by character.",
       "escalation": {
         "label": "Composio custom auth configs",
@@ -810,7 +810,7 @@
         "S4",
         "P5"
       ],
-      "confidence": "tested"
+      "confidence": "inferred"
     },
     {
       "title": "Unapproved scope breaks a verified app",

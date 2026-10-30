@@ -154,7 +154,7 @@ export default function Generate() {
           </ol>
         </div>
         <div className="card p-4 text-xs text-slate-500 dark:text-slate-400">
-          Takes about 2–4 minutes on the free model tier. You can leave this page open; the guide gets a permanent link when it's done.
+          Takes about 1–3 minutes on the free model tier. You can leave this page open; the guide gets a permanent link when it's done.
         </div>
       </aside>
     </div>

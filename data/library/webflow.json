@@ -442,7 +442,7 @@
           "id": "review-wait",
           "title": "Webflow app review",
           "actor": "provider",
-          "effort": "—",
+          "effort": "None (waiting)",
           "wait": "Aim: within 10 business days per round",
           "details": "Review covers Webflow API use and credential handling. The decision comes by email to your Webflow account address. 10 business days is Webflow's stated aim, not a guarantee.",
           "agentAssist": "Watch the inbox and keep the backend and demo account healthy.",
@@ -719,7 +719,7 @@
     {
       "title": "Invalid Redirect URI",
       "symptom": "'Invalid Redirect URI' error after login on the Webflow authorize page",
-      "likelihood": "common",
+      "likelihood": "occasional",
       "howToProceed": "Register exactly the URL your auth config sends, with no trailing slash: `https://backend.composio.dev/api/v1/auth-apps/add` by default, or `https://backend.composio.dev/api/v3/toolkits/auth/callback` if you set `oauth_redirect_uri` (or your forwarder URL). Errors only appear after sign-in, so test while logged in.",
       "escalation": {
         "label": "Register an App: troubleshooting",
@@ -731,7 +731,7 @@
         "P1",
         "P6"
       ],
-      "confidence": "tested"
+      "confidence": "official"
     },
     {
       "title": "Authorization succeeds but tool calls fail on scope",

@@ -402,7 +402,7 @@
           "id": "xero-review",
           "title": "Xero reviews the integration",
           "actor": "provider",
-          "effort": "—",
+          "effort": "None (waiting)",
           "wait": "No official SLA; integrators report the partner process can take several months",
           "details": "Xero checks the prerequisites, then tests your integration against the checkpoints and may raise additional requirements. Fix the findings and respond. Once you pass, you move to Plus (A$245/month) and become eligible for an optional App Store listing.",
           "agentAssist": "Turn each review finding into a fix list and re-verify against the checkpoint text.",
@@ -630,7 +630,7 @@
     {
       "title": "Unknown client or redirect mismatch",
       "symptom": "Xero error page: \"Error: unauthorized_client — Unknown client or client not enabled\" (Error code: 500).",
-      "likelihood": "common",
+      "likelihood": "occasional",
       "howToProceed": "Check that the Client ID in Composio matches **Configuration** exactly. Also check that the URI Composio sends is listed under **Redirect URIs** with no trailing slash (`https://backend.composio.dev/api/v1/auth-apps/add` by default, `https://backend.composio.dev/api/v3/toolkits/auth/callback` only if the auth config sets `oauth_redirect_uri`), and that you clicked **Save**.",
       "escalation": {
         "label": "Xero developer support",
@@ -642,7 +642,7 @@
         "S21",
         "P5"
       ],
-      "confidence": "tested"
+      "confidence": "inferred"
     },
     {
       "title": "Connection cap reached (5 Starter / 50 Core)",

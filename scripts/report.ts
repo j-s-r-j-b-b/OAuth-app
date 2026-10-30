@@ -12,6 +12,12 @@ const guides = readdirSync('data/library')
   .sort((a, b) => a.verdict.timeToProduction.maxHours - b.verdict.timeToProduction.maxHours);
 
 const managed = { available: 'managed', 'not-available': 'bring your own', 'not-in-catalog': 'not in catalog', unknown: '?' } as const;
+/** Cut at a word boundary (never mid-word) and add an ellipsis. */
+const clip = (text: string, max: number): string => {
+  if (text.length <= max) return text;
+  const end = /\s/.test(text[max]) ? max : text.lastIndexOf(' ', max);
+  return text.slice(0, end > 0 ? end : max).replace(/[\s,;:.\-–—(]+$/, '') + '…';
+};
 const claims = (g: Guide) => [g.factors, g.requirements, g.scopes, g.blockers, g.nuances, g.phases.flatMap((p) => p.steps)].flat();
 
 const out: string[] = [];
@@ -23,7 +29,7 @@ out.push('|---|---|---|---|---|---|');
 for (const g of guides) {
   const v = g.verdict;
   out.push(
-    `| [${g.app.name}](../data/library/${g.slug}.json) | ${managed[g.composio.managedOAuth]} | ${DIFFICULTY_INFO[v.difficulty].label} | ${v.timeToFirstConnection.label} | ${v.timeToProduction.label} | ${v.longestPole.replace(/\|/g, '/').slice(0, 140)} |`,
+    `| [${g.app.name}](../data/library/${g.slug}.json) | ${managed[g.composio.managedOAuth]} | ${DIFFICULTY_INFO[v.difficulty].label} | ${v.timeToFirstConnection.label} | ${v.timeToProduction.label} | ${clip(v.longestPole.replace(/\|/g, '/'), 140)} |`,
   );
 }
 

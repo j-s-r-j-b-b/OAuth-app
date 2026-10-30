@@ -750,7 +750,7 @@
         "S15",
         "P7"
       ],
-      "confidence": "tested"
+      "confidence": "official"
     },
     {
       "title": "Wrong client ID in the auth config",
