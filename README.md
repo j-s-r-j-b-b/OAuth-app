@@ -7,7 +7,7 @@
 
 Every claim links to its source or to a probe we ran.
 
-- **Live demo:** _<Railway URL>_
+- **Live demo:** https://oauth-runway-nnmh.onrender.com (Render free tier; if it has been idle, the first load can take about a minute)
 - **Library:** 10 researched and independently verified guides: Gmail, Slack, Shopify, X, Xero, DocuSign, Meta Ads, Microsoft Graph, Spotify, Workday.
 - **Catalog:** all 382 OAuth toolkits from [Composio's managed-auth directory](https://docs.composio.dev/toolkits/managed-auth).
 - **Live generation:** type any app name or website. A research agent investigates it in about 2–4 minutes and publishes a shareable guide.
