@@ -24,6 +24,7 @@ Registering takes minutes. Review, verification, security assessments, user caps
 ## What a guide gives you
 
 - **A verdict.** A rating computed from eight factors by one rule (Self-serve, Light review, Formal review, Gated). Hands-on effort is shown separately from calendar time, and calendar time is split into *first test connection* and *any user can connect*. Longest pole, cost and easier paths are included.
+- **A rating for your use case.** Pick a use case, such as "Send email only" or "Internal workspace only", or tick the scopes your agent needs. The page recomputes the rating with the same rule and shows what changes, such as "Security assessment: yes → no". Every library guide has 2–4 researched profiles; live guides get them too.
 - **Your next step, at the top.** The first unfinished step, who does it, its effort, and what an agent can prepare. Mark it done and the next one appears.
 - **"Stuck? Paste your error."** It matches error codes like `redirect_uri_mismatch` or `AADSTS900941` against the guide's known blockers, then gives an answer grounded in the guide's evidence, with citations.
 - **A step-by-step plan.** Each step is tagged 🤖 Agent / 👤 You / ⏳ Provider, with notes on what an agent can prepare even when you must act. Progress is tracked in your browser.

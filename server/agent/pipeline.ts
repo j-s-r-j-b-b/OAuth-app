@@ -29,7 +29,7 @@ import { matchToolkit } from '../catalog.ts';
 import { composioEnabled, connectProbeAuto, describeConnectProbe, getToolkitAuth, getToolkitDocs, webSearch, type ConnectProbeResult } from '../composio.ts';
 import { env } from '../env.ts';
 import { chat, parseJsonLoose, type Usage } from './llm.ts';
-import { IDENTIFY_SYSTEM, PLAN_TASK, RESEARCH_SYSTEM, VERDICT_TASK, VERIFY_TASK, WRITE_RULES } from './prompts.ts';
+import { IDENTIFY_SYSTEM, PLAN_TASK, PROFILES_TASK, RESEARCH_SYSTEM, VERDICT_TASK, VERIFY_TASK, WRITE_RULES } from './prompts.ts';
 import { EvidenceRegistry } from './registry.ts';
 import { RESEARCH_TOOLS, runTool, type ToolContext } from './tools.ts';
 
@@ -317,6 +317,24 @@ export async function generateGuide(
     sourceNotes: z.record(z.string(), z.string()).default({}),
   });
 
+  const ProfilesOut = z.object({
+    profiles: z
+      .array(
+        z.object({
+          id: z.string(),
+          label: z.string(),
+          description: z.string().default(''),
+          scopes: z.array(z.string()).default([]),
+          factorOverrides: z.record(z.string(), z.string()).default({}),
+          timeToProduction: Duration.optional(),
+          note: z.string().default(''),
+          sourceIds: z.array(z.string()).default([]),
+          confidence: z.string().default('inferred'),
+        }),
+      )
+      .default([]),
+  });
+
   const writeJson = async <T extends z.ZodTypeAny>(task: string, schema: T, extra = ''): Promise<z.infer<T>> => {
     const base: OpenAI.Chat.ChatCompletionMessageParam[] = [
       { role: 'system', content: `You write OAuth setup guides for developers from research notes.\n\n${WRITE_RULES}` },
@@ -370,6 +388,22 @@ export async function generateGuide(
     Part2,
     `\n\nPART 1 (already written — stay consistent with it):\n${JSON.stringify(p1ForContext).slice(0, 12000)}`,
   );
+
+  // Use-case profiles for the scope-based rating (optional: skipped if the model can't produce valid ones).
+  let rawProfiles: z.infer<typeof ProfilesOut>['profiles'] = [];
+  try {
+    const pr = await writeJson(
+      PROFILES_TASK,
+      ProfilesOut,
+      `
+
+PART 1 (default assumption, factors, scopes, easier paths):
+${JSON.stringify({ assumption: p1.assumption, factors: p1.factors.map((f) => ({ key: f.key, value: f.value })), scopes: p1.scopes.map((x) => ({ scope: x.scope, tier: x.tier })), easierPaths: p1.verdict.easierPaths })}`,
+    );
+    rawProfiles = pr.profiles.slice(0, 4);
+  } catch (e) {
+    emit({ type: 'warn', message: `Use-case profiles skipped: ${(e as Error).message.slice(0, 100)}` });
+  }
 
   // ── 5. Assemble & check ───────────────────────────────────────────────────
   emit({ type: 'stage', stage: 'check', message: 'Checking citations, confidence labels and ratings' });
@@ -490,6 +524,20 @@ export async function generateGuide(
       escalation: b.escalation && /^https?:\/\//.test(b.escalation.url) ? b.escalation : null,
     })),
     nuances: p2.nuances.map((n, i) => fixRefs(n, `nuance ${i + 1}`)),
+    profiles: rawProfiles.map((pr, i) => {
+      const scopeSet = new Set(p1.scopes.map((x) => x.scope));
+      const factorOverrides = Object.fromEntries(
+        Object.entries(pr.factorOverrides).filter(([k, v]) => (FactorKey.options as string[]).includes(k) && ['yes', 'no', 'depends', 'unknown'].includes(v)),
+      );
+      return {
+        ...fixRefs(pr, `profile ${pr.label.slice(0, 30)}`),
+        id: (pr.id || pr.label).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `profile-${i + 1}`,
+        label: pr.label.slice(0, 60),
+        scopes: pr.scopes.filter((sc) => scopeSet.has(sc)),
+        factorOverrides,
+        ...(pr.timeToProduction ? { timeToProduction: pr.timeToProduction.label.length > 32 ? { ...pr.timeToProduction, label: formatRange(pr.timeToProduction.minHours, pr.timeToProduction.maxHours) } : pr.timeToProduction } : {}),
+      };
+    }),
     composioSetup: {
       redirectUri: connectTest?.redirectUri ?? COMPOSIO_DEFAULT_REDIRECT_URI,
       ...(connectTest ? { tested: connectTest } : {}),
@@ -604,7 +652,7 @@ export async function generateGuide(
       Object.values(o).forEach(walk);
     }
   };
-  walk([draft.factors, draft.phases, draft.requirements, draft.scopes, draft.blockers, draft.nuances, draft.evidence.verification]);
+  walk([draft.factors, draft.phases, draft.requirements, draft.scopes, draft.blockers, draft.nuances, draft.evidence.verification, draft.profiles]);
 
   if (!reg.probes.some((p) => p.result === 'pass' && p.kind !== 'composio-api')) {
     draft.evidence.openQuestions.push({

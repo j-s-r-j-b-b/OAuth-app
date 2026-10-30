@@ -135,6 +135,25 @@ export const Nuance = z.object({
 });
 export type Nuance = z.infer<typeof Nuance>;
 
+/**
+ * A use-case profile: the same app needed for a narrower or different set of scopes.
+ * Only the factors that differ from the guide's default assumption are listed; the
+ * rating for the profile is recomputed with the same rule (deriveDifficulty).
+ */
+export const Profile = z.object({
+  id: z.string().regex(/^[a-z0-9-]+$/),
+  label: z.string().min(1), // "Send email only"
+  description: z.string(), // what the agent does in this use case
+  scopes: z.array(z.string()), // scope strings from guide.scopes that this use case needs
+  factorOverrides: z.partialRecord(FactorKey, Tri).default({}),
+  timeToProduction: Duration.optional(),
+  handsOnEffort: Duration.optional(),
+  note: z.string(), // what changes vs. the default path, 1–2 sentences
+  sourceIds,
+  confidence: Confidence,
+});
+export type Profile = z.infer<typeof Profile>;
+
 export const Source = z.object({
   id: z.string(), // "S1", "S2", ...
   url: z.string(),
@@ -218,6 +237,8 @@ export const Guide = z.object({
   scopes: z.array(Scope).default([]),
   blockers: z.array(Blocker).default([]),
   nuances: z.array(Nuance).default([]),
+  /** Use-case profiles for the scope-based rating (the default path is the guide's own assumption). */
+  profiles: z.array(Profile).default([]),
   composioSetup: z.object({
     redirectUri: z.string(),
     steps: z.array(z.string()).min(1),
@@ -329,6 +350,11 @@ export function lintGuide(g: Guide): string[] {
     if (v.label.length > 32) problems.push(`verdict.${d}.label is ${v.label.length} chars; keep it ≤ 32 and put detail in "basis"`);
   }
   if (g.verdict.cost.length > 48) problems.push(`verdict.cost is ${g.verdict.cost.length} chars; keep it ≤ 48 and put detail in "costDetail"`);
+  const scopeNames = new Set(g.scopes.map((s) => s.scope));
+  for (const p of g.profiles) {
+    check(`profile ${p.id}`, p.sourceIds, p.confidence);
+    for (const sc of p.scopes) if (!scopeNames.has(sc)) problems.push(`profile ${p.id}: scope "${sc}" is not in the guide's scopes table`);
+  }
   const stepIds = g.phases.flatMap((p) => p.steps.map((s) => s.id));
   if (new Set(stepIds).size !== stepIds.length) problems.push('phases: duplicate step ids');
   return problems;
@@ -380,4 +406,24 @@ export function parseDurationLabel(label: string): { minHours: number; maxHours:
   const upTo = /\bup to\b|\bwithin\b|\bunder\b|\bless than\b/.test(s) && values.length === 1;
   const sameDay = /same[- ]day/.test(s);
   return { minHours: upTo ? 0 : sameDay ? Math.min(0.5, ...values) : Math.min(...values), maxHours: Math.max(...values) };
+}
+
+/** The guide's factors with a profile's overrides applied, and the rating recomputed by the same rule. */
+export function rateProfile(g: Guide, p: Profile) {
+  const factors = g.factors.map((f) => (p.factorOverrides[f.key] ? { ...f, value: p.factorOverrides[f.key]! } : f));
+  const verdict = { ...g.verdict, timeToProduction: p.timeToProduction ?? g.verdict.timeToProduction };
+  const changed = g.factors.filter((f) => p.factorOverrides[f.key] && p.factorOverrides[f.key] !== f.value).map((f) => ({ key: f.key, from: f.value, to: p.factorOverrides[f.key]! }));
+  return { difficulty: deriveDifficulty({ factors, verdict }), timeToProduction: verdict.timeToProduction, handsOnEffort: p.handsOnEffort ?? g.verdict.handsOnEffort, changed };
+}
+
+/** The lightest profile whose scopes cover everything the developer ticked (null if none does). */
+export function profileForScopes(g: Guide, picked: string[]): Profile | null {
+  const order: Difficulty[] = ['self-serve', 'light-review', 'formal-review', 'gated'];
+  const covering = g.profiles.filter((p) => picked.every((sc) => p.scopes.includes(sc)));
+  covering.sort((a, b) => {
+    const ra = rateProfile(g, a);
+    const rb = rateProfile(g, b);
+    return order.indexOf(ra.difficulty) - order.indexOf(rb.difficulty) || ra.timeToProduction.maxHours - rb.timeToProduction.maxHours;
+  });
+  return covering[0] ?? null;
 }

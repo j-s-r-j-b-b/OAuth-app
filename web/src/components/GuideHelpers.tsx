@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import type { Guide, Step } from '../../../shared/schema.ts';
+import { DIFFICULTY_INFO, profileForScopes, rateProfile, type Guide, type Step } from '../../../shared/schema.ts';
 import { renderInline, renderMd } from '../lib/md.ts';
-import { ActorChip } from './ui.tsx';
+import { ActorChip, DifficultyPill, Evidence } from './ui.tsx';
 
 /** The one thing to do now: the first step not yet ticked, plus what's left. */
 export function NextAction({ g, steps, done, onDone }: { g: Guide; steps: Step[]; done: Set<string>; onDone: (id: string) => void }) {
@@ -159,5 +159,104 @@ export function RequestReview({ g }: { g: Guide }) {
     >
       {typeof state === 'number' ? `✓ Requested (${state} so far): we prioritise the most-requested apps` : state === 'busy' ? 'Requesting…' : 'Request a verified deep guide'}
     </button>
+  );
+}
+
+const FACTOR_NAME: Record<string, string> = {
+  self_serve_registration: 'Self-serve registration',
+  review_required: 'Provider review',
+  business_verification: 'Business verification',
+  security_assessment: 'Security assessment',
+  paid_access: 'Paid access',
+  partner_or_sales_gate: 'Partner / sales gate',
+  user_cap_before_review: 'User cap before approval',
+  per_customer_setup: 'Per-customer setup',
+};
+
+/** Scope-based rating: pick a use case or tick scopes; the rating is recomputed with the same rule. */
+export function TailorPanel({ g, onCite }: { g: Guide; onCite: (id: string) => void }) {
+  const [profileId, setProfileId] = useState<string | null>(null);
+  const [picked, setPicked] = useState<string[]>([]);
+  if (!g.profiles.length) return null;
+  const byScopes = picked.length ? profileForScopes(g, picked) : null;
+  const profile = picked.length ? byScopes : (g.profiles.find((p) => p.id === profileId) ?? null);
+  const r = profile ? rateProfile(g, profile) : null;
+  const tierCls: Record<string, string> = {
+    restricted: 'text-rose-700 dark:text-rose-300',
+    sensitive: 'text-amber-700 dark:text-amber-300',
+    admin: 'text-amber-700 dark:text-amber-300',
+    basic: 'text-slate-500',
+    unknown: 'text-slate-400',
+  };
+  const toggle = (sc: string) => {
+    setProfileId(null);
+    setPicked((p) => (p.includes(sc) ? p.filter((x) => x !== sc) : [...p, sc]));
+  };
+  return (
+    <div className="card p-4 sm:p-5">
+      <div className="font-semibold text-slate-900 dark:text-white">Rate it for your use case</div>
+      <p className="text-sm text-slate-500 dark:text-slate-400">
+        The verdict above assumes: <em>{g.assumption}</em> Pick what you're building, or tick the scopes you need, to recompute the rating with the same rule.
+      </p>
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {g.profiles.map((p) => (
+          <button
+            key={p.id}
+            onClick={() => {
+              setPicked([]);
+              setProfileId(profileId === p.id ? null : p.id);
+            }}
+            className={`rounded-full px-3 py-1 text-xs font-semibold ${profile?.id === p.id && !picked.length ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'}`}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+      <details className="mt-3" open={picked.length > 0}>
+        <summary className="cursor-pointer text-sm font-medium text-sky-700 dark:text-sky-300">…or tick the scopes your agent needs</summary>
+        <div className="mt-2 grid gap-1 sm:grid-cols-2">
+          {g.scopes.map((s) => (
+            <label key={s.scope} className="flex items-start gap-2 text-sm">
+              <input type="checkbox" className="mt-1 accent-sky-600" checked={picked.includes(s.scope)} onChange={() => toggle(s.scope)} />
+              <span className="min-w-0">
+                <code className="text-xs break-all">{s.scope}</code> <span className={`text-[11px] font-semibold uppercase ${tierCls[s.tier]}`}>{s.tier}</span>
+              </span>
+            </label>
+          ))}
+        </div>
+      </details>
+      {picked.length > 0 && !profile && (
+        <p className="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-500/10 dark:text-amber-200">
+          No researched profile covers that exact combination, so plan for the full path in the verdict above. Its heaviest requirement applies.
+        </p>
+      )}
+      {profile && r && (
+        <div className="mt-3 rounded-lg border border-slate-200 p-3 dark:border-slate-700">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-semibold">{profile.label}:</span>
+            <DifficultyPill d={r.difficulty} />
+            {r.difficulty !== g.verdict.difficulty && <span className="text-xs text-slate-500">(default: {DIFFICULTY_INFO[g.verdict.difficulty].label})</span>}
+            <span className="text-sm">
+              Any user can connect: <strong>{r.timeToProduction.label}</strong>
+            </span>
+            <span className="text-sm text-slate-500">Hands-on: {r.handsOnEffort.label}</span>
+          </div>
+          <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">{profile.note}</p>
+          {r.changed.length > 0 && (
+            <ul className="mt-2 flex flex-wrap gap-1.5 text-xs">
+              {r.changed.map((c) => (
+                <li key={c.key} className="rounded bg-slate-100 px-2 py-0.5 dark:bg-slate-800">
+                  {FACTOR_NAME[c.key]}: {c.from} → <strong>{c.to}</strong>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+            <span>Scopes: {profile.scopes.map((s) => s.replace('https://www.googleapis.com/auth/', '')).join(', ') || 'none'}</span>
+            <Evidence c={profile.confidence} ids={profile.sourceIds} onCite={onCite} />
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

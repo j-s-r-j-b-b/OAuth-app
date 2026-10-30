@@ -133,3 +133,11 @@ Return JSON only: {"items": [{"claimKey": string, "outcome": "confirmed" | "corr
 - "corrected": a source contradicts it. For factor claims, give the corrected factor value and detail in "fix"; for other claims, explain in "note" with fix null.
 - "unverifiable": the source texts neither support nor contradict it.
 - note ≤ 40 words, concrete ("Pricing page says…"). sourceIds: the ids you relied on.`;
+
+export const PROFILES_TASK = `Write USE-CASE PROFILES for the scope-based rating, as JSON only: {"profiles": [...]}.
+Each profile is a narrower or different use case than the default assumption, built ONLY from the research (easier paths, scope tiers, findings):
+{"id": "kebab-case", "label": "≤ 40 chars, e.g. Send email only", "description": "one sentence", "scopes": [scope strings copied EXACTLY from PART 1 scopes],
+ "factorOverrides": {"<factor key>": "yes" | "no" | "depends" | "unknown"},   // ONLY factors that differ from PART 1
+ "timeToProduction": {"label": "≤ 32 chars", "minHours": number, "maxHours": number, "basis": string} | omit,
+ "note": "1–2 sentences: what changes vs the default and why", "sourceIds": [S#/P# ids], "confidence": "official" | "reported" | "inferred"}
+Write 2–4 profiles: a minimal/basic-scope use case, a middle tier if the scope tiers support one, and the full default use case (same scopes as PART 1, no overrides). If a profile removes provider review, give its shorter timeToProduction. Never invent scopes or rules the research does not support.`;

@@ -5,7 +5,7 @@ import { guideToMarkdown } from '../../../shared/markdown.ts';
 import { DIFFICULTY_INFO, type Actor, type Guide, type Step } from '../../../shared/schema.ts';
 import { api, type GuideSummary, type Health, type Trace } from '../api.ts';
 import { EventFeed, QualitySummary } from '../components/EventFeed.tsx';
-import { NextAction, RequestReview, StuckBox } from '../components/GuideHelpers.tsx';
+import { NextAction, RequestReview, StuckBox, TailorPanel } from '../components/GuideHelpers.tsx';
 import { ActorChip, CONF, CopyButton, DIFF_BAR, DifficultyPill, Evidence, ManagedBadge, RunwayBar, Section } from '../components/ui.tsx';
 import { renderInline, renderMd } from '../lib/md.ts';
 
@@ -237,6 +237,7 @@ export default function GuidePage() {
             <NeedOwnApp g={g} />
           </section>
 
+          <TailorPanel g={g} onCite={cite} />
           <NextAction g={g} steps={steps} done={done} onDone={toggle} />
           <StuckBox g={g} />
 
