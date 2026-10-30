@@ -10,7 +10,7 @@ Every claim links to its source, or to a setup attempt we ran.
 - **Live demo:** https://oauth-runway-nnmh.onrender.com (Render free tier; if it has been idle, the first load can take about a minute)
 - **Library:** 12 researched and independently verified guides covering all difficulty levels: GitHub, X, Microsoft Graph, Gmail, Slack, Shopify, Xero, Meta Ads, Webflow, DocuSign, Spotify, Workday.
 - **Catalog:** all 382 OAuth toolkits from [Composio's managed-auth directory](https://docs.composio.dev/toolkits/managed-auth).
-- **Live generation:** type any app name or website. A research agent investigates it in about 1–2 minutes and publishes a shareable guide.
+- **Live generation:** type any app name or website. A research agent investigates it in about 1–3 minutes and publishes a shareable guide.
 - **Product reasoning:** [docs/DECISIONS.md](docs/DECISIONS.md)
 
 ## The problem

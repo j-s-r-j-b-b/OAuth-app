@@ -30,7 +30,7 @@ Composio's own [setup guides](https://composio.dev/auth) cover the console click
 1. **Research agents** (one per library app) follow a written [protocol](RESEARCH_PROTOCOL.md). They read official docs and policies, changelogs and community reports, and run read-only probes against the provider.
 2. **Verifier agents** use a different model with a fresh context and an adversarial brief ("find what's wrong"). They re-read the cited sources for each guide's most decision-critical claims and fix what doesn't hold.
 3. **Setup attempts through Composio.** For every app, the system creates a throwaway custom auth config with a dummy client, starts a connection, and follows Composio's redirect to the provider, then deletes everything. This shows exactly which redirect URI and default scopes reach the provider. It found that the redirect URI in Composio's API docs isn't what Composio sends by default, and that the default Gmail scopes include full mailbox access.
-4. **The live agent** runs the same loop on a free model in about a minute. Deterministic code then checks what the model can't be trusted to do:
+4. **The live agent** runs the same loop on a free model in about one to three minutes. Deterministic code then checks what the model can't be trusted to do:
    - it drops citations to pages that were never retrieved;
    - it downgrades "tested" labels on claims no probe can confirm;
    - it re-derives hours from labels;
